@@ -265,6 +265,7 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
       <header
         id="home"
         className="h-screen w-full relative flex items-center justify-center flex-col text-white text-center px-4 overflow-hidden"
+        style={{ position: "relative" }}
       >
         <Image
           src={data.hero.mainPhoto || "/templates/barcelona/background.jpeg"}
@@ -322,7 +323,7 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
         {/* Bride */}
         <ScrollReveal direction="left">
           <div className="flex flex-col items-center md:items-end text-center md:text-right space-y-6">
-            <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-2xl overflow-hidden shadow-2xl border-4 border-white">
+            <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-2xl overflow-hidden shadow-2xl border-4 border-white" style={{ position: "relative" }}>
               {data.partner1.photo ? (
                 <Image
                   src={data.partner1.photo}
@@ -368,7 +369,7 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
         {/* Groom */}
         <ScrollReveal direction="right">
           <div className="flex flex-col items-center md:items-start text-center md:text-left space-y-6">
-            <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-2xl overflow-hidden shadow-2xl border-4 border-white">
+            <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-2xl overflow-hidden shadow-2xl border-4 border-white" style={{ position: "relative" }}>
               {data.partner2.photo ? (
                 <Image
                   src={data.partner2.photo}
@@ -445,7 +446,7 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
             <ScrollReveal key={event.id} direction={idx % 2 === 0 ? "left" : "right"}>
               <div className={`flex flex-col md:flex-row items-center gap-8 ${idx % 2 !== 0 ? "md:flex-row-reverse" : ""}`}>
                 {/* Event Photo */}
-                <div className="w-full md:w-1/2 aspect-video relative rounded-xl overflow-hidden shadow-lg">
+                <div className="w-full md:w-1/2 aspect-video relative rounded-xl overflow-hidden shadow-lg" style={{ position: "relative" }}>
                   {event.photo ? (
                     <Image
                       src={event.photo}
@@ -503,7 +504,7 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
 
           <ScrollReveal>
             <div className="max-w-4xl mx-auto px-6 relative group">
-              <div className="aspect-[3/2] relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white">
+              <div className="aspect-[3/2] relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white" style={{ position: "relative" }}>
                 <Image
                   src={data.gallery[activeSlide].url}
                   alt={data.gallery[activeSlide].alt || "Wedding Gallery"}
@@ -558,7 +559,7 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
             {data.extras.keyGuests.map((guest) => (
               <ScrollReveal key={guest.id}>
                 <div className="flex flex-col items-center text-center bg-white border border-[#eae6df] rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300">
-                  <div className="relative w-36 h-36 rounded-full overflow-hidden mb-4 border-2 border-var(--gold)">
+                  <div className="relative w-36 h-36 rounded-full overflow-hidden mb-4 border-2 border-var(--gold)" style={{ position: "relative" }}>
                     {guest.photo ? (
                       <Image
                         src={guest.photo}
