@@ -33,62 +33,62 @@ interface IframePreviewProps {
 }
 
 function IframePreview({ children }: IframePreviewProps) {
-  const [contentRef, setContentRef] = useState<HTMLIFrameElement | null>(null);
+  const [iframeRef, setIframeRef] = useState<HTMLIFrameElement | null>(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
-  const mountNode = contentRef?.contentDocument?.body;
+  const mountNode = iframeRef?.contentDocument?.body;
 
-  useEffect(() => {
-    if (!contentRef) return;
-    const doc = contentRef.contentDocument;
+  const setupIframe = () => {
+    if (!iframeRef) return;
+    const doc = iframeRef.contentDocument;
     if (!doc) return;
 
-    const setupIframe = () => {
-      const doc = contentRef.contentDocument;
-      if (!doc) return;
+    // Clear head to avoid duplicates
+    doc.head.innerHTML = "";
 
-      // Clear head to avoid duplicates
-      doc.head.innerHTML = "";
+    // Copy styles
+    document.querySelectorAll("style, link[rel='stylesheet']").forEach((el) => {
+      doc.head.appendChild(el.cloneNode(true));
+    });
 
-      // Copy styles
-      document.querySelectorAll("style, link[rel='stylesheet']").forEach((el) => {
-        doc.head.appendChild(el.cloneNode(true));
-      });
+    // Viewport meta
+    const meta = doc.createElement("meta");
+    meta.name = "viewport";
+    meta.content = "width=device-width, initial-scale=1.0";
+    doc.head.appendChild(meta);
 
-      // Viewport meta
-      const meta = doc.createElement("meta");
-      meta.name = "viewport";
-      meta.content = "width=device-width, initial-scale=1.0";
-      doc.head.appendChild(meta);
+    // Base URL for relative paths
+    const base = doc.createElement("base");
+    base.href = window.location.origin;
+    doc.head.appendChild(base);
 
-      // Base URL for relative paths
-      const base = doc.createElement("base");
-      base.href = window.location.origin;
-      doc.head.appendChild(base);
+    // Document styles
+    doc.documentElement.style.height = "100%";
+    doc.body.style.margin = "0";
+    doc.body.style.padding = "0";
+    doc.body.style.height = "100%";
+    doc.body.style.width = "100%";
+    doc.body.style.overflowX = "hidden";
 
-      // Document styles
-      doc.documentElement.style.height = "100%";
-      doc.body.style.margin = "0";
-      doc.body.style.padding = "0";
-      doc.body.style.height = "100%";
-      doc.body.style.width = "100%";
-      doc.body.style.overflowX = "hidden";
+    setIframeLoaded(true);
+  };
 
-      setIframeLoaded(true);
-    };
+  useEffect(() => {
+    if (!iframeRef) return;
+    const doc = iframeRef.contentDocument;
+    if (!doc) return;
 
     if (doc.readyState === "complete" || doc.readyState === "interactive") {
       setupIframe();
-    } else {
-      contentRef.onload = setupIframe;
     }
-  }, [contentRef]);
+  }, [iframeRef]);
 
   return (
     <iframe
-      ref={setContentRef}
+      ref={setIframeRef}
       src="about:blank"
       style={{ border: "none", width: "100%", height: "100%" }}
       title="preview-frame"
+      onLoad={setupIframe}
     >
       {iframeLoaded && mountNode && createPortal(children, mountNode)}
     </iframe>
@@ -340,7 +340,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
           >
             {/* The Actual Template Client Render */}
             <div className="w-full h-full relative">
-              <IframePreview>
+              <IframePreview key={previewDevice}>
                 <ActiveTemplateComponent data={data} colorSchemeId={colorSchemeId} isPreview={true} />
               </IframePreview>
             </div>
