@@ -273,10 +273,10 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
           fill
           priority
           sizes="100vw"
-          className="object-cover -z-10"
+          className="object-cover z-0"
         />
         {/* Dark overlay to make white text highly readable */}
-        <div className="absolute inset-0 bg-black/45 -z-10" />
+        <div className="absolute inset-0 bg-black/45 z-0" />
         
         <div className="relative z-10 space-y-6 max-w-2xl">
           <p className="font-serif italic text-lg md:text-xl tracking-wider text-var(--gold-light) drop-shadow">
