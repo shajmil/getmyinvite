@@ -303,7 +303,11 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
         </div>
 
         {/* Right Preview Panel */}
-        <div className="hidden md:flex w-1/2 bg-[#efede8] flex-col items-center justify-center p-6 relative h-full">
+        <div
+          className={`hidden md:flex w-1/2 bg-[#efede8] flex-col p-6 relative h-full transition-all duration-300 ${
+            previewDevice === "mobile" ? "items-center justify-center" : "items-stretch justify-stretch"
+          }`}
+        >
           {/* Device and Preview Controls Bar */}
           <div className="absolute top-4 right-4 bg-white border border-[#eae6df] rounded-xl p-1 shadow-lg flex items-center gap-1 z-30">
             <button
@@ -326,10 +330,10 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
 
           {/* Preview Container Frame */}
           <div
-            className={`transition-all duration-500 ease-in-out shadow-2xl bg-white border border-[#eae6df] overflow-hidden ${
+            className={`transition-all duration-500 ease-in-out shadow-2xl bg-white border border-[#eae6df] overflow-hidden relative ${
               previewDevice === "mobile"
-                ? "relative w-[375px] h-[768px] rounded-[36px] border-[12px] border-[#1a1a1a] z-10"
-                : "absolute inset-6 rounded-2xl z-10"
+                ? "w-[375px] h-[768px] rounded-[36px] border-[12px] border-[#1a1a1a] z-10"
+                : "flex-1 w-full rounded-2xl z-10"
             }`}
           >
             {/* The Actual Template Client Render */}
