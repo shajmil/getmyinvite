@@ -74,7 +74,7 @@ export async function POST(req: Request) {
         publicUrl,
         key,
         isLocal: false,
-      });
+      }); 
     } else {
       // Local development mock fallback
       const mockUploadUrl = `/api/uploads/local?key=${encodeURIComponent(key)}`;
