@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MakeMyInvite | Custom Wedding Invitation Websites",
+  title: "GetMyInvite | Custom Wedding Invitation Websites",
   description: "Create a beautiful wedding invitation website without designing anything.",
 };
 

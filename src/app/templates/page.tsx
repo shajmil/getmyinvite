@@ -4,7 +4,20 @@ import { auth } from "@/lib/auth";
 import { TemplatesList } from "@/components/TemplatesList";
 import Link from "next/link";
 
+import { Metadata } from "next";
+
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Wedding Invitation Templates & Themes | GetMyInvite",
+  description: "Browse our collection of premium digital wedding website designs. Choose from elegant layouts, scrolling parallax themes, and customizable modal invitations.",
+  openGraph: {
+    title: "Wedding Invitation Templates & Themes | GetMyInvite",
+    description: "Select from modern, responsive digital wedding invitation templates. Live preview gold, charcoal, and emerald themes instantly.",
+    type: "website",
+    siteName: "GetMyInvite",
+  },
+};
 
 export default async function TemplatesPage() {
   const session = await auth.api.getSession({
@@ -18,7 +31,7 @@ export default async function TemplatesPage() {
       <header className="h-20 bg-white border-b border-[#eae6df] px-6">
         <div className="max-w-6xl mx-auto h-full flex items-center justify-between">
           <Link href="/" className="font-serif text-2xl font-bold tracking-wide">
-            MakeMyInvite
+            GetMyInvite
           </Link>
           <nav className="flex items-center gap-6">
             <Link href="/" className="text-xs font-bold uppercase tracking-wider hover:text-[#855f18]">

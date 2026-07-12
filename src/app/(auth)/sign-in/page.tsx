@@ -56,7 +56,7 @@ function SignInForm() {
       <div className="w-full max-w-md bg-white border border-[#eae6df] rounded-2xl p-8 shadow-xl">
         <div className="text-center mb-8">
           <Link href="/" className="inline-block text-3xl font-serif text-[#1a1a1a] mb-2 hover:opacity-80">
-            MakeMyInvite
+            GetMyInvite
           </Link>
           <p className="text-sm text-[#666]">Sign in to manage your wedding websites</p>
         </div>

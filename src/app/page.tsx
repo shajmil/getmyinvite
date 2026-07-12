@@ -4,7 +4,20 @@ import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { templateRegistry } from "@/templates/registry";
 
+import { Metadata } from "next";
+
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "GetMyInvite | Free Wedding Website Builder & Digital Invitations",
+  description: "Create a stunning, mobile-responsive wedding website and digital invitation in minutes. Customize templates, collect guest RSVPs, and share your live link for free.",
+  openGraph: {
+    title: "GetMyInvite | Free Wedding Website Builder & Digital Invitations",
+    description: "Create a stunning wedding website and digital invitation. Customize designs, collect RSVPs, and publish instantly.",
+    type: "website",
+    siteName: "GetMyInvite",
+  },
+};
 
 export default async function LandingPage() {
   // Check if user is logged in
@@ -21,7 +34,7 @@ export default async function LandingPage() {
       <header className="h-20 bg-white/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50 border-b border-[#eae6df] px-6">
         <div className="max-w-6xl mx-auto h-full flex items-center justify-between">
           <Link href="/" className="font-serif text-2xl font-bold tracking-wide">
-            MakeMyInvite
+            GetMyInvite
           </Link>
           <nav className="flex items-center gap-6">
             <Link href="/templates" className="text-xs font-bold uppercase tracking-wider hover:text-[#855f18]">
@@ -154,7 +167,7 @@ export default async function LandingPage() {
           <div className="space-y-6">
             {[
               {
-                q: "Is MakeMyInvite really free?",
+                q: "Is GetMyInvite really free?",
                 a: "Yes, it is 100% free. You can create, customize, preview, and publish your wedding website to a unique link without paying anything.",
               },
               {
@@ -177,7 +190,7 @@ export default async function LandingPage() {
 
       {/* ------------------ FOOTER ------------------ */}
       <footer className="py-12 border-t border-[#eae6df] text-center text-xs text-[#666] uppercase tracking-wider space-y-2">
-        <p>&copy; {new Date().getFullYear()} MakeMyInvite. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} GetMyInvite. All rights reserved.</p>
         <p className="text-[10px] text-gray-400">Website by Shajmil</p>
       </footer>
     </div>

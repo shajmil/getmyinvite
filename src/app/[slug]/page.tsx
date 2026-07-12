@@ -21,7 +21,7 @@ export async function generateMetadata(props: SlugPageProps) {
 
   if (!invitation) {
     return {
-      title: "Invitation Not Found | MakeMyInvite",
+      title: "Invitation Not Found | GetMyInvite",
       robots: "noindex, nofollow",
     };
   }
@@ -114,9 +114,9 @@ export default async function PublishedSlugPage(props: SlugPageProps) {
   const icsLines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//MakeMyInvite//NONSGML Wedding Invite//EN",
+    "PRODID:-//GetMyInvite//NONSGML Wedding Invite//EN",
     "BEGIN:VEVENT",
-    `UID:${slug}@makemyinvite.app`,
+    `UID:${slug}@getmyinvite.in`,
     `DTSTAMP:${dateStr}T000000Z`,
     `DTSTART:${startDateTime}`,
     `DTEND:${endDateTime}`,

@@ -111,7 +111,7 @@ export async function POST(req: Request) {
         `;
 
         await resend.emails.send({
-          from: "MakeMyInvite RSVP <rsvp@makemyinvite.app>",
+          from: "GetMyInvite RSVP <rsvp@getmyinvite.in>",
           to: hostUser.email,
           subject: `RSVP Alert: ${guestName} is attending!`,
           html: emailContent,

@@ -83,7 +83,7 @@ export function DashboardList({ initialInvitations, user }: DashboardListProps) 
       {/* Navbar */}
       <nav className="h-16 bg-white border-b border-[#eae6df] px-6 flex items-center justify-between shadow-sm">
         <Link href="/" className="font-serif text-2xl font-bold text-[#1a1a1a] hover:opacity-85">
-          MakeMyInvite
+          GetMyInvite
         </Link>
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col text-right text-xs">

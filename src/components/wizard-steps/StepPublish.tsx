@@ -187,7 +187,7 @@ export function StepPublish({ onPublishSuccess }: StepPublishProps) {
             </label>
             <div className="flex items-center">
               <span className="px-3 py-2 bg-[#faf8f5] border border-r-0 border-[#eae6df] text-xs text-[#777] rounded-l">
-                makemyinvite.app/
+                getmyinvite.in/
               </span>
               <input
                 type="text"

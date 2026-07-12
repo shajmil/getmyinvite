@@ -54,7 +54,7 @@ export const verification = pgTable("verification", {
 });
 
 // ==========================================
-// MAKEMYINVITE SCHEMAS
+// GETMYINVITE SCHEMAS
 // ==========================================
 
 export const invitations = pgTable(

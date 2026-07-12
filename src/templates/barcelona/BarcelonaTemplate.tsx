@@ -773,8 +773,8 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
             </p>
           )}
           <div className="text-[11px] text-[#999] tracking-wider pt-6 font-semibold uppercase space-y-1">
-            <p>&copy; {new Date().getFullYear()} MakeMyInvite. All rights reserved.</p>
-            <p className="text-xs mt-2 italic">Created via MakeMyInvite Wedding Builder</p>
+            <p>&copy; {new Date().getFullYear()} GetMyInvite. All rights reserved.</p>
+            <p className="text-xs mt-2 italic">Created via GetMyInvite Wedding Builder</p>
           </div>
         </div>
       </footer>
