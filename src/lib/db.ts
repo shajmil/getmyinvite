@@ -18,6 +18,11 @@ const pool =
     connectionTimeoutMillis: 5000,
   });
 
+// Prevent idle connection terminations (like Neon scale-down) from crashing Node.js
+pool.on("error", (err) => {
+  console.error("Unexpected database pool client error:", err);
+});
+
 if (process.env.NODE_ENV !== "production") {
   globalForDb.pool = pool;
 }
