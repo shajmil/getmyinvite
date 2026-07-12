@@ -36,7 +36,7 @@ export default async function EditInvitationPage(
     // Clear out photos to let them upload their own
     partner1: { ...demoInvitationData.partner1, photo: "" },
     partner2: { ...demoInvitationData.partner2, photo: "" },
-    hero: { ...demoInvitationData.hero, mainPhoto: "", invitationCardUrl: "" },
+    hero: { ...demoInvitationData.hero, mainPhoto: "/templates/barcelona/background.jpeg", invitationCardUrl: "" },
     gallery: [],
     extras: { ...demoInvitationData.extras, keyGuests: [], contactPersons: [] },
   };
