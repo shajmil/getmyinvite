@@ -72,6 +72,25 @@ function IframePreview({ children }: IframePreviewProps) {
       doc.body.style.width = "100%";
       doc.body.style.overflowX = "hidden";
 
+      // Intercept hash link clicks to prevent base URL navigation inside the preview iframe
+      doc.addEventListener("click", (e) => {
+        const target = e.target as HTMLElement;
+        const anchor = target.closest("a");
+        if (anchor) {
+          const href = anchor.getAttribute("href");
+          if (href?.startsWith("#")) {
+            e.preventDefault();
+            const id = href.slice(1);
+            if (id) {
+              const element = doc.getElementById(id);
+              if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+              }
+            }
+          }
+        }
+      });
+
       setMountNode(doc.body);
     };
 
