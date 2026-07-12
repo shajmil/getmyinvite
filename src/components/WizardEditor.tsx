@@ -60,6 +60,11 @@ function IframePreview({ children }: IframePreviewProps) {
       meta.content = "width=device-width, initial-scale=1.0";
       doc.head.appendChild(meta);
 
+      // Base URL for relative paths
+      const base = doc.createElement("base");
+      base.href = window.location.origin;
+      doc.head.appendChild(base);
+
       // Document styles
       doc.documentElement.style.height = "100%";
       doc.body.style.margin = "0";

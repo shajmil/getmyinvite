@@ -15,7 +15,7 @@ const pool =
     ssl: dbUrl.includes("neon.tech") ? { rejectUnauthorized: false } : undefined,
     max: 10,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: 20000,
   });
 
 // Prevent idle connection terminations (like Neon scale-down) from crashing Node.js
