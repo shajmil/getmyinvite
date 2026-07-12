@@ -304,7 +304,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
 
         {/* Right Preview Panel */}
         <div
-          className={`hidden md:flex w-1/2 bg-[#efede8] flex-col p-6 relative h-full transition-all duration-300 ${
+          className={`hidden md:flex w-1/2 bg-[#efede8] flex-col p-6 relative h-[70vh] transition-all duration-300 ${
             previewDevice === "mobile" ? "items-center justify-center" : "items-stretch justify-stretch"
           }`}
         >

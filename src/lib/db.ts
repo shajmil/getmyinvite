@@ -13,9 +13,10 @@ const pool =
   new Pool({
     connectionString: dbUrl,
     ssl: dbUrl.includes("neon.tech") ? { rejectUnauthorized: false } : undefined,
-    max: 10,
+    max: 2, // Prevent Neon connection limit exhaustion in serverless environments
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 20000,
+    keepAlive: true, // Prevent firewall NAT terminations of idle connections
   });
 
 // Prevent idle connection terminations (like Neon scale-down) from crashing Node.js
