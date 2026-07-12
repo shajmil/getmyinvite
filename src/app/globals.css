@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-cormorant);
+  --font-script: var(--font-great-vibes);
+  --font-meddon: var(--font-meddon);
+  --font-merienda: var(--font-merienda);
+  --font-pinyon: var(--font-pinyon);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* =============================================================
+   TEMPLATE-SPECIFIC UTILITIES
+   ============================================================= */
+
+/* Barcelona Custom Layout Styling */
+.text-var\(--text\) {
+  color: var(--text);
+}
+.bg-var\(--bg-light\) {
+  background-color: var(--bg-light);
+}
+.bg-var\(--bg-cream\) {
+  background-color: var(--bg-cream);
+}
+.text-var\(--dark\) {
+  color: var(--dark);
+}
+.text-var\(--gold\) {
+  color: var(--gold);
+}
+.text-var\(--gold-light\) {
+  color: var(--gold-light);
+}
+.border-var\(--gold\) {
+  border-color: var(--gold);
+}
+.bg-var\(--gold\) {
+  background-color: var(--gold);
+}
+.border-var\(--accent-color\) {
+  border-color: var(--accent-color);
+}
+.text-var\(--accent-color\) {
+  color: var(--accent-color);
+}
+.text-var\(--body-color\) {
+  color: var(--body-color);
+}
+.text-var\(--header-color\) {
+  color: var(--header-color);
+}
+
+/* Base resets for templates scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+

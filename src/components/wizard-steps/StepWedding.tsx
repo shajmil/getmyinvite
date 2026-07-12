@@ -1,0 +1,164 @@
+"use client";
+
+import React, { useState } from "react";
+import { useWizardStore } from "@/lib/store";
+import { uploadFile } from "@/lib/compress";
+
+export function StepWedding() {
+  const { data, updateNestedData, setData } = useWizardStore();
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  if (!data) return null;
+
+  const handleVenuePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setProgress(0);
+
+    try {
+      const { url } = await uploadFile(file, (percent) => setProgress(percent));
+      updateNestedData("wedding", {
+        venue: {
+          ...data.wedding.venue,
+          photo: url,
+        },
+      });
+    } catch (err) {
+      alert("Failed to upload venue photo. Please try again.");
+      console.error(err);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleVenueChange = (fields: any) => {
+    updateNestedData("wedding", {
+      venue: {
+        ...data.wedding.venue,
+        ...fields,
+      },
+    });
+  };
+
+  const timezones = [
+    "Asia/Kolkata",
+    "Europe/London",
+    "America/New_York",
+    "America/Los_Angeles",
+    "Asia/Dubai",
+    "Asia/Singapore",
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="border-b border-[#eae6df] pb-4">
+        <h2 className="text-xl font-serif font-bold text-[#1a1a1a]">Step 2 — Date & Venue</h2>
+        <p className="text-xs text-[#666]">Enter the date, time, and main location for your wedding</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-2">
+            Wedding Date
+          </label>
+          <input
+            type="date"
+            value={data.wedding.date}
+            onChange={(e) => updateNestedData("wedding", { date: e.target.value })}
+            className="w-full px-4 py-2 border border-[#eae6df] rounded bg-white text-sm focus:outline-none focus:border-[#855f18]"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-2">
+            Time (24h)
+          </label>
+          <input
+            type="time"
+            value={data.wedding.time}
+            onChange={(e) => updateNestedData("wedding", { time: e.target.value })}
+            className="w-full px-4 py-2 border border-[#eae6df] rounded bg-white text-sm focus:outline-none focus:border-[#855f18]"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-2">
+            Timezone
+          </label>
+          <select
+            value={data.wedding.timezone}
+            onChange={(e) => updateNestedData("wedding", { timezone: e.target.value })}
+            className="w-full px-4 py-2.5 border border-[#eae6df] rounded bg-white text-sm focus:outline-none focus:border-[#855f18]"
+          >
+            {timezones.map((tz) => (
+              <option key={tz} value={tz}>
+                {tz}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
+        <h3 className="font-serif text-lg font-semibold text-[#855f18] border-b border-[#faf8f5] pb-2">Venue Location</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Venue Name</label>
+            <input
+              type="text"
+              value={data.wedding.venue.name}
+              onChange={(e) => handleVenueChange({ name: e.target.value })}
+              className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+              placeholder="Infant Jesus Church"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">City</label>
+            <input
+              type="text"
+              value={data.wedding.venue.city}
+              onChange={(e) => handleVenueChange({ city: e.target.value })}
+              className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+              placeholder="Thrissur, Kerala"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Address</label>
+          <input
+            type="text"
+            value={data.wedding.venue.address}
+            onChange={(e) => handleVenueChange({ address: e.target.value })}
+            className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+            placeholder="Church Road, High Street"
+          />
+        </div>
+
+        <div>
+          <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Google Maps link (URL)</label>
+          <input
+            type="url"
+            value={data.wedding.venue.mapUrl || ""}
+            onChange={(e) => handleVenueChange({ mapUrl: e.target.value })}
+            className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+            placeholder="https://maps.app.goo.gl/..."
+          />
+        </div>
+
+        <div>
+          <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Venue Cover Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleVenuePhotoUpload}
+            className="w-full text-xs text-[#777] file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
+          />
+          {uploading && <p className="text-[10px] text-[#855f18] mt-1">Uploading: {progress}%</p>}
+        </div>
+      </div>
+    </div>
+  );
+}

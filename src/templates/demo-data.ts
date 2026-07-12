@@ -1,0 +1,125 @@
+import { InvitationData } from "@/lib/zod-schemas";
+
+export const demoInvitationData: InvitationData = {
+  partner1: {
+    firstName: "Alfi",
+    lastName: "John",
+    photo: "/templates/barcelona/bride.jpeg",
+    parents: "Mrs. Toncy Bosco & John Bosco Kuzhikkadan",
+    facebookUrl: "https://facebook.com",
+    instagramUrl: "https://instagram.com",
+  },
+  partner2: {
+    firstName: "Garyson",
+    lastName: "George",
+    photo: "/templates/barcelona/groom.jpeg",
+    parents: "Mrs. Latha George & Konnoth Antony George",
+    facebookUrl: "https://facebook.com",
+    instagramUrl: "https://instagram.com",
+  },
+  coupleTagline: "Save the Date for Our Betrothal",
+  wedding: {
+    date: "2026-12-20",
+    time: "16:00",
+    timezone: "Asia/Kolkata",
+    venue: {
+      name: "Infant Jesus Church",
+      address: "Church Road, High Street",
+      city: "Thrissur, Kerala",
+      mapUrl: "https://maps.app.goo.gl/GHjV8syg8MgxcXjp8",
+      photo: "/templates/barcelona/church.jpeg",
+    },
+  },
+  events: [
+    {
+      id: "evt-1",
+      name: "Church Ceremony",
+      date: "2026-12-20",
+      time: "4:00 PM",
+      venue: "Infant Jesus Church",
+      dressCode: "Formal / White Suit",
+      note: "Join us in our sacred prayers.",
+      photo: "/templates/barcelona/couple_pic1.jpeg",
+    },
+    {
+      id: "evt-2",
+      name: "Betrothal Reception",
+      date: "2026-12-20",
+      time: "6:00 PM - 8:30 PM",
+      venue: "Vaz Arena",
+      dressCode: "Cocktail Attire",
+      note: "Dinner and celebration follows.",
+      photo: "/templates/barcelona/couple_pic2.jpeg",
+    },
+  ],
+  story: {
+    howWeMet: "We met at university in 2021 and became instant friends.",
+    proposal: "Garyson popped the question at a beautiful beach side in Goa.",
+    timeline: [
+      {
+        id: "st-1",
+        date: "Sept 2021",
+        title: "First Meeting",
+        text: "It started with a shared textbook and a long conversation in the library.",
+      },
+    ],
+  },
+  gallery: [
+    { url: "/templates/barcelona/pic1.jpeg", alt: "Memory 1", order: 1 },
+    { url: "/templates/barcelona/pic2.jpeg", alt: "Memory 2", order: 2 },
+    { url: "/templates/barcelona/pic3.jpeg", alt: "Memory 3", order: 3 },
+    { url: "/templates/barcelona/pic4.jpeg", alt: "Memory 4", order: 4 },
+    { url: "/templates/barcelona/pic5.jpeg", alt: "Memory 5", order: 5 },
+    { url: "/templates/barcelona/pic6.jpeg", alt: "Memory 6", order: 6 },
+  ],
+  hero: {
+    mainPhoto: "/templates/barcelona/background.jpeg",
+    quote: "Love is patient, love is kind.",
+    videoUrl: "/templates/classic/Video.mp4",
+    musicUrl: "/templates/classic/audio.mpeg",
+    invitationCardUrl: "/templates/classic/invitation.jpg",
+  },
+  rsvpConfig: {
+    enabled: true,
+    deadline: "2026-12-01",
+    allowPlusOnes: true,
+    mealChoices: ["Veg", "Non-Veg", "Vegan"],
+    customQuestion: "Any food allergies?",
+  },
+  extras: {
+    dressCode: "Elegant",
+    giftNote: "Your presence is our present. No gifts required.",
+    hashtag: "GarysonAlfi2026",
+    contactPersons: [
+      {
+        id: "c-1",
+        name: "Bosco Kuzhikkadan",
+        phone: "+91 96456 85457",
+        role: "Bride's Brother",
+        photo: "/templates/classic/pic01.jpg",
+      },
+      {
+        id: "c-2",
+        name: "Konoth Antony George",
+        phone: "+91 96456 85457",
+        role: "Groom's Father",
+        photo: "/templates/classic/pic02.jpg",
+      },
+    ],
+    keyGuests: [
+      {
+        id: "kg-1",
+        name: "Thobias & Henna",
+        photo: "/templates/barcelona/henna.jpeg",
+        relationship: "Best Friends",
+      },
+      {
+        id: "kg-2",
+        name: "Glenda & Alwin",
+        photo: "/templates/barcelona/glenda.jpeg",
+        relationship: "Cousins",
+      },
+    ],
+    footerMessage: "Thank you for sharing in our happiness!",
+  },
+};
