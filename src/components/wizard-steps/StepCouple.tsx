@@ -8,6 +8,8 @@ export function StepCouple() {
   const { data, updateNestedData, updateData } = useWizardStore();
   const [uploading, setUploading] = useState<"partner1" | "partner2" | null>(null);
   const [progress, setProgress] = useState(0);
+  const [uploadingHero, setUploadingHero] = useState<boolean>(false);
+  const [heroProgress, setHeroProgress] = useState(0);
 
   if (!data) return null;
 
@@ -26,6 +28,24 @@ export function StepCouple() {
       console.error(err);
     } finally {
       setUploading(null);
+    }
+  };
+
+  const handleHeroUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingHero(true);
+    setHeroProgress(0);
+
+    try {
+      const { url } = await uploadFile(file, (percent) => setHeroProgress(percent));
+      updateNestedData("hero", { ...(data.hero || {}), mainPhoto: url });
+    } catch (err) {
+      alert("Failed to upload background image. Please try again.");
+      console.error(err);
+    } finally {
+      setUploadingHero(false);
     }
   };
 
@@ -152,6 +172,38 @@ export function StepCouple() {
             {uploading === "partner2" && (
               <p className="text-[10px] text-[#855f18] mt-1">Uploading: {progress}%</p>
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* Hero welcome screen customization */}
+      <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
+        <h3 className="font-serif text-lg font-semibold text-[#855f18] border-b border-[#faf8f5] pb-2">Hero Cover Settings</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Hero Background Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleHeroUpload}
+              className="w-full text-xs text-[#777] file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
+            />
+            {uploadingHero && (
+              <p className="text-[10px] text-[#855f18] mt-1">Uploading: {heroProgress}%</p>
+            )}
+            {data.hero?.mainPhoto && (
+              <p className="text-[10px] text-green-600 mt-1 font-medium">✓ Background image loaded</p>
+            )}
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Hero Quote / Motto (Optional)</label>
+            <input
+              type="text"
+              value={data.hero?.quote || ""}
+              onChange={(e) => updateNestedData("hero", { ...(data.hero || {}), quote: e.target.value })}
+              className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+              placeholder="Love is patient, love is kind..."
+            />
           </div>
         </div>
       </div>

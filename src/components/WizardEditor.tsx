@@ -81,6 +81,7 @@ function IframePreview({ children }: IframePreviewProps) {
   return (
     <iframe
       ref={setContentRef}
+      src="about:blank"
       style={{ border: "none", width: "100%", height: "100%" }}
       title="preview-frame"
     >
@@ -326,10 +327,10 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
 
           {/* Preview Container Frame */}
           <div
-            className={`transition-all duration-500 ease-in-out shadow-2xl relative bg-white border border-[#eae6df] overflow-hidden ${
+            className={`transition-all duration-500 ease-in-out shadow-2xl bg-white border border-[#eae6df] overflow-hidden ${
               previewDevice === "mobile"
-                ? "w-[375px] h-[768px] rounded-[36px] border-[12px] border-[#1a1a1a]"
-                : "w-full h-full rounded-2xl"
+                ? "relative w-[375px] h-[768px] rounded-[36px] border-[12px] border-[#1a1a1a] z-10"
+                : "absolute inset-6 rounded-2xl z-10"
             }`}
           >
             {/* The Actual Template Client Render */}

@@ -3,20 +3,20 @@ import { z } from "zod";
 export const PartnerSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  photo: z.string().url("Must be a valid photo URL").optional().or(z.literal("")),
+  photo: z.string().optional().or(z.literal("")),
   parents: z.string().optional().or(z.literal("")),
-  facebookUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  instagramUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  facebookUrl: z.string().optional().or(z.literal("")),
+  instagramUrl: z.string().optional().or(z.literal("")),
 });
 
 export const VenueSchema = z.object({
   name: z.string().min(1, "Venue name is required"),
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
-  mapUrl: z.string().url("Must be a valid Google Maps URL").optional().or(z.literal("")),
+  mapUrl: z.string().optional().or(z.literal("")),
   lat: z.number().optional(),
   lng: z.number().optional(),
-  photo: z.string().url("Must be a valid URL").optional().or(z.literal("")), // Extended for Template 2 venue photo
+  photo: z.string().optional().or(z.literal("")), // Extended for Template 2 venue photo
 });
 
 export const EventSchema = z.object({
@@ -27,7 +27,7 @@ export const EventSchema = z.object({
   venue: z.string().min(1, "Venue name is required"),
   dressCode: z.string().optional().or(z.literal("")),
   note: z.string().optional().or(z.literal("")),
-  photo: z.string().url("Must be a valid URL").optional().or(z.literal("")), // Extended for Template 1 event photos
+  photo: z.string().optional().or(z.literal("")), // Extended for Template 1 event photos
 });
 
 export const StoryTimelineSchema = z.object({
@@ -35,7 +35,7 @@ export const StoryTimelineSchema = z.object({
   date: z.string().min(1, "Date/Period is required"),
   title: z.string().min(1, "Title is required"),
   text: z.string().min(1, "Story text is required"),
-  photo: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  photo: z.string().optional().or(z.literal("")),
 });
 
 export const StorySchema = z.object({
@@ -45,17 +45,17 @@ export const StorySchema = z.object({
 });
 
 export const GalleryImageSchema = z.object({
-  url: z.string().url("Must be a valid image URL"),
+  url: z.string().min(1, "Must be a valid image path"),
   alt: z.string().optional().or(z.literal("")),
   order: z.number(),
 });
 
 export const HeroSchema = z.object({
-  mainPhoto: z.string().url("Must be a valid image URL").optional().or(z.literal("")),
+  mainPhoto: z.string().optional().or(z.literal("")),
   quote: z.string().optional().or(z.literal("")),
-  videoUrl: z.string().url("Must be a valid video URL").optional().or(z.literal("")), // Extended for Template 2 background video
-  musicUrl: z.string().url("Must be a valid audio URL").optional().or(z.literal("")), // Extended for Template 2 background music
-  invitationCardUrl: z.string().url("Must be a valid invitation card image URL").optional().or(z.literal("")), // Extended for Template 2 card
+  videoUrl: z.string().optional().or(z.literal("")), // Extended for Template 2 background video
+  musicUrl: z.string().optional().or(z.literal("")), // Extended for Template 2 background music
+  invitationCardUrl: z.string().optional().or(z.literal("")), // Extended for Template 2 card
 });
 
 export const RSVPConfigSchema = z.object({
@@ -71,13 +71,13 @@ export const ContactPersonSchema = z.object({
   name: z.string().min(1, "Name is required"),
   phone: z.string().min(1, "Phone is required"),
   role: z.string().min(1, "Role is required"),
-  photo: z.string().url("Must be a valid photo URL").optional().or(z.literal("")), // Extended for Template 2 avatars
+  photo: z.string().optional().or(z.literal("")), // Extended for Template 2 avatars
 });
 
 export const KeyGuestSchema = z.object({
   id: z.string(),
   name: z.string().min(1, "Name is required"),
-  photo: z.string().url("Must be a valid photo URL").optional().or(z.literal("")),
+  photo: z.string().optional().or(z.literal("")),
   relationship: z.string().optional().or(z.literal("")), // Bridesmaid, Groomsman
 });
 

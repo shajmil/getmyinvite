@@ -266,18 +266,14 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
         id="home"
         className="h-screen w-full relative flex items-center justify-center flex-col text-white text-center px-4 overflow-hidden"
       >
-        {data.hero.mainPhoto ? (
-          <Image
-            src={data.hero.mainPhoto}
-            alt="Wedding Hero Background"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover -z-10"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-[#1a1a1a] -z-10" />
-        )}
+        <Image
+          src={data.hero.mainPhoto || "/templates/barcelona/background.jpeg"}
+          alt="Wedding Hero Background"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover -z-10"
+        />
         {/* Dark overlay to make white text highly readable */}
         <div className="absolute inset-0 bg-black/45 -z-10" />
         
