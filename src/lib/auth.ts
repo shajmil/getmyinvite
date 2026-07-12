@@ -13,6 +13,11 @@ export const auth = betterAuth({
       verification: schema.verification,
     },
   }),
+  trustedOrigins: [
+    "https://getmyinvite.in",
+    "https://www.getmyinvite.in",
+    "https://getmyinvite.vercel.app",
+  ],
   emailAndPassword: {
     enabled: true,
   },
