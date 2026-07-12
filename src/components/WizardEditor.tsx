@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useWizardStore } from "@/lib/store";
@@ -25,6 +26,67 @@ interface WizardEditorProps {
     status: "draft" | "published";
     content: any;
   };
+}
+
+interface IframePreviewProps {
+  children: React.ReactNode;
+}
+
+function IframePreview({ children }: IframePreviewProps) {
+  const [contentRef, setContentRef] = useState<HTMLIFrameElement | null>(null);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const mountNode = contentRef?.contentDocument?.body;
+
+  useEffect(() => {
+    if (!contentRef) return;
+    const doc = contentRef.contentDocument;
+    if (!doc) return;
+
+    const setupIframe = () => {
+      const doc = contentRef.contentDocument;
+      if (!doc) return;
+
+      // Clear head to avoid duplicates
+      doc.head.innerHTML = "";
+
+      // Copy styles
+      document.querySelectorAll("style, link[rel='stylesheet']").forEach((el) => {
+        doc.head.appendChild(el.cloneNode(true));
+      });
+
+      // Viewport meta
+      const meta = doc.createElement("meta");
+      meta.name = "viewport";
+      meta.content = "width=device-width, initial-scale=1.0";
+      doc.head.appendChild(meta);
+
+      // Document styles
+      doc.documentElement.style.height = "100%";
+      doc.body.style.margin = "0";
+      doc.body.style.padding = "0";
+      doc.body.style.height = "100%";
+      doc.body.style.width = "100%";
+      doc.body.style.overflowX = "hidden";
+
+      setIframeLoaded(true);
+    };
+
+    if (doc.readyState === "complete" || doc.readyState === "interactive") {
+      setupIframe();
+    } else {
+      contentRef.onload = setupIframe;
+    }
+  }, [contentRef]);
+
+  return (
+    <iframe
+      ref={setContentRef}
+      style={{ border: "none", width: "100%", height: "100%" }}
+      title="preview-frame"
+    >
+      {iframeLoaded && mountNode && createPortal(children, mountNode)}
+    </iframe>
+  );
 }
 
 export function WizardEditor({ invitation }: WizardEditorProps) {
@@ -271,8 +333,10 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
             }`}
           >
             {/* The Actual Template Client Render */}
-            <div className="w-full h-full overflow-y-auto overflow-x-hidden scrollbar-none relative">
-              <ActiveTemplateComponent data={data} colorSchemeId={colorSchemeId} isPreview={true} />
+            <div className="w-full h-full relative">
+              <IframePreview>
+                <ActiveTemplateComponent data={data} colorSchemeId={colorSchemeId} isPreview={true} />
+              </IframePreview>
             </div>
 
             {/* Mobile Notch overlay */}

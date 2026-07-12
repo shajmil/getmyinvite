@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import React from "react";
-import { getInvitationBySlug } from "@/db/queries/invitation";
+import { getCachedInvitationBySlug } from "@/db/queries/invitation";
 import { templateRegistry } from "@/templates/registry";
 import Link from "next/link";
 
@@ -17,7 +17,7 @@ interface SlugPageProps {
 
 export async function generateMetadata(props: SlugPageProps) {
   const { slug } = await props.params;
-  const invitation = await getInvitationBySlug(slug);
+  const invitation = await getCachedInvitationBySlug(slug);
 
   if (!invitation) {
     return {
@@ -63,7 +63,7 @@ export async function generateMetadata(props: SlugPageProps) {
 
 export default async function PublishedSlugPage(props: SlugPageProps) {
   const { slug } = await props.params;
-  const invitation = await getInvitationBySlug(slug);
+  const invitation = await getCachedInvitationBySlug(slug);
 
   if (!invitation) {
     // Elegant Custom 404

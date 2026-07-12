@@ -264,14 +264,22 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
       {/* -------------------- HERO -------------------- */}
       <header
         id="home"
-        style={{
-          backgroundImage: data.hero.mainPhoto ? `linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5)), url(${data.hero.mainPhoto})` : "none",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-        className="h-screen w-full relative flex items-center justify-center flex-col text-white text-center px-4"
+        className="h-screen w-full relative flex items-center justify-center flex-col text-white text-center px-4 overflow-hidden"
       >
-        {!data.hero.mainPhoto && <div className="absolute inset-0 bg-[#1a1a1a]" />}
+        {data.hero.mainPhoto ? (
+          <Image
+            src={data.hero.mainPhoto}
+            alt="Wedding Hero Background"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover -z-10"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[#1a1a1a] -z-10" />
+        )}
+        {/* Dark overlay to make white text highly readable */}
+        <div className="absolute inset-0 bg-black/45 -z-10" />
         
         <div className="relative z-10 space-y-6 max-w-2xl">
           <p className="font-serif italic text-lg md:text-xl tracking-wider text-var(--gold-light) drop-shadow">

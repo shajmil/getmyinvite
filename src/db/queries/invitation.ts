@@ -1,4 +1,4 @@
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   invitations,
@@ -7,6 +7,7 @@ import {
   assets,
 } from "@/db/schema";
 import { InvitationData } from "@/lib/zod-schemas";
+import { cache } from "react";
 
 // ==========================================
 // INVITATION QUERIES
@@ -14,45 +15,46 @@ import { InvitationData } from "@/lib/zod-schemas";
 
 export async function getInvitationById(id: string, userId: string) {
   const result = await db
-    .select()
+    .select({
+      invitation: invitations,
+      content: invitationContent.content,
+    })
     .from(invitations)
+    .leftJoin(invitationContent, eq(invitationContent.invitationId, invitations.id))
     .where(and(eq(invitations.id, id), eq(invitations.userId, userId)))
     .limit(1);
 
   if (result.length === 0) return null;
 
-  const contentResult = await db
-    .select()
-    .from(invitationContent)
-    .where(eq(invitationContent.invitationId, id))
-    .limit(1);
-
   return {
-    ...result[0],
-    content: contentResult[0]?.content as InvitationData | undefined,
+    ...result[0].invitation,
+    content: result[0].content as InvitationData | undefined,
   };
 }
 
 export async function getInvitationBySlug(slug: string) {
   const result = await db
-    .select()
+    .select({
+      invitation: invitations,
+      content: invitationContent.content,
+    })
     .from(invitations)
+    .leftJoin(invitationContent, eq(invitationContent.invitationId, invitations.id))
     .where(and(eq(invitations.slug, slug), eq(invitations.status, "published")))
     .limit(1);
 
   if (result.length === 0) return null;
 
-  const contentResult = await db
-    .select()
-    .from(invitationContent)
-    .where(eq(invitationContent.invitationId, result[0].id))
-    .limit(1);
-
   return {
-    ...result[0],
-    content: contentResult[0]?.content as InvitationData,
+    ...result[0].invitation,
+    content: result[0].content as InvitationData,
   };
 }
+
+// React cache wrapper to deduplicate server component and generateMetadata requests
+export const getCachedInvitationBySlug = cache(async (slug: string) => {
+  return await getInvitationBySlug(slug);
+});
 
 export async function checkSlugAvailable(slug: string, excludeInvitationId?: string) {
   const query = db.select().from(invitations).where(eq(invitations.slug, slug));
@@ -64,36 +66,37 @@ export async function checkSlugAvailable(slug: string, excludeInvitationId?: str
 
 export async function getInvitationsByUser(userId: string) {
   const list = await db
-    .select()
+    .select({
+      invitation: invitations,
+      content: invitationContent.content,
+    })
     .from(invitations)
+    .leftJoin(invitationContent, eq(invitationContent.invitationId, invitations.id))
     .where(eq(invitations.userId, userId))
     .orderBy(desc(invitations.createdAt));
 
-  // Hydrate each invitation with content and RSVP count
-  const hydrated = await Promise.all(
-    list.map(async (inv: { id: string; userId: string; slug: string; templateId: string; status: "draft" | "published"; colorSchemeId: string; publishedAt: Date | null; createdAt: Date; updatedAt: Date }) => {
-      const contentResult = await db
-        .select()
-        .from(invitationContent)
-        .where(eq(invitationContent.invitationId, inv.id))
-        .limit(1);
+  if (list.length === 0) return [];
 
-      const rsvpsCount = await db
-        .select()
-        .from(rsvps)
-        .where(eq(rsvps.invitationId, inv.id));
+  const invitationIds = list.map((item) => item.invitation.id);
 
-      const totalGuests = rsvpsCount.reduce((acc: number, curr: { guestCount: number }) => acc + (curr.guestCount || 1), 0);
+  // Fetch RSVPs in a single query instead of N queries
+  const allRsvps = await db
+    .select()
+    .from(rsvps)
+    .where(inArray(rsvps.invitationId, invitationIds));
 
-      return {
-        ...inv,
-        content: contentResult[0]?.content as InvitationData | undefined,
-        rsvpCount: totalGuests,
-      };
-    })
-  );
+  // Count guests in memory
+  const rsvpCounts: Record<string, number> = {};
+  allRsvps.forEach((rsvp) => {
+    const invId = rsvp.invitationId;
+    rsvpCounts[invId] = (rsvpCounts[invId] || 0) + (rsvp.guestCount || 1);
+  });
 
-  return hydrated;
+  return list.map((item) => ({
+    ...item.invitation,
+    content: item.content as InvitationData | undefined,
+    rsvpCount: rsvpCounts[item.invitation.id] || 0,
+  }));
 }
 
 export async function createInvitation(
