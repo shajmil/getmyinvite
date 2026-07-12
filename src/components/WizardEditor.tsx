@@ -337,7 +337,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
             }`}
           >
             {/* The Actual Template Client Render */}
-            <div className="w-full h-full relative">
+            <div className="absolute inset-0 w-full h-full">
               <IframePreview key={previewDevice}>
                 <ActiveTemplateComponent data={data} colorSchemeId={colorSchemeId} isPreview={true} />
               </IframePreview>
