@@ -1,27 +1,196 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Code, X, Heart } from "lucide-react";
 
 export function DeveloperCredits() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Coordinate position of the floating button
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [activeCorner, setActiveCorner] = useState<"TL" | "TR" | "BL" | "BR">("BR");
+  const [isDragging, setIsDragging] = useState(false);
+  
+  const dragStart = useRef({ x: 0, y: 0 });
+  const dragPositionStart = useRef({ x: 0, y: 0 });
+  const hasMoved = useRef(false);
+
+  // Initialize position in bottom right corner on mount
+  useEffect(() => {
+    setIsMounted(true);
+    const initX = window.innerWidth - 170;
+    const initY = window.innerHeight - 70;
+    setPosition({ x: initX, y: initY });
+  }, []);
+
+  // Recalculate bounds and snap position on window resize
+  useEffect(() => {
+    if (!isMounted) return;
+    const handleResize = () => {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      let newX = 24;
+      let newY = 24;
+
+      if (activeCorner === "TR" || activeCorner === "BR") {
+        newX = vw - 170;
+      }
+      if (activeCorner === "BL" || activeCorner === "BR") {
+        newY = vh - 70;
+      }
+      setPosition({ x: newX, y: newY });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isMounted, activeCorner]);
+
+  const handleStart = (clientX: number, clientY: number) => {
+    setIsDragging(true);
+    hasMoved.current = false;
+    dragStart.current = { x: clientX, y: clientY };
+    dragPositionStart.current = { ...position };
+  };
+
+  const handleMove = (clientX: number, clientY: number) => {
+    if (!isDragging) return;
+    const deltaX = clientX - dragStart.current.x;
+    const deltaY = clientY - dragStart.current.y;
+    
+    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+      hasMoved.current = true;
+    }
+    
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    
+    // Maintain a safe margin within the screen bounds
+    const newX = Math.max(10, Math.min(vw - 160, dragPositionStart.current.x + deltaX));
+    const newY = Math.max(10, Math.min(vh - 60, dragPositionStart.current.y + deltaY));
+    
+    setPosition({ x: newX, y: newY });
+  };
+
+  const handleEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    if (!hasMoved.current) {
+      setIsOpen(true);
+      return;
+    }
+
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    
+    const corners = [
+      { id: "TL" as const, x: 24, y: 24 },
+      { id: "TR" as const, x: vw - 170, y: 24 },
+      { id: "BL" as const, x: 24, y: vh - 70 },
+      { id: "BR" as const, x: vw - 170, y: vh - 70 },
+    ];
+
+    let closest = corners[3]; // Default to BR
+    let minDist = Infinity;
+
+    corners.forEach((c) => {
+      const dist = Math.pow(position.x - c.x, 2) + Math.pow(position.y - c.y, 2);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = c;
+      }
+    });
+
+    setActiveCorner(closest.id);
+    setPosition({ x: closest.x, y: closest.y });
+  };
+
+  // Capture global mouse/touch events while dragging is active
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const onMouseMove = (e: MouseEvent) => {
+      handleMove(e.clientX, e.clientY);
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches[0]) {
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+
+    const onMouseUp = () => {
+      handleEnd();
+    };
+
+    const onTouchEnd = () => {
+      handleEnd();
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("touchend", onTouchEnd);
+
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [isDragging, position]);
+
+  if (!isMounted) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 font-sans select-none">
+    <div className="fixed inset-0 pointer-events-none z-50 select-none">
+      <style>{`
+        @keyframes dev-float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
+        }
+        .animate-dev-float {
+          animation: dev-float 3s ease-in-out infinite;
+        }
+      `}</style>
+
       {/* Floating Trigger Button */}
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#855f18] to-[#b38f4d] text-white rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 group cursor-pointer border border-white/20"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            handleStart(e.clientX, e.clientY);
+          }}
+          onTouchStart={(e) => {
+            if (e.touches[0]) {
+              handleStart(e.touches[0].clientX, e.touches[0].clientY);
+            }
+          }}
+          style={{
+            left: `${position.x}px`,
+            top: `${position.y}px`,
+          }}
+          className={`fixed pointer-events-auto flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#855f18] to-[#b38f4d] text-white rounded-full shadow-2xl hover:scale-105 active:scale-95 group cursor-grab active:cursor-grabbing border border-white/20 ${
+            isDragging ? "transition-none" : "transition-all duration-300 ease-out animate-dev-float"
+          }`}
         >
           <Code className="w-4 h-4 animate-pulse group-hover:rotate-12 transition-transform" />
           <span className="text-xs font-semibold tracking-wider">Meet the Dev</span>
         </button>
       )}
 
-      {/* Credit Card modal */}
+      {/* Credit Card Modal */}
       {isOpen && (
-        <div className="w-80 bg-white/95 backdrop-blur-md border border-[#eae6df] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] p-6 relative animate-in fade-in zoom-in-95 duration-300">
+        <div
+          style={{
+            left: activeCorner === "TL" || activeCorner === "BL" ? "24px" : "auto",
+            right: activeCorner === "TR" || activeCorner === "BR" ? "24px" : "auto",
+            top: activeCorner === "TL" || activeCorner === "TR" ? "24px" : "auto",
+            bottom: activeCorner === "BL" || activeCorner === "BR" ? "24px" : "auto",
+          }}
+          className="fixed pointer-events-auto w-80 bg-white/95 backdrop-blur-md border border-[#eae6df] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] p-6 animate-in fade-in zoom-in-95 duration-300"
+        >
           {/* Close button */}
           <button
             onClick={() => setIsOpen(false)}
