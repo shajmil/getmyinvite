@@ -2,9 +2,9 @@ import { InvitationData } from "@/lib/zod-schemas";
 
 export const demoInvitationData: InvitationData = {
   partner1: {
-    firstName: "Alfi",
+    firstName: "Sophia",
     lastName: "John",
-    photo: "/templates/barcelona/bride.jpeg",
+    photo: "/templates/barcelona/bride.png",
     parents: "Mrs. Toncy Bosco & John Bosco Kuzhikkadan",
     facebookUrl: "https://facebook.com",
     instagramUrl: "https://instagram.com",
@@ -12,7 +12,7 @@ export const demoInvitationData: InvitationData = {
   partner2: {
     firstName: "Garyson",
     lastName: "George",
-    photo: "/templates/barcelona/groom.jpeg",
+    photo: "/templates/barcelona/groom.png",
     parents: "Mrs. Latha George & Konnoth Antony George",
     facebookUrl: "https://facebook.com",
     instagramUrl: "https://instagram.com",
@@ -73,7 +73,7 @@ export const demoInvitationData: InvitationData = {
     { url: "/templates/barcelona/pic6.jpeg", alt: "Memory 6", order: 6 },
   ],
   hero: {
-    mainPhoto: "/templates/barcelona/background.jpeg",
+    mainPhoto: "/templates/barcelona/background.png",
     quote: "Love is patient, love is kind.",
     videoUrl: "/templates/classic/Video.mp4",
     musicUrl: "/templates/classic/audio.mpeg",
@@ -89,7 +89,7 @@ export const demoInvitationData: InvitationData = {
   extras: {
     dressCode: "Elegant",
     giftNote: "Your presence is our present. No gifts required.",
-    hashtag: "GarysonAlfi2026",
+    hashtag: "GarysonSophia2026",
     contactPersons: [
       {
         id: "c-1",

@@ -83,7 +83,7 @@ export function StepCouple() {
                 value={data.partner1.firstName}
                 onChange={(e) => updateNestedData("partner1", { firstName: e.target.value })}
                 className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
-                placeholder="Alfi"
+                placeholder="Sophia"
               />
             </div>
             <div>
