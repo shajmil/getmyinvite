@@ -19,9 +19,13 @@ export function DeveloperCredits() {
   // Initialize position in bottom right corner on mount
   useEffect(() => {
     setIsMounted(true);
-    const initX = window.innerWidth - 170;
-    const initY = window.innerHeight - 70;
-    setPosition({ x: initX, y: initY });
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const isMobile = vw < 768;
+    const buttonWidth = isMobile ? 40 : 146;
+    const buttonHeight = isMobile ? 40 : 42;
+    const margin = isMobile ? 12 : 24;
+    setPosition({ x: vw - buttonWidth - margin, y: vh - buttonHeight - margin });
   }, []);
 
   // Recalculate bounds and snap position on window resize
@@ -30,14 +34,19 @@ export function DeveloperCredits() {
     const handleResize = () => {
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      let newX = 24;
-      let newY = 24;
+      const isMobile = vw < 768;
+      const buttonWidth = isMobile ? 40 : 146;
+      const buttonHeight = isMobile ? 40 : 42;
+      const margin = isMobile ? 12 : 24;
+      
+      let newX = margin;
+      let newY = margin;
 
       if (activeCorner === "TR" || activeCorner === "BR") {
-        newX = vw - 170;
+        newX = vw - buttonWidth - margin;
       }
       if (activeCorner === "BL" || activeCorner === "BR") {
-        newY = vh - 70;
+        newY = vh - buttonHeight - margin;
       }
       setPosition({ x: newX, y: newY });
     };
@@ -64,10 +73,14 @@ export function DeveloperCredits() {
     
     const vw = window.innerWidth;
     const vh = window.innerHeight;
+    const isMobile = vw < 768;
+    const buttonWidth = isMobile ? 40 : 146;
+    const buttonHeight = isMobile ? 40 : 42;
+    const margin = isMobile ? 8 : 12;
     
     // Maintain a safe margin within the screen bounds
-    const newX = Math.max(10, Math.min(vw - 160, dragPositionStart.current.x + deltaX));
-    const newY = Math.max(10, Math.min(vh - 60, dragPositionStart.current.y + deltaY));
+    const newX = Math.max(margin, Math.min(vw - buttonWidth - margin, dragPositionStart.current.x + deltaX));
+    const newY = Math.max(margin, Math.min(vh - buttonHeight - margin, dragPositionStart.current.y + deltaY));
     
     setPosition({ x: newX, y: newY });
   };
@@ -83,12 +96,16 @@ export function DeveloperCredits() {
 
     const vw = window.innerWidth;
     const vh = window.innerHeight;
+    const isMobile = vw < 768;
+    const buttonWidth = isMobile ? 40 : 146;
+    const buttonHeight = isMobile ? 40 : 42;
+    const margin = isMobile ? 12 : 24;
     
     const corners = [
-      { id: "TL" as const, x: 24, y: 24 },
-      { id: "TR" as const, x: vw - 170, y: 24 },
-      { id: "BL" as const, x: 24, y: vh - 70 },
-      { id: "BR" as const, x: vw - 170, y: vh - 70 },
+      { id: "TL" as const, x: margin, y: margin },
+      { id: "TR" as const, x: vw - buttonWidth - margin, y: margin },
+      { id: "BL" as const, x: margin, y: vh - buttonHeight - margin },
+      { id: "BR" as const, x: vw - buttonWidth - margin, y: vh - buttonHeight - margin },
     ];
 
     let closest = corners[3]; // Default to BR
@@ -171,12 +188,12 @@ export function DeveloperCredits() {
             left: `${position.x}px`,
             top: `${position.y}px`,
           }}
-          className={`fixed pointer-events-auto flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#855f18] to-[#b38f4d] text-white rounded-full shadow-2xl hover:scale-105 active:scale-95 group cursor-grab active:cursor-grabbing border border-white/20 ${
-            isDragging ? "transition-none" : "transition-all duration-300 ease-out animate-dev-float"
+          className={`fixed pointer-events-auto flex items-center justify-center gap-2 rounded-full shadow-2xl hover:scale-105 active:scale-95 group cursor-grab active:cursor-grabbing border border-white/20 bg-gradient-to-r from-[#855f18] to-[#b38f4d] text-white transition-all duration-300 ease-out w-10 h-10 md:w-auto md:h-auto md:px-4 md:py-2.5 opacity-70 hover:opacity-100 md:opacity-100 ${
+            isDragging ? "transition-none" : "animate-dev-float"
           }`}
         >
-          <Code className="w-4 h-4 animate-pulse group-hover:rotate-12 transition-transform" />
-          <span className="text-xs font-semibold tracking-wider">Meet the Dev</span>
+          <Code className="w-4 h-4 animate-pulse group-hover:rotate-12 transition-transform flex-shrink-0" />
+          <span className="hidden md:inline text-xs font-semibold tracking-wider">Meet the Dev</span>
         </button>
       )}
 

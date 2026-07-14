@@ -1,19 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { templateRegistry } from "@/templates/registry";
 import { demoInvitationData } from "@/templates/demo-data";
 
-export default function TestTemplatesPage() {
-  const [selectedTemplate, setSelectedTemplate] = useState<"barcelona" | "classic">("barcelona");
+function TestTemplatesContent() {
+  const searchParams = useSearchParams();
+  const templateParam = searchParams.get("template") as "barcelona" | "classic" | null;
+  const initialTemplate = (templateParam && templateRegistry[templateParam]) ? templateParam : "barcelona";
+
+  const [selectedTemplate, setSelectedTemplate] = useState<"barcelona" | "classic">(initialTemplate);
   const [selectedScheme, setSelectedScheme] = useState<string>("");
+
+  // Sync state if URL search parameters update dynamically
+  useEffect(() => {
+    if (templateParam && templateRegistry[templateParam] && templateParam !== selectedTemplate) {
+      setSelectedTemplate(templateParam);
+      setSelectedScheme(templateRegistry[templateParam].colorSchemes[0].id);
+    }
+  }, [templateParam, selectedTemplate]);
 
   const registryEntry = templateRegistry[selectedTemplate];
   const activeSchemeId = selectedScheme || registryEntry.colorSchemes[0].id;
 
   const TemplateComponent = registryEntry.component;
 
-  // Handle template change
+  // Handle template selection transitions
   const handleTemplateChange = (tempId: "barcelona" | "classic") => {
     setSelectedTemplate(tempId);
     setSelectedScheme(templateRegistry[tempId].colorSchemes[0].id);
@@ -70,5 +83,17 @@ export default function TestTemplatesPage() {
         <TemplateComponent data={demoInvitationData} colorSchemeId={activeSchemeId} isPreview={true} />
       </div>
     </div>
+  );
+}
+
+export default function TestTemplatesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#faf8f5]">
+        <div className="animate-spin w-8 h-8 border-4 border-[#855f18] border-t-transparent rounded-full" />
+      </div>
+    }>
+      <TestTemplatesContent />
+    </Suspense>
   );
 }
