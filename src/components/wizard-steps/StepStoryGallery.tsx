@@ -5,7 +5,7 @@ import { useWizardStore } from "@/lib/store";
 import { uploadFile } from "@/lib/compress";
 
 export function StepStoryGallery() {
-  const { data, updateData } = useWizardStore();
+  const { data, updateData, templateId } = useWizardStore();
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [galleryProgress, setGalleryProgress] = useState(0);
 
@@ -90,68 +90,78 @@ export function StepStoryGallery() {
     updateData({ gallery: newGallery });
   };
 
+  const isBarcelona = templateId === "barcelona";
+
   return (
     <div className="space-y-6">
       <div className="border-b border-[#eae6df] pb-4">
-        <h2 className="text-xl font-serif font-bold text-[#1a1a1a]">Step 4 — Story & Gallery</h2>
-        <p className="text-xs text-[#666]">Share how you met and upload up to 20 gallery memories</p>
+        <h2 className="text-xl font-serif font-bold text-[#1a1a1a]">
+          {isBarcelona ? "Step 4 — Media Gallery" : "Step 4 — Story & Gallery"}
+        </h2>
+        <p className="text-xs text-[#666]">
+          {isBarcelona 
+            ? "Upload up to 20 gallery memories for your wedding template carousel" 
+            : "Share how you met and upload up to 20 gallery memories"}
+        </p>
       </div>
 
-      {/* Love Story Details */}
-      <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
-        <div className="flex justify-between items-center border-b border-[#faf8f5] pb-2">
-          <h3 className="font-serif text-lg font-semibold text-[#855f18]">Love Story Timeline</h3>
-          <button
-            onClick={handleStoryTimelineAdd}
-            className="px-2.5 py-1 border border-[#855f18] text-[#855f18] hover:bg-[#855f18]/10 text-xs font-semibold rounded"
-          >
-            + Add Milestone
-          </button>
-        </div>
-
-        {(data.story?.timeline || []).length === 0 ? (
-          <p className="text-xs text-[#777] italic text-center py-4">No story timeline milestones added.</p>
-        ) : (
-          <div className="space-y-4">
-            {data.story?.timeline.map((point, idx) => (
-              <div key={point.id} className="border border-[#faf8f5] p-3 rounded-lg bg-[#faf8f5]/50 space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold text-[#855f18]">Milestone #{idx + 1}</span>
-                  <button
-                    onClick={() => handleStoryTimelineRemove(point.id)}
-                    className="text-[10px] text-red-600 hover:underline font-bold"
-                  >
-                    Delete
-                  </button>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <input
-                    type="text"
-                    value={point.date}
-                    onChange={(e) => handleStoryTimelineUpdate(point.id, { date: e.target.value })}
-                    className="px-2 py-1 border border-[#eae6df] rounded text-xs focus:outline-none"
-                    placeholder="Date (e.g. Sept 2021)"
-                  />
-                  <input
-                    type="text"
-                    value={point.title}
-                    onChange={(e) => handleStoryTimelineUpdate(point.id, { title: e.target.value })}
-                    className="col-span-2 px-2 py-1 border border-[#eae6df] rounded text-xs focus:outline-none"
-                    placeholder="Title (e.g. How we met)"
-                  />
-                </div>
-                <textarea
-                  value={point.text}
-                  onChange={(e) => handleStoryTimelineUpdate(point.id, { text: e.target.value })}
-                  rows={2}
-                  className="w-full px-2 py-1 border border-[#eae6df] rounded text-xs focus:outline-none"
-                  placeholder="Tell your story..."
-                />
-              </div>
-            ))}
+      {/* Love Story Details - Hidden for templates that don't display a story timeline */}
+      {!isBarcelona && templateId !== "classic" && (
+        <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
+          <div className="flex justify-between items-center border-b border-[#faf8f5] pb-2">
+            <h3 className="font-serif text-lg font-semibold text-[#855f18]">Love Story Timeline</h3>
+            <button
+              onClick={handleStoryTimelineAdd}
+              className="px-2.5 py-1 border border-[#855f18] text-[#855f18] hover:bg-[#855f18]/10 text-xs font-semibold rounded"
+            >
+              + Add Milestone
+            </button>
           </div>
-        )}
-      </div>
+
+          {(data.story?.timeline || []).length === 0 ? (
+            <p className="text-xs text-[#777] italic text-center py-4">No story timeline milestones added.</p>
+          ) : (
+            <div className="space-y-4">
+              {data.story?.timeline.map((point, idx) => (
+                <div key={point.id} className="border border-[#faf8f5] p-3 rounded-lg bg-[#faf8f5]/50 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-semibold text-[#855f18]">Milestone #{idx + 1}</span>
+                    <button
+                      onClick={() => handleStoryTimelineRemove(point.id)}
+                      className="text-[10px] text-red-600 hover:underline font-bold"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <input
+                      type="text"
+                      value={point.date}
+                      onChange={(e) => handleStoryTimelineUpdate(point.id, { date: e.target.value })}
+                      className="px-2 py-1 border border-[#eae6df] rounded text-xs focus:outline-none"
+                      placeholder="Date (e.g. Sept 2021)"
+                    />
+                    <input
+                      type="text"
+                      value={point.title}
+                      onChange={(e) => handleStoryTimelineUpdate(point.id, { title: e.target.value })}
+                      className="col-span-2 px-2 py-1 border border-[#eae6df] rounded text-xs focus:outline-none"
+                      placeholder="Title (e.g. How we met)"
+                    />
+                  </div>
+                  <textarea
+                    value={point.text}
+                    onChange={(e) => handleStoryTimelineUpdate(point.id, { text: e.target.value })}
+                    rows={2}
+                    className="w-full px-2 py-1 border border-[#eae6df] rounded text-xs focus:outline-none"
+                    placeholder="Tell your story..."
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Media Gallery Grid */}
       <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">

@@ -175,7 +175,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
     return () => clearTimeout(timer);
   }, [data, invitationId, mounted, setSaveStatus]);
 
-  const stepsCount = templateId === "barcelona" ? 7 : 6;
+  const stepsCount = templateId === "barcelona" ? 7 : 5;
 
   // Safety check: ensure currentStep index is within bounds if steps array shrinks
   useEffect(() => {
@@ -216,15 +216,17 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
   };
 
   // Dynamically define steps based on template selection
-  // Barcelona needs: Couple, Details, Events, Story, RSVP, Template, Publish (7 steps)
-  // Classic needs: Couple, Details, Story, RSVP, Template, Publish (6 steps)
+  // Barcelona needs: Couple, Details, Events, Gallery, RSVP, Template, Publish (7 steps)
+  // Classic needs: Couple, Details, RSVP, Template, Publish (5 steps)
   const steps = [
     { id: "couple", title: "Couple", component: <StepCouple /> },
     { id: "details", title: "Details", component: <StepWedding /> },
     ...(templateId === "barcelona"
-      ? [{ id: "events", title: "Events", component: <StepEvents /> }]
+      ? [
+          { id: "events", title: "Events", component: <StepEvents /> },
+          { id: "gallery", title: "Gallery", component: <StepStoryGallery /> },
+        ]
       : []),
-    { id: "story", title: "Story", component: <StepStoryGallery /> },
     { id: "rsvp", title: "RSVP", component: <StepRSVPExtras /> },
     { id: "template", title: "Template", component: <StepTemplateStyle onUpdateTemplate={handleUpdateTemplate} /> },
     { id: "publish", title: "Publish", component: <StepPublish onPublishSuccess={handlePublishSuccess} /> },

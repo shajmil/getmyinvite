@@ -165,44 +165,46 @@ export function StepRSVPExtras() {
         )}
       </div>
 
-      {/* Extras: Hashtags, Dress Codes, Gift Notes */}
-      <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
-        <h3 className="font-serif text-lg font-semibold text-[#855f18] border-b border-[#faf8f5] pb-2">Event Extras</h3>
+      {/* Extras: Hashtags, Dress Codes, Gift Notes - Hidden as they are not rendered by the active templates */}
+      {false && (
+        <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
+          <h3 className="font-serif text-lg font-semibold text-[#855f18] border-b border-[#faf8f5] pb-2">Event Extras</h3>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Wedding Hashtag</label>
-            <input
-              type="text"
-              value={data.extras.hashtag || ""}
-              onChange={(e) => updateNestedData("extras", { hashtag: e.target.value })}
-              className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
-              placeholder="ArunMeera2026"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Wedding Hashtag</label>
+              <input
+                type="text"
+                value={data?.extras?.hashtag || ""}
+                onChange={(e) => updateNestedData("extras", { hashtag: e.target.value })}
+                className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+                placeholder="ArunMeera2026"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Overall Dress Code</label>
+              <input
+                type="text"
+                value={data?.extras?.dressCode || ""}
+                onChange={(e) => updateNestedData("extras", { dressCode: e.target.value })}
+                className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+                placeholder="Formals / Traditional"
+              />
+            </div>
           </div>
+
           <div>
-            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Overall Dress Code</label>
+            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Gift Note / Note on Registry</label>
             <input
               type="text"
-              value={data.extras.dressCode || ""}
-              onChange={(e) => updateNestedData("extras", { dressCode: e.target.value })}
-              className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
-              placeholder="Formals / Traditional"
+              value={data?.extras?.giftNote || ""}
+              onChange={(e) => updateNestedData("extras", { giftNote: e.target.value })}
+              className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none"
+              placeholder="Your presence is our present..."
             />
           </div>
         </div>
-
-        <div>
-          <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Gift Note / Note on Registry</label>
-          <input
-            type="text"
-            value={data.extras.giftNote || ""}
-            onChange={(e) => updateNestedData("extras", { giftNote: e.target.value })}
-            className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none"
-            placeholder="Your presence is our present..."
-          />
-        </div>
-      </div>
+      )}
 
       {/* Contacts List */}
       <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
