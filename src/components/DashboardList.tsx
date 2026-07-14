@@ -14,6 +14,7 @@ interface InvitationListItem {
   colorSchemeId: string;
   publishedAt: string | null;
   createdAt: string;
+  weddingDate: string | null;
   rsvpCount: number;
   partner1Name: string;
   partner2Name: string;
@@ -197,6 +198,36 @@ export function DashboardList({ initialInvitations, user }: DashboardListProps) 
                         </div>
                       </div>
                     );
+                  })()}
+
+                  {inv.status === "published" && inv.weddingDate && (() => {
+                    const wDate = new Date(inv.weddingDate + "T00:00:00");
+                    const expiryDate = new Date(wDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+                    const msRemaining = expiryDate.getTime() - Date.now();
+                    const daysRemaining = Math.max(0, Math.ceil(msRemaining / (1000 * 60 * 60 * 24)));
+                    const hasPassed = Date.now() > wDate.getTime();
+                    
+                    if (hasPassed) {
+                      return (
+                        <div className="mt-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-2.5 text-[10px] leading-relaxed flex items-start gap-2 font-medium">
+                          <span className="text-xs leading-none mt-0.5">⚠️</span>
+                          <div>
+                            <p className="font-bold text-amber-900">Website Expiring Soon</p>
+                            <p className="text-amber-800/80">Wedding is completed. Deletes in {daysRemaining} day{daysRemaining !== 1 ? "s" : ""} (kept for 7 days post-event).</p>
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="mt-3 bg-blue-50 border border-blue-200 text-blue-800 rounded-xl p-2.5 text-[10px] leading-relaxed flex items-start gap-2 font-medium">
+                          <span className="text-xs leading-none mt-0.5">ℹ️</span>
+                          <div>
+                            <p className="font-bold text-blue-900">Live Website Active</p>
+                            <p className="text-blue-800/80">Auto-deletes 7 days after the wedding (expires in {daysRemaining} days).</p>
+                          </div>
+                        </div>
+                      );
+                    }
                   })()}
                 </div>
 
