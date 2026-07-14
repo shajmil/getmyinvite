@@ -229,13 +229,23 @@ export function DeveloperCredits() {
             </div>
 
             {/* Description */}
-            <div className="space-y-2 border-t border-[#eae6df] pt-3">
+            <div className="space-y-2 border-t border-[#eae6df] pt-3 text-left">
               <h5 className="text-xs font-bold text-[#1a1a1a] flex items-center gap-1">
                 Are you amazed? <Heart className="w-3 h-3 text-red-500 fill-red-500 animate-ping" />
               </h5>
               <p className="text-xs text-[#666] leading-relaxed">
-                Yes, I designed and developed this entire wedding invitation builder platform from scratch!
+                I designed and developed this platform from scratch. Want to create a beautiful wedding site for your own event?
               </p>
+              <div className="pt-1">
+                <a
+                  href="https://getmyinvite.in"
+                  target="_blank"
+                  rel="noopener"
+                  className="text-xs font-bold text-[#855f18] hover:underline"
+                >
+                  Make your invitation at getmyinvite.in →
+                </a>
+              </div>
             </div>
 
             {/* Social Links */}
