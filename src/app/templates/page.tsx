@@ -11,6 +11,9 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Wedding Invitation Templates & Themes | GetMyInvite",
   description: "Browse our collection of premium digital wedding website designs. Choose from elegant layouts, scrolling parallax themes, and customizable modal invitations.",
+  alternates: {
+    canonical: "https://getmyinvite.in/templates",
+  },
   openGraph: {
     title: "Wedding Invitation Templates & Themes | GetMyInvite",
     description: "Select from modern, responsive digital wedding invitation templates. Live preview gold, charcoal, and emerald themes instantly.",
@@ -59,7 +62,7 @@ export default async function TemplatesPage() {
       {/* Main Body */}
       <main className="flex-1 p-6 md:p-10 max-w-6xl w-full mx-auto space-y-6">
         <div className="text-center max-w-xl mx-auto space-y-2 mb-10">
-          <h2 className="font-serif text-3xl font-bold text-[#1a1a1a]">Curated Wedding Invitation Templates</h2>
+          <h1 className="font-serif text-3xl font-bold text-[#1a1a1a]">Curated Wedding Invitation Templates</h1>
           <p className="text-xs text-[#666] leading-relaxed uppercase tracking-wider font-semibold">
             Choose a foundation theme to start building your wedding site
           </p>
