@@ -1,4 +1,4 @@
-import { eq, and, desc, inArray, lt } from "drizzle-orm";
+import { eq, and, desc, inArray, lt, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   invitations,
@@ -65,9 +65,11 @@ export async function checkSlugAvailable(slug: string, excludeInvitationId?: str
 }
 
 export async function getInvitationsByUser(userId: string) {
-  // Automatically clean up drafts older than 7 days on dashboard load
+  // Automatically clean up drafts older than 7 days and past wedding events on dashboard load
   try {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    
+    // 1. Delete drafts older than 7 days
     await db
       .delete(invitations)
       .where(
@@ -76,8 +78,23 @@ export async function getInvitationsByUser(userId: string) {
           lt(invitations.createdAt, sevenDaysAgo)
         )
       );
+
+    // 2. Delete invitations where the wedding date has passed by more than 7 days
+    const expiredList = await db
+      .select({ id: invitationContent.invitationId })
+      .from(invitationContent)
+      .where(
+        sql`to_date(content->'wedding'->>'date', 'YYYY-MM-DD') < CURRENT_DATE - 7`
+      );
+
+    if (expiredList.length > 0) {
+      const expiredIds = expiredList.map((item) => item.id);
+      await db
+        .delete(invitations)
+        .where(inArray(invitations.id, expiredIds));
+    }
   } catch (err) {
-    console.error("Dashboard cleanup drafts error:", err);
+    console.error("Dashboard cleanup drafts and past weddings error:", err);
   }
 
   const list = await db

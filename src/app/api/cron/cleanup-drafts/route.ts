@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { invitations } from "@/db/schema";
-import { and, eq, lt } from "drizzle-orm";
+import { invitations, invitationContent } from "@/db/schema";
+import { and, eq, lt, inArray, sql } from "drizzle-orm";
 
 export const runtime = "nodejs";
 
@@ -36,14 +36,30 @@ export async function GET(req: Request) {
         )
       );
 
+    // 3. Clear invitations where the wedding date is more than 7 days in the past
+    const expiredList = await db
+      .select({ id: invitationContent.invitationId })
+      .from(invitationContent)
+      .where(
+        sql`to_date(content->'wedding'->>'date', 'YYYY-MM-DD') < CURRENT_DATE - 7`
+      );
+
+    if (expiredList.length > 0) {
+      const expiredIds = expiredList.map((item) => item.id);
+      await db
+        .delete(invitations)
+        .where(inArray(invitations.id, expiredIds));
+    }
+
     return NextResponse.json({
       ok: true,
-      message: "Expired drafts cleaned up successfully",
+      message: "Expired drafts and past wedding events cleaned up successfully",
       timestamp: new Date().toISOString(),
+      expiredWeddingsCount: expiredList.length,
     });
   } catch (err: any) {
-    console.error("Cleanup drafts cron error:", err);
-    return NextResponse.json({ error: err.message || "Failed to cleanup drafts" }, { status: 500 });
+    console.error("Cleanup cron error:", err);
+    return NextResponse.json({ error: err.message || "Failed to cleanup invitations" }, { status: 500 });
   }
 }
 
