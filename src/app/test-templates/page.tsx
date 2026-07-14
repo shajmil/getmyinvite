@@ -1,35 +1,34 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { templateRegistry } from "@/templates/registry";
 import { demoInvitationData } from "@/templates/demo-data";
 
 function TestTemplatesContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const templateParam = searchParams.get("template") as "barcelona" | "classic" | null;
-  const initialTemplate = (templateParam && templateRegistry[templateParam]) ? templateParam : "barcelona";
-
-  const [selectedTemplate, setSelectedTemplate] = useState<"barcelona" | "classic">(initialTemplate);
+  
+  // Deriving active template state directly from search parameters to prevent conflicting updates
+  const selectedTemplate = (templateParam && templateRegistry[templateParam]) ? templateParam : "barcelona";
   const [selectedScheme, setSelectedScheme] = useState<string>("");
-
-  // Sync state if URL search parameters update dynamically
-  useEffect(() => {
-    if (templateParam && templateRegistry[templateParam] && templateParam !== selectedTemplate) {
-      setSelectedTemplate(templateParam);
-      setSelectedScheme(templateRegistry[templateParam].colorSchemes[0].id);
-    }
-  }, [templateParam, selectedTemplate]);
 
   const registryEntry = templateRegistry[selectedTemplate];
   const activeSchemeId = selectedScheme || registryEntry.colorSchemes[0].id;
 
+  // Sync color scheme when active template updates
+  useEffect(() => {
+    setSelectedScheme(registryEntry.colorSchemes[0].id);
+  }, [selectedTemplate, registryEntry]);
+
   const TemplateComponent = registryEntry.component;
 
-  // Handle template selection transitions
+  // Transition template by updating URL query params, keeping URL as single source of truth
   const handleTemplateChange = (tempId: "barcelona" | "classic") => {
-    setSelectedTemplate(tempId);
-    setSelectedScheme(templateRegistry[tempId].colorSchemes[0].id);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("template", tempId);
+    router.push(`/test-templates?${params.toString()}`);
   };
 
   return (
