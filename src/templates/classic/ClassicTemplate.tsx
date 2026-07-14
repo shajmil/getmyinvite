@@ -148,7 +148,9 @@ export function ClassicTemplate({ data, colorSchemeId, isPreview = false }: Clas
       {data.hero.musicUrl && (
         <button
           onClick={toggleMusic}
-          className="fixed top-6 right-6 z-50 p-3 bg-white/10 hover:bg-white/20 active:scale-95 border border-white/20 text-white rounded-full transition-all shadow-lg flex items-center justify-center"
+          className={`fixed z-50 p-3 bg-white/10 hover:bg-white/20 active:scale-95 border border-white/20 text-white rounded-full transition-all shadow-lg flex items-center justify-center ${
+            isPreview ? "top-20 right-6" : "top-6 right-6"
+          }`}
           title={musicPlaying ? "Mute Background Music" : "Play Background Music"}
         >
           {musicPlaying ? (
