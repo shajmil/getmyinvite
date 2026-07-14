@@ -66,11 +66,17 @@ export async function generateMetadata(props: SlugPageProps) {
   const rawDescription = invitation.content.coupleTagline || `You are cordially invited to celebrate the wedding of ${names} on ${dateFormatted}.`;
   const description = rawDescription.length > 155 ? rawDescription.substring(0, 152) + "..." : rawDescription;
 
+  const isUnlisted = invitation.privacy === "unlisted";
+
   return {
     title,
     description,
     alternates: {
       canonical: `${appUrl}/${slug}`,
+    },
+    robots: {
+      index: !isUnlisted,
+      follow: true,
     },
     openGraph: {
       title,

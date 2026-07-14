@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import QRCode from "qrcode";
 import { useWizardStore } from "@/lib/store";
-import { checkSlugAvailabilityAction, publishInvitation } from "@/app/actions";
+import { checkSlugAvailabilityAction, publishInvitation, suggestAvailableSlugAction } from "@/app/actions";
 
 interface StepPublishProps {
   onPublishSuccess: (slug: string) => void;
@@ -23,20 +23,51 @@ export function StepPublish({ onPublishSuccess }: StepPublishProps) {
   const [publishing, setPublishing] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [showQR, setShowQR] = useState(false);
+  const [privacy, setPrivacy] = useState<"public" | "unlisted">("public");
+  const [randomSuffix, setRandomSuffix] = useState("");
+  const [baseSlug, setBaseSlug] = useState("");
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Derive slug suggestion from partner names if slug is currently empty
+  // Derive slug suggestion from partner names if slug is empty or is the default timestamp slug
   useEffect(() => {
-    if (!currentSlug && data) {
-      const name1 = data.partner1.firstName.toLowerCase().replace(/[^a-z0-9]/g, "");
-      const name2 = data.partner2.firstName.toLowerCase().replace(/[^a-z0-9]/g, "");
-      if (name1 && name2) {
-        const suggestion = `${name1}-${name2}`;
-        setSlug(suggestion);
+    const isDefaultSlug = currentSlug.startsWith("wedding-");
+    if ((!currentSlug || isDefaultSlug) && data) {
+      const p1 = data.partner1.firstName;
+      const p2 = data.partner2.firstName;
+      if (p1 && p2) {
+        suggestAvailableSlugAction(p1, p2, invitationId).then((res) => {
+          if (res.ok && res.slug) {
+            setBaseSlug(res.slug);
+            setSlug(res.slug);
+          }
+        });
       }
+    } else if (currentSlug) {
+      setBaseSlug(currentSlug);
     }
-  }, [currentSlug, data]);
+  }, [currentSlug, data, invitationId]);
+
+  const handlePrivacyChange = (newPrivacy: "public" | "unlisted") => {
+    setPrivacy(newPrivacy);
+    
+    if (newPrivacy === "unlisted") {
+      let suffix = randomSuffix;
+      if (!suffix) {
+        suffix = Math.random().toString(36).substring(2, 10);
+        setRandomSuffix(suffix);
+      }
+      
+      const cleanBase = baseSlug || slug;
+      const cleanBaseWithoutSuffix = cleanBase.replace(/-[a-z0-9]{8}$/, "");
+      const newSlug = `${cleanBaseWithoutSuffix}-${suffix}`;
+      setSlug(newSlug);
+    } else {
+      const cleanBase = baseSlug || slug;
+      const cleanBaseWithoutSuffix = cleanBase.replace(/-[a-z0-9]{8}$/, "");
+      setSlug(cleanBaseWithoutSuffix);
+    }
+  };
 
   // Check slug availability when it changes (debounced)
   useEffect(() => {
@@ -76,7 +107,7 @@ export function StepPublish({ onPublishSuccess }: StepPublishProps) {
     setErrorMsg("");
 
     try {
-      const res = await publishInvitation(invitationId, slug);
+      const res = await publishInvitation(invitationId, slug, privacy);
       if (res.ok) {
         // Success
         onPublishSuccess(slug);
@@ -208,6 +239,51 @@ export function StepPublish({ onPublishSuccess }: StepPublishProps) {
               {!checking && available === false && (
                 <span className="text-[10px] text-red-600 font-bold">✗ Link slug is unavailable or invalid</span>
               )}
+            </div>
+
+            {/* Privacy Settings Options */}
+            <div className="mt-4 border-t border-[#eae6df] pt-4 space-y-3">
+              <label className="block text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider">
+                Privacy Option
+              </label>
+              
+              <div className="grid grid-cols-1 gap-3">
+                {/* Public Option */}
+                <label className="flex items-start gap-3 p-3 border border-[#eae6df] hover:bg-[#faf8f5] rounded-xl cursor-pointer transition-all">
+                  <input
+                    type="radio"
+                    name="privacy"
+                    checked={privacy === "public"}
+                    onChange={() => handlePrivacyChange("public")}
+                    disabled={publishing}
+                    className="mt-0.5 text-[#855f18] focus:ring-[#855f18]"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-[#1a1a1a]">Public (Recommended)</span>
+                    <p className="text-[10px] text-[#666] leading-relaxed">
+                      Your invitation will have a clean URL (e.g. <code>getmyinvite.in/priya-and-arjun</code>), is searchable on Google, and is indexed on the sitemap.
+                    </p>
+                  </div>
+                </label>
+
+                {/* Unlisted Option */}
+                <label className="flex items-start gap-3 p-3 border border-[#eae6df] hover:bg-[#faf8f5] rounded-xl cursor-pointer transition-all">
+                  <input
+                    type="radio"
+                    name="privacy"
+                    checked={privacy === "unlisted"}
+                    onChange={() => handlePrivacyChange("unlisted")}
+                    disabled={publishing}
+                    className="mt-0.5 text-[#855f18] focus:ring-[#855f18]"
+                  />
+                  <div className="space-y-0.5">
+                    <span className="text-xs font-bold text-[#1a1a1a]">Unlisted / Private</span>
+                    <p className="text-[10px] text-[#666] leading-relaxed">
+                      Appends a random suffix to make your URL unguessable (e.g. <code>getmyinvite.in/priya-and-arjun-k3xq9f2p</code>). Excluded from search indexing and sitemaps.
+                    </p>
+                  </div>
+                </label>
+              </div>
             </div>
           </div>
 

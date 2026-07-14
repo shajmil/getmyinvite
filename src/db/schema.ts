@@ -68,6 +68,7 @@ export const invitations = pgTable(
     templateId: text("template_id").notNull(),
     status: text("status").$type<"draft" | "published">().default("draft").notNull(),
     colorSchemeId: text("color_scheme_id").notNull(),
+    privacy: text("privacy").$type<"public" | "unlisted">().default("public").notNull(),
     publishedAt: timestamp("published_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),

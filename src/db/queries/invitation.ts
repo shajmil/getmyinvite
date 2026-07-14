@@ -189,7 +189,7 @@ export async function updateInvitationContent(id: string, userId: string, conten
 export async function updateInvitationSettings(
   id: string,
   userId: string,
-  data: { slug?: string; templateId?: string; colorSchemeId?: string; status?: "draft" | "published"; publishedAt?: Date }
+  data: { slug?: string; templateId?: string; colorSchemeId?: string; status?: "draft" | "published"; publishedAt?: Date; privacy?: "public" | "unlisted" }
 ) {
   // Validate ownership first
   const inv = await db

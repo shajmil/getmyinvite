@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { db } from "@/lib/db";
 import { invitations } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://getmyinvite.in";
@@ -12,7 +12,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const activeInvites = await db
       .select({ slug: invitations.slug, updatedAt: invitations.updatedAt })
       .from(invitations)
-      .where(eq(invitations.status, "published"));
+      .where(
+        and(
+          eq(invitations.status, "published"),
+          eq(invitations.privacy, "public")
+        )
+      );
 
     invitationRoutes = activeInvites.map((inv) => ({
       url: `${baseUrl}/${inv.slug}`,

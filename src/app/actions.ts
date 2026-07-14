@@ -53,7 +53,7 @@ export async function checkSlugAvailabilityAction(slug: string, invitationId: st
   }
 }
 
-export async function publishInvitation(id: string, slug: string) {
+export async function publishInvitation(id: string, slug: string, privacy: "public" | "unlisted" = "public") {
   try {
     const user = await getAuthenticatedUser();
 
@@ -73,6 +73,7 @@ export async function publishInvitation(id: string, slug: string) {
     await queries.updateInvitationSettings(id, user.id, {
       slug,
       status: "published",
+      privacy,
       publishedAt: new Date(),
     });
 
@@ -122,7 +123,7 @@ export async function createNewInvitationAction(templateId: string) {
 
 export async function updateInvitationSettingsAction(
   id: string,
-  data: { templateId?: string; colorSchemeId?: string; status?: "draft" | "published" }
+  data: { templateId?: string; colorSchemeId?: string; status?: "draft" | "published"; privacy?: "public" | "unlisted" }
 ) {
   try {
     const user = await getAuthenticatedUser();
@@ -140,6 +141,31 @@ export async function triggerRevalidate(slug: string) {
     return { ok: true };
   } catch (err: any) {
     return { ok: false, error: err.message };
+  }
+}
+
+export async function suggestAvailableSlugAction(partner1: string, partner2: string, invitationId: string) {
+  try {
+    await getAuthenticatedUser();
+    const name1 = partner1.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const name2 = partner2.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (!name1 || !name2) {
+      return { ok: false, error: "Names are empty" };
+    }
+    const baseSlug = `${name1}-and-${name2}`;
+    
+    // Find next available slug (with collision suffix if taken)
+    let slug = baseSlug;
+    let isAvailable = await queries.checkSlugAvailable(slug, invitationId);
+    let counter = 2;
+    while (!isAvailable) {
+      slug = `${baseSlug}-${counter}`;
+      isAvailable = await queries.checkSlugAvailable(slug, invitationId);
+      counter++;
+    }
+    return { ok: true, slug };
+  } catch (err: any) {
+    return { ok: false, error: err.message || "Failed to suggest slug" };
   }
 }
 
