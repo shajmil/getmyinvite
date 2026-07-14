@@ -32,17 +32,38 @@ export default function RSVPIndiaLandingPage() {
     },
   ];
 
-  const faqSchema = {
+  const pageSchema = {
     "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": faqs.map((faq) => ({
-      "@type": "Question",
-      "name": faq.q,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": faq.a,
+    "@graph": [
+      {
+        "@type": "FAQPage",
+        "mainEntity": faqs.map((faq) => ({
+          "@type": "Question",
+          "name": faq.q,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": faq.a,
+          },
+        })),
       },
-    })),
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://getmyinvite.in"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Free Wedding RSVP Website India",
+            "item": "https://getmyinvite.in/free-wedding-rsvp-website-india"
+          }
+        ]
+      }
+    ]
   };
 
   return (
@@ -160,7 +181,7 @@ export default function RSVPIndiaLandingPage() {
       {/* JSON-LD Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(pageSchema) }}
       />
     </div>
   );

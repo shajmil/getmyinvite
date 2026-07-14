@@ -251,6 +251,26 @@ export default async function LandingPage() {
                 "publisher": {
                   "@id": "https://getmyinvite.in/#organization",
                 },
+                "potentialAction": {
+                  "@type": "SearchAction",
+                  "target": {
+                    "@type": "EntryPoint",
+                    "urlTemplate": "https://getmyinvite.in/templates?search={search_term_string}"
+                  },
+                  "query-input": "required name=search_term_string"
+                }
+              },
+              {
+                "@type": "BreadcrumbList",
+                "@id": "https://getmyinvite.in/#breadcrumb",
+                "itemListElement": [
+                  {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": "https://getmyinvite.in"
+                  }
+                ]
               },
               {
                 "@type": "SoftwareApplication",

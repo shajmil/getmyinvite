@@ -91,29 +91,49 @@ export default async function TemplatesPage() {
         </div>
       </footer>
 
-      {/* JSON-LD Structured Data Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "ItemList",
-            "name": "Wedding Invitation Templates Gallery",
-            "description": "Explore the list of responsive parallax and overlay wedding invitation template designs available on GetMyInvite.",
-            "itemListElement": [
+            "@graph": [
               {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Barcelona Template",
-                "description": "Elegant mobile-responsive design featuring smooth full-viewport parallax scrolling, photo slide-ins, and customizable palettes.",
+                "@type": "ItemList",
+                "name": "Wedding Invitation Templates Gallery",
+                "description": "Explore the list of responsive parallax and overlay wedding invitation template designs available on GetMyInvite.",
+                "itemListElement": [
+                  {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Barcelona Template",
+                    "description": "Elegant mobile-responsive design featuring smooth full-viewport parallax scrolling, photo slide-ins, and customizable palettes.",
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Classic Template",
+                    "description": "Sophisticated overlay card design with floral backdrops, looping music, and floating RSVP controls.",
+                  },
+                ],
               },
               {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Classic Template",
-                "description": "Sophisticated overlay card design with floral backdrops, looping music, and floating RSVP controls.",
-              },
-            ],
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                  {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": "https://getmyinvite.in"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Templates",
+                    "item": "https://getmyinvite.in/templates"
+                  }
+                ]
+              }
+            ]
           }),
         }}
       />
