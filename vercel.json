@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "getmyinvite.vercel.app"
+        }
+      ],
+      "destination": "https://getmyinvite.in/:path*",
+      "permanent": true
+    }
+  ]
+}
