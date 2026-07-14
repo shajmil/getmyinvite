@@ -180,8 +180,12 @@ export function DashboardList({ initialInvitations, user }: DashboardListProps) 
                   </div>
 
                   {inv.status === "draft" && (() => {
-                    const createdDate = new Date(inv.createdAt);
-                    const expiryDate = new Date(createdDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+                    const idTimestamp = parseInt(inv.id.replace("inv-", ""), 10);
+                    const createdDate = !isNaN(idTimestamp) && idTimestamp > 0 
+                      ? new Date(idTimestamp) 
+                      : (inv.createdAt ? new Date(inv.createdAt) : new Date());
+                    const validDate = isNaN(createdDate.getTime()) ? new Date() : createdDate;
+                    const expiryDate = new Date(validDate.getTime() + 7 * 24 * 60 * 60 * 1000);
                     const msRemaining = expiryDate.getTime() - Date.now();
                     const daysRemaining = Math.max(0, Math.ceil(msRemaining / (1000 * 60 * 60 * 24)));
                     return (
