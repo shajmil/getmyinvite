@@ -90,7 +90,7 @@ export default async function LandingPage() {
       <section className="py-20 bg-white border-y border-[#eae6df] px-6">
         <div className="max-w-6xl mx-auto space-y-16">
           <div className="text-center space-y-2">
-            <h2 className="font-serif text-3xl font-bold">How MakeMyInvite Works</h2>
+            <h2 className="font-serif text-3xl font-bold">How GetMyInvite Works</h2>
             <p className="text-xs text-[#666] uppercase tracking-wider font-semibold">
               Three simple steps to publish your wedding site
             </p>

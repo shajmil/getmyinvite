@@ -163,10 +163,10 @@ export function DashboardList({ initialInvitations, user }: DashboardListProps) 
                           rel="noopener noreferrer"
                           className="text-[#855f18] hover:underline"
                         >
-                          makemyinvite.app/{inv.slug}
+                          getmyinvite.in/{inv.slug}
                         </a>
                       ) : (
-                        <span>makemyinvite.app/{inv.slug} (draft)</span>
+                        <span>getmyinvite.in/{inv.slug} (draft)</span>
                       )}
                     </div>
                     <div>
