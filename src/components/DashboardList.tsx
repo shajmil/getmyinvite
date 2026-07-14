@@ -13,6 +13,7 @@ interface InvitationListItem {
   status: "draft" | "published";
   colorSchemeId: string;
   publishedAt: string | null;
+  createdAt: string;
   rsvpCount: number;
   partner1Name: string;
   partner2Name: string;
@@ -177,6 +178,22 @@ export function DashboardList({ initialInvitations, user }: DashboardListProps) 
                       <span className="font-bold text-[#855f18]">{inv.rsvpCount}</span>
                     </div>
                   </div>
+
+                  {inv.status === "draft" && (() => {
+                    const createdDate = new Date(inv.createdAt);
+                    const expiryDate = new Date(createdDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+                    const msRemaining = expiryDate.getTime() - Date.now();
+                    const daysRemaining = Math.max(0, Math.ceil(msRemaining / (1000 * 60 * 60 * 24)));
+                    return (
+                      <div className="mt-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-2.5 text-[10px] leading-relaxed flex items-start gap-2 font-medium">
+                        <span className="text-xs leading-none mt-0.5">⚠️</span>
+                        <div>
+                          <p className="font-bold text-amber-900">Draft Will Auto-Delete</p>
+                          <p className="text-amber-800/80">Expires in {daysRemaining} day{daysRemaining !== 1 ? "s" : ""} (drafts are kept for only 7 days).</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Dashboard Card Actions */}

@@ -26,6 +26,7 @@ export default async function DashboardPage() {
     status: inv.status,
     colorSchemeId: inv.colorSchemeId,
     publishedAt: inv.publishedAt ? inv.publishedAt.toISOString() : null,
+    createdAt: inv.createdAt.toISOString(),
     rsvpCount: inv.rsvpCount,
     partner1Name: inv.content?.partner1.firstName || "Bride",
     partner2Name: inv.content?.partner2.firstName || "Groom",
