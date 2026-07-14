@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { X } from "lucide-react";
 import { templateRegistry } from "@/templates/registry";
 import { demoInvitationData } from "@/templates/demo-data";
 
@@ -33,23 +35,32 @@ function TestTemplatesContent() {
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      {/* Top Floating Control Bar */}
-      <div className="fixed top-20 left-6 z-50 bg-black/80 backdrop-blur-md border border-white/20 p-4 rounded-2xl text-white shadow-2xl flex flex-col gap-4 text-xs font-semibold max-w-[240px]">
+      {/* Premium Close Preview Pill (Top Right) */}
+      <Link
+        href="/templates"
+        className="fixed top-6 right-6 z-50 pointer-events-auto flex items-center gap-1.5 px-4 py-2.5 bg-black/80 hover:bg-black backdrop-blur-md text-white rounded-full border border-white/20 hover:scale-105 active:scale-95 transition-all shadow-[0_8px_30px_rgb(0,0,0,0.3)] text-[10px] font-bold uppercase tracking-wider cursor-pointer"
+      >
+        <X className="w-3.5 h-3.5" />
+        <span>Exit Preview</span>
+      </Link>
+
+      {/* Top Left Floating Control Bar */}
+      <div className="fixed top-6 left-6 z-50 bg-black/80 backdrop-blur-md border border-white/20 p-4 rounded-2xl text-white shadow-[0_8px_30px_rgb(0,0,0,0.3)] flex flex-col gap-4 text-xs font-semibold max-w-[240px]">
         <div>
-          <label className="block uppercase tracking-wider mb-1 text-[10px] text-white/60">Template</label>
+          <label className="block uppercase tracking-wider mb-1.5 text-[9px] text-white/50 font-bold">Template</label>
           <div className="grid grid-cols-2 gap-1 bg-white/10 p-1 rounded-lg">
             <button
               onClick={() => handleTemplateChange("barcelona")}
-              className={`px-3 py-1.5 rounded-md transition-all ${
-                selectedTemplate === "barcelona" ? "bg-white text-black" : "hover:bg-white/5"
+              className={`px-3 py-1.5 rounded-md transition-all cursor-pointer ${
+                selectedTemplate === "barcelona" ? "bg-white text-black" : "hover:bg-white/5 text-white/80"
               }`}
             >
               Barcelona
             </button>
             <button
               onClick={() => handleTemplateChange("classic")}
-              className={`px-3 py-1.5 rounded-md transition-all ${
-                selectedTemplate === "classic" ? "bg-white text-black" : "hover:bg-white/5"
+              className={`px-3 py-1.5 rounded-md transition-all cursor-pointer ${
+                selectedTemplate === "classic" ? "bg-white text-black" : "hover:bg-white/5 text-white/80"
               }`}
             >
               Classic
@@ -58,22 +69,22 @@ function TestTemplatesContent() {
         </div>
 
         <div>
-          <label className="block uppercase tracking-wider mb-1 text-[10px] text-white/60">Color Palette</label>
+          <label className="block uppercase tracking-wider mb-1.5 text-[9px] text-white/50 font-bold">Color Palette</label>
           <select
             value={activeSchemeId}
             onChange={(e) => setSelectedScheme(e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white outline-none"
+            className="w-full bg-white/10 border border-white/20 rounded-lg p-2 text-white outline-none cursor-pointer"
           >
             {registryEntry.colorSchemes.map((scheme) => (
-              <option key={scheme.id} value={scheme.id} className="bg-neutral-800 text-white">
+              <option key={scheme.id} value={scheme.id} className="bg-neutral-900 text-white">
                 {scheme.name}
               </option>
             ))}
           </select>
         </div>
 
-        <div className="text-[10px] text-white/40 border-t border-white/10 pt-2 leading-relaxed">
-          Testing with standard demo data matching the Zod model. RSVP form is running in demo mock mode.
+        <div className="text-[9px] text-white/40 border-t border-white/10 pt-2 leading-relaxed font-medium">
+          Testing with standard demo data matching the Zod model. RSVP form runs in preview mode.
         </div>
       </div>
 
