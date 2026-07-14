@@ -175,6 +175,15 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
     return () => clearTimeout(timer);
   }, [data, invitationId, mounted, setSaveStatus]);
 
+  const stepsCount = templateId === "barcelona" ? 7 : 6;
+
+  // Safety check: ensure currentStep index is within bounds if steps array shrinks
+  useEffect(() => {
+    if (currentStep >= stepsCount) {
+      setCurrentStep(stepsCount - 1);
+    }
+  }, [templateId, stepsCount, currentStep, setCurrentStep]);
+
   if (!mounted || !data) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -221,19 +230,11 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
     { id: "publish", title: "Publish", component: <StepPublish onPublishSuccess={handlePublishSuccess} /> },
   ];
 
-  const stepsCount = steps.length;
   const renderStepContent = () => {
     return steps[currentStep]?.component || null;
   };
 
   const stepTitles = steps.map((s) => s.title);
-
-  // Safety check: ensure currentStep index is within bounds if steps array shrinks
-  useEffect(() => {
-    if (currentStep >= stepsCount) {
-      setCurrentStep(stepsCount - 1);
-    }
-  }, [templateId, stepsCount, currentStep, setCurrentStep]);
 
   const ActiveTemplateComponent = templateRegistry[templateId]?.component || templateRegistry.barcelona.component;
 
