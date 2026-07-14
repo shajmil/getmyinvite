@@ -38,7 +38,7 @@ export const useWizardStore = create<WizardState>((set) => ({
   slug: "",
   status: "draft",
   privacy: "public",
-  currentStep: 0,
+  currentStep: 0, 
   saveStatus: "idle",
   saveError: null,
 
