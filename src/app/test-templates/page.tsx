@@ -36,7 +36,7 @@ function TestTemplatesContent() {
   return (
     <div className="h-screen overflow-hidden flex flex-col font-sans">
       {/* Sleek Dark Top Control Header Bar */}
-      <header className="h-16 bg-[#131519]/95 backdrop-blur-md border-b border-white/10 px-4 md:px-6 flex items-center justify-between flex-shrink-0 z-50 select-none text-white shadow-md">
+      <header className="h-16 bg-[#131519]/95 backdrop-blur-md border-b border-white/10 px-4 md:px-6 flex items-center justify-between flex-shrink-0 z-[100] select-none text-white shadow-md">
         
         {/* Left: Symmetrical Close Button */}
         <Link
