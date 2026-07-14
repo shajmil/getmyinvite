@@ -198,10 +198,7 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
       style={scheme.cssVars as React.CSSProperties}
       className={`min-h-screen text-var(--text) bg-var(--bg-light) overflow-x-hidden ${cormorant.variable} ${josefin.variable} ${greatVibes.variable} font-sans selection:bg-[#eae6df] selection:text-[#855f18]`}
     >
-      {/* -------------------- NAVBAR -------------------- */}
-      <nav className={`fixed left-0 right-0 bg-white/80 backdrop-blur-md border-b border-[#eae6df] z-50 transition-all duration-300 ${
-        isPreview ? "top-16" : "top-0"
-      }`}>
+      <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-[#eae6df] z-50 transition-all duration-300">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <a href="#home" className="font-serif text-2xl font-semibold tracking-wider text-var(--dark) hover:opacity-80">
             {data.partner1.firstName.charAt(0)} <span className="text-var(--gold)">&amp;</span> {data.partner2.firstName.charAt(0)}

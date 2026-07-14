@@ -1,11 +1,92 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
+import { createPortal } from "react-dom";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { templateRegistry } from "@/templates/registry";
 import { demoInvitationData } from "@/templates/demo-data";
+
+interface IframePreviewProps {
+  children: React.ReactNode;
+}
+
+function IframePreview({ children }: IframePreviewProps) {
+  const [iframeRef, setIframeRef] = useState<HTMLIFrameElement | null>(null);
+  const [mountNode, setMountNode] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!iframeRef) return;
+    const doc = iframeRef.contentDocument;
+    if (!doc) return;
+
+    const setupIframe = () => {
+      const doc = iframeRef.contentDocument;
+      if (!doc || !doc.body) return;
+
+      // Clear head to avoid duplicates
+      doc.head.innerHTML = "";
+
+      // Copy styles
+      document.querySelectorAll("style, link[rel='stylesheet']").forEach((el) => {
+        doc.head.appendChild(el.cloneNode(true));
+      });
+
+      // Viewport meta
+      const meta = doc.createElement("meta");
+      meta.name = "viewport";
+      meta.content = "width=device-width, initial-scale=1.0";
+      doc.head.appendChild(meta);
+
+      // Base URL for relative paths
+      const base = doc.createElement("base");
+      base.href = window.location.origin;
+      doc.head.appendChild(base);
+
+      // Document styles
+      doc.documentElement.style.height = "100%";
+      doc.body.style.margin = "0";
+      doc.body.style.padding = "0";
+      doc.body.style.height = "100%";
+      doc.body.style.width = "100%";
+      doc.body.style.overflowX = "hidden";
+
+      // Intercept hash link clicks to prevent base URL navigation inside the preview iframe
+      doc.addEventListener("click", (e) => {
+        const target = e.target as HTMLElement;
+        const anchor = target.closest("a");
+        if (anchor) {
+          const href = anchor.getAttribute("href");
+          if (href?.startsWith("#")) {
+            e.preventDefault();
+            const id = href.slice(1);
+            if (id) {
+              const element = doc.getElementById(id);
+              if (element) {
+                element.scrollIntoView({ behavior: "smooth" });
+              }
+            }
+          }
+        }
+      });
+
+      setMountNode(doc.body);
+    };
+
+    setupIframe();
+  }, [iframeRef]);
+
+  return (
+    <iframe
+      ref={setIframeRef}
+      style={{ border: "none", width: "100%", height: "100%" }}
+      title="preview-frame"
+    >
+      {mountNode && createPortal(children, mountNode)}
+    </iframe>
+  );
+}
 
 function TestTemplatesContent() {
   const router = useRouter();
@@ -86,8 +167,10 @@ function TestTemplatesContent() {
       </header>
 
       {/* Main Template Scrollable Frame (Renders cleanly below the Header Bar) */}
-      <div className="flex-1 overflow-y-auto relative">
-        <TemplateComponent data={demoInvitationData} colorSchemeId={activeSchemeId} isPreview={true} />
+      <div className="flex-1 relative">
+        <IframePreview>
+          <TemplateComponent data={demoInvitationData} colorSchemeId={activeSchemeId} isPreview={true} />
+        </IframePreview>
       </div>
     </div>
   );
