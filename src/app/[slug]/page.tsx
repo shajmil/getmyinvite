@@ -19,21 +19,27 @@ export async function generateMetadata(props: SlugPageProps) {
   const { slug } = await props.params;
   const invitation = await getCachedInvitationBySlug(slug);
 
-  if (!invitation) {
+  // If the invite is unpublished or not found: return robots: { index: false }
+  if (!invitation || invitation.status !== "published") {
     return {
       title: "Invitation Not Found | GetMyInvite",
-      robots: "noindex, nofollow",
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
 
-  const names = `${invitation.content.partner1.firstName} & ${invitation.content.partner2.firstName}`;
+  const partner1 = invitation.content.partner1.firstName;
+  const partner2 = invitation.content.partner2.firstName;
+  const names = `${partner1} & ${partner2}`;
   const dateFormatted = new Date(invitation.content.wedding.date).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = "https://getmyinvite.in";
   const ogUrl = new URL(`${appUrl}/api/og`);
   ogUrl.searchParams.set("names", names);
   ogUrl.searchParams.set("date", dateFormatted);
@@ -41,22 +47,36 @@ export async function generateMetadata(props: SlugPageProps) {
     ogUrl.searchParams.set("tagline", invitation.content.coupleTagline);
   }
 
+  // Use the couple's uploaded hero image from R2/storage, or fallback to generated OG URL
+  const heroImage = invitation.content.hero.mainPhoto || ogUrl.toString();
+
+  const title = `${partner1} & ${partner2} Wedding Invitation — ${dateFormatted}`;
+  const rawDescription = invitation.content.coupleTagline || `You are cordially invited to celebrate the wedding of ${names} on ${dateFormatted}.`;
+  const description = rawDescription.length > 155 ? rawDescription.substring(0, 152) + "..." : rawDescription;
+
   return {
-    title: `${names} — ${dateFormatted}`,
-    description: invitation.content.coupleTagline || `You are cordially invited to celebrate the wedding of ${names} on ${dateFormatted}.`,
+    title,
+    description,
+    alternates: {
+      canonical: `${appUrl}/${slug}`,
+    },
     openGraph: {
-      title: `${names} — ${dateFormatted}`,
-      description: invitation.content.coupleTagline || `Celebrate with us on ${dateFormatted}!`,
+      title,
+      description,
       type: "website",
       url: `${appUrl}/${slug}`,
       images: [
         {
-          url: ogUrl.toString(),
-          width: 1200,
-          height: 630,
+          url: heroImage,
           alt: `${names} Wedding Invitation`,
         },
       ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [heroImage],
     },
   };
 }
@@ -65,7 +85,7 @@ export default async function PublishedSlugPage(props: SlugPageProps) {
   const { slug } = await props.params;
   const invitation = await getCachedInvitationBySlug(slug);
 
-  if (!invitation) {
+  if (!invitation || invitation.status !== "published") {
     // Elegant Custom 404
     return (
       <main className="min-h-screen flex flex-col items-center justify-center bg-[#faf8f5] px-4 text-center">

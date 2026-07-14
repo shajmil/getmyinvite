@@ -9,17 +9,22 @@ import { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Wedding Invitation Templates & Themes | GetMyInvite",
-  description: "Browse our collection of premium digital wedding website designs. Choose from elegant layouts, scrolling parallax themes, and customizable modal invitations.",
+  title: "Wedding Invitation Website Templates & Themes | GetMyInvite",
+  description: "Browse premium wedding invitation website templates. Pick elegant designs, responsive parallax layouts, and launch your wedding site. Choose a theme today!",
   alternates: {
     canonical: "https://getmyinvite.in/templates",
   },
   openGraph: {
-    title: "Wedding Invitation Templates & Themes | GetMyInvite",
-    description: "Select from modern, responsive digital wedding invitation templates. Live preview gold, charcoal, and emerald themes instantly.",
+    title: "Wedding Invitation Website Templates & Themes | GetMyInvite",
+    description: "Browse premium wedding invitation website templates. Pick elegant designs, responsive parallax layouts, and launch your wedding site. Choose a theme today!",
     type: "website",
     siteName: "GetMyInvite",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Wedding Invitation Website Templates & Themes | GetMyInvite",
+    description: "Browse premium wedding invitation website templates. Pick elegant designs, responsive parallax layouts, and launch your wedding site. Choose a theme today!",
+  }
 };
 
 export default async function TemplatesPage() {

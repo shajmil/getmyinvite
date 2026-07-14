@@ -9,10 +9,10 @@ import { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "GetMyInvite | Best Digital Wedding Invitation & Website Builder",
-  description: "Create the best digital wedding invitation websites in minutes. GetMyInvite lets you design stunning, mobile-responsive wedding websites with photo galleries, online RSVP tracking, maps, and music loops for free.",
+  title: "Free Digital Wedding Invitation Website | GetMyInvite",
+  description: "Create a free digital wedding invitation website in minutes. Share location maps, track guest RSVPs online, and pick premium themes. Start building now!",
   keywords: [
-    "best wedding invitation site",
+    "free digital wedding invitation website",
     "get my invite",
     "getmyinvite",
     "digital wedding card",
@@ -30,17 +30,10 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
   },
   openGraph: {
-    title: "GetMyInvite | Best Digital Wedding Invitation & Website Builder",
-    description: "Build the best digital wedding invitation websites. Create custom responsive parallax layout pages, coordinate locations, sync colors, and gather RSVPs online.",
+    title: "Free Digital Wedding Invitation Website | GetMyInvite",
+    description: "Create a free digital wedding invitation website in minutes. Share location maps, track guest RSVPs online, and pick premium themes. Start building now!",
     url: "https://getmyinvite.in",
     siteName: "GetMyInvite",
     type: "website",
@@ -48,8 +41,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "GetMyInvite | Best Digital Wedding Invitation & Website Builder",
-    description: "Build your premium wedding website and custom digital invitation cards in minutes.",
+    title: "Free Digital Wedding Invitation Website | GetMyInvite",
+    description: "Create a free digital wedding invitation website in minutes. Share location maps, track guest RSVPs online, and pick premium themes. Start building now!",
   }
 };
 

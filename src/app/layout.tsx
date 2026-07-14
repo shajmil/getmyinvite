@@ -17,8 +17,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GetMyInvite | Custom Wedding Invitation Websites",
+  metadataBase: new URL("https://getmyinvite.in"),
+  title: {
+    template: "%s | GetMyInvite",
+    default: "GetMyInvite | Custom Wedding Invitation Websites",
+  },
   description: "Create a beautiful wedding invitation website without designing anything.",
+  applicationName: "GetMyInvite",
+  alternates: {
+    canonical: "./",
+  },
 };
 
 export default function RootLayout({
