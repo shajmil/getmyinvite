@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { invitations, invitationContent } from "@/db/schema";
-import { and, eq, lt, inArray, sql } from "drizzle-orm";
+import { and, eq, lt, sql } from "drizzle-orm";
+import { deleteInvitationsByIds } from "@/db/queries/invitation";
 
 export const runtime = "nodejs";
 
@@ -26,15 +27,20 @@ export async function GET(req: Request) {
 
     // 2. Clear drafts older than 7 days based on creation date
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    
-    await db
-      .delete(invitations)
+    const expiredDrafts = await db
+      .select({ id: invitations.id })
+      .from(invitations)
       .where(
         and(
           eq(invitations.status, "draft"),
           lt(invitations.createdAt, sevenDaysAgo)
         )
       );
+
+    if (expiredDrafts.length > 0) {
+      const draftIds = expiredDrafts.map((d) => d.id);
+      await deleteInvitationsByIds(draftIds);
+    }
 
     // 3. Clear invitations where the wedding date is more than 7 days in the past
     const expiredList = await db
@@ -46,16 +52,15 @@ export async function GET(req: Request) {
 
     if (expiredList.length > 0) {
       const expiredIds = expiredList.map((item) => item.id);
-      await db
-        .delete(invitations)
-        .where(inArray(invitations.id, expiredIds));
+      await deleteInvitationsByIds(expiredIds);
     }
 
     return NextResponse.json({
       ok: true,
-      message: "Expired drafts and past wedding events cleaned up successfully",
+      message: "Expired drafts and past wedding events cleaned up successfully along with all associated image assets",
       timestamp: new Date().toISOString(),
       expiredWeddingsCount: expiredList.length,
+      expiredDraftsCount: expiredDrafts.length,
     });
   } catch (err: any) {
     console.error("Cleanup cron error:", err);

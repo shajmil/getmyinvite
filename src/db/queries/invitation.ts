@@ -8,6 +8,107 @@ import {
 } from "@/db/schema";
 import { InvitationData } from "@/lib/zod-schemas";
 import { cache } from "react";
+import fs from "fs";
+import path from "path";
+import { del } from "@vercel/blob";
+
+// ==========================================
+// ASSET CLEANUP HELPERS
+// ==========================================
+
+function extractUploadUrls(content: any): string[] {
+  const urls: string[] = [];
+
+  const traverse = (obj: any) => {
+    if (!obj) return;
+    if (typeof obj === "string") {
+      if (
+        obj.startsWith("/uploads/assets/") ||
+        obj.includes(".public.blob.vercel-storage.com/") ||
+        (process.env.R2_PUBLIC_URL && obj.startsWith(process.env.R2_PUBLIC_URL))
+      ) {
+        urls.push(obj);
+      }
+    } else if (Array.isArray(obj)) {
+      obj.forEach(traverse);
+    } else if (typeof obj === "object") {
+      Object.values(obj).forEach(traverse);
+    }
+  };
+
+  traverse(content);
+  return urls;
+}
+
+export async function deleteAsset(url: string) {
+  try {
+    // 1. Local filesystem cleanup
+    if (url.startsWith("/uploads/")) {
+      const relativePath = url.replace(/^\/uploads\//, "");
+      const fullPath = path.join(process.cwd(), "public", "uploads", relativePath);
+      if (fs.existsSync(fullPath)) {
+        fs.unlinkSync(fullPath);
+        console.log(`Deleted local asset: ${fullPath}`);
+      }
+    }
+
+    // 2. Vercel Blob cleanup
+    if (url.includes(".public.blob.vercel-storage.com/")) {
+      if (process.env.BLOB_READ_WRITE_TOKEN) {
+        await del(url);
+        console.log(`Deleted Vercel Blob asset: ${url}`);
+      }
+    }
+
+    // 3. Cloudflare R2 cleanup
+    if (process.env.R2_PUBLIC_URL && url.startsWith(process.env.R2_PUBLIC_URL)) {
+      const key = url.replace(process.env.R2_PUBLIC_URL + "/", "");
+      const { S3Client, DeleteObjectCommand } = await import("@aws-sdk/client-s3");
+      const s3 = new S3Client({
+        region: "auto",
+        endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+        credentials: {
+          accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+        },
+      });
+      await s3.send(new DeleteObjectCommand({
+        Bucket: process.env.R2_BUCKET_NAME!,
+        Key: key,
+      }));
+      console.log(`Deleted R2 asset: ${key}`);
+    }
+  } catch (err) {
+    console.error(`Failed to delete asset ${url}:`, err);
+  }
+}
+
+export async function deleteInvitationsByIds(ids: string[]) {
+  if (ids.length === 0) return;
+
+  try {
+    // 1. Fetch content for asset extraction
+    const contents = await db
+      .select()
+      .from(invitationContent)
+      .where(inArray(invitationContent.invitationId, ids));
+
+    // 2. Extract and delete assets
+    for (const item of contents) {
+      if (item.content) {
+        const urls = extractUploadUrls(item.content);
+        for (const url of urls) {
+          deleteAsset(url).catch((e) => console.error("Asset deletion error:", e));
+        }
+      }
+    }
+
+    // 3. Delete records from invitations (cascade deletes invitationContent & rsvps)
+    await db.delete(invitations).where(inArray(invitations.id, ids));
+  } catch (err) {
+    console.error("deleteInvitationsByIds query error:", err);
+  }
+}
 
 // ==========================================
 // INVITATION QUERIES
@@ -69,9 +170,10 @@ export async function getInvitationsByUser(userId: string) {
   try {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     
-    // 1. Delete drafts older than 7 days
-    await db
-      .delete(invitations)
+    // 1. Fetch expired drafts and delete them with assets
+    const expiredDrafts = await db
+      .select({ id: invitations.id })
+      .from(invitations)
       .where(
         and(
           eq(invitations.status, "draft"),
@@ -79,7 +181,12 @@ export async function getInvitationsByUser(userId: string) {
         )
       );
 
-    // 2. Delete invitations where the wedding date has passed by more than 7 days
+    if (expiredDrafts.length > 0) {
+      const draftIds = expiredDrafts.map((d) => d.id);
+      await deleteInvitationsByIds(draftIds);
+    }
+
+    // 2. Fetch invitations where the wedding date has passed by more than 7 days and delete them with assets
     const expiredList = await db
       .select({ id: invitationContent.invitationId })
       .from(invitationContent)
@@ -89,9 +196,7 @@ export async function getInvitationsByUser(userId: string) {
 
     if (expiredList.length > 0) {
       const expiredIds = expiredList.map((item) => item.id);
-      await db
-        .delete(invitations)
-        .where(inArray(invitations.id, expiredIds));
+      await deleteInvitationsByIds(expiredIds);
     }
   } catch (err) {
     console.error("Dashboard cleanup drafts and past weddings error:", err);
@@ -224,7 +329,7 @@ export async function deleteInvitation(id: string, userId: string) {
     throw new Error("Invitation not found or unauthorized");
   }
 
-  await db.delete(invitations).where(eq(invitations.id, id));
+  await deleteInvitationsByIds([id]);
   return true;
 }
 
