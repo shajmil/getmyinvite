@@ -206,30 +206,34 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
     setStatus("published");
   };
 
-  // Steps rendering mapping
-  const stepsCount = 7;
+  // Dynamically define steps based on template selection
+  // Barcelona needs: Couple, Details, Events, Story, RSVP, Template, Publish (7 steps)
+  // Classic needs: Couple, Details, Story, RSVP, Template, Publish (6 steps)
+  const steps = [
+    { id: "couple", title: "Couple", component: <StepCouple /> },
+    { id: "details", title: "Details", component: <StepWedding /> },
+    ...(templateId === "barcelona"
+      ? [{ id: "events", title: "Events", component: <StepEvents /> }]
+      : []),
+    { id: "story", title: "Story", component: <StepStoryGallery /> },
+    { id: "rsvp", title: "RSVP", component: <StepRSVPExtras /> },
+    { id: "template", title: "Template", component: <StepTemplateStyle onUpdateTemplate={handleUpdateTemplate} /> },
+    { id: "publish", title: "Publish", component: <StepPublish onPublishSuccess={handlePublishSuccess} /> },
+  ];
+
+  const stepsCount = steps.length;
   const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
-        return <StepCouple />;
-      case 1:
-        return <StepWedding />;
-      case 2:
-        return <StepEvents />;
-      case 3:
-        return <StepStoryGallery />;
-      case 4:
-        return <StepRSVPExtras />;
-      case 5:
-        return <StepTemplateStyle onUpdateTemplate={handleUpdateTemplate} />;
-      case 6:
-        return <StepPublish onPublishSuccess={handlePublishSuccess} />;
-      default:
-        return null;
-    }
+    return steps[currentStep]?.component || null;
   };
 
-  const stepTitles = ["Couple", "Details", "Events", "Story", "RSVP", "Template", "Publish"];
+  const stepTitles = steps.map((s) => s.title);
+
+  // Safety check: ensure currentStep index is within bounds if steps array shrinks
+  useEffect(() => {
+    if (currentStep >= stepsCount) {
+      setCurrentStep(stepsCount - 1);
+    }
+  }, [templateId, stepsCount, currentStep, setCurrentStep]);
 
   const ActiveTemplateComponent = templateRegistry[templateId]?.component || templateRegistry.barcelona.component;
 

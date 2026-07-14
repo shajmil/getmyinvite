@@ -5,11 +5,13 @@ import { useWizardStore } from "@/lib/store";
 import { uploadFile } from "@/lib/compress";
 
 export function StepCouple() {
-  const { data, updateNestedData, updateData } = useWizardStore();
+  const { data, updateNestedData, updateData, templateId } = useWizardStore();
   const [uploading, setUploading] = useState<"partner1" | "partner2" | null>(null);
   const [progress, setProgress] = useState(0);
   const [uploadingHero, setUploadingHero] = useState<boolean>(false);
   const [heroProgress, setHeroProgress] = useState(0);
+  const [uploadingCard, setUploadingCard] = useState<boolean>(false);
+  const [cardProgress, setCardProgress] = useState(0);
 
   if (!data) return null;
 
@@ -46,6 +48,24 @@ export function StepCouple() {
       console.error(err);
     } finally {
       setUploadingHero(false);
+    }
+  };
+
+  const handleCardUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingCard(true);
+    setCardProgress(0);
+
+    try {
+      const { url } = await uploadFile(file, (percent) => setCardProgress(percent));
+      updateNestedData("hero", { ...(data.hero || {}), invitationCardUrl: url });
+    } catch (err) {
+      alert("Failed to upload invitation card. Please try again.");
+      console.error(err);
+    } finally {
+      setUploadingCard(false);
     }
   };
 
@@ -178,8 +198,8 @@ export function StepCouple() {
 
       {/* Hero welcome screen customization */}
       <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
-        <h3 className="font-serif text-lg font-semibold text-[#855f18] border-b border-[#faf8f5] pb-2">Hero Cover Settings</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h3 className="font-serif text-lg font-semibold text-[#855f18] border-b border-[#faf8f5] pb-2">Hero Cover & Invitation Settings</h3>
+        <div className={`grid grid-cols-1 ${templateId === "classic" ? "md:grid-cols-2" : ""} gap-4`}>
           <div>
             <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Hero Background Image</label>
             <input
@@ -195,16 +215,35 @@ export function StepCouple() {
               <p className="text-[10px] text-green-600 mt-1 font-medium">✓ Background image loaded</p>
             )}
           </div>
-          <div>
-            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Hero Quote / Motto (Optional)</label>
-            <input
-              type="text"
-              value={data.hero?.quote || ""}
-              onChange={(e) => updateNestedData("hero", { ...(data.hero || {}), quote: e.target.value })}
-              className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
-              placeholder="Love is patient, love is kind..."
-            />
-          </div>
+
+          {templateId === "classic" && (
+            <div>
+              <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Digital Invitation Card Image (Kalyana Kuri)</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleCardUpload}
+                className="w-full text-xs text-[#777] file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
+              />
+              {uploadingCard && (
+                <p className="text-[10px] text-[#855f18] mt-1">Uploading: {cardProgress}%</p>
+              )}
+              {data.hero?.invitationCardUrl && (
+                <p className="text-[10px] text-green-600 mt-1 font-medium">✓ Invitation card image loaded</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Hero Quote / Motto (Optional)</label>
+          <input
+            type="text"
+            value={data.hero?.quote || ""}
+            onChange={(e) => updateNestedData("hero", { ...(data.hero || {}), quote: e.target.value })}
+            className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+            placeholder="Love is patient, love is kind..."
+          />
         </div>
       </div>
     </div>
