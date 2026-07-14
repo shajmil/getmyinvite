@@ -23,9 +23,16 @@ export function StepPublish({ onPublishSuccess }: StepPublishProps) {
   const [publishing, setPublishing] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [showQR, setShowQR] = useState(false);
-  const [privacy, setPrivacy] = useState<"public" | "unlisted">("public");
+  const storePrivacy = useWizardStore((state) => (state as any).privacy || "public");
+  const storeSetPrivacy = useWizardStore((state) => (state as any).setPrivacy || (() => {}));
+  const [privacy, setPrivacy] = useState<"public" | "unlisted">(storePrivacy);
   const [randomSuffix, setRandomSuffix] = useState("");
   const [baseSlug, setBaseSlug] = useState("");
+
+  // Sync privacy state with store when hydrations occur
+  useEffect(() => {
+    setPrivacy(storePrivacy);
+  }, [storePrivacy]);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -109,7 +116,9 @@ export function StepPublish({ onPublishSuccess }: StepPublishProps) {
     try {
       const res = await publishInvitation(invitationId, slug, privacy);
       if (res.ok) {
-        // Success
+        // Success - update store values
+        storeSetPrivacy(privacy);
+        alert(currentStatus === "published" ? "Settings updated successfully! Your live page is up to date." : "Your invitation is now live!");
         onPublishSuccess(slug);
       } else {
         setErrorMsg(res.error || "Failed to publish invitation");
@@ -150,7 +159,7 @@ export function StepPublish({ onPublishSuccess }: StepPublishProps) {
         <p className="text-xs text-[#666]">Choose your shareable web link and publish it live</p>
       </div>
 
-      {currentStatus === "published" ? (
+      {currentStatus === "published" && (
         <div className="bg-white border border-[#eae6df] rounded-2xl p-6 shadow-md text-center space-y-6">
           <div className="space-y-2">
             <span className="text-4xl">🎉</span>
@@ -204,97 +213,104 @@ export function StepPublish({ onPublishSuccess }: StepPublishProps) {
             )}
           </div>
         </div>
-      ) : (
-        <div className="bg-white border border-[#eae6df] rounded-2xl p-6 shadow-md space-y-6">
-          {errorMsg && (
-            <div className="p-3 bg-red-50 text-red-700 text-xs rounded border border-red-200">
-              {errorMsg}
-            </div>
-          )}
+      )}
 
-          <div>
-            <label className="block text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-2">
-              Choose URL Slug (link path)
-            </label>
-            <div className="flex items-center">
-              <span className="px-3 py-2 bg-[#faf8f5] border border-r-0 border-[#eae6df] text-xs text-[#777] rounded-l">
-                getmyinvite.in/
-              </span>
-              <input
-                type="text"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"))}
-                disabled={publishing}
-                className="flex-1 px-3 py-2 border border-[#eae6df] rounded-r text-xs focus:outline-none focus:border-[#855f18] disabled:opacity-50"
-                placeholder="couple-names"
-              />
-            </div>
+      <div className="bg-white border border-[#eae6df] rounded-2xl p-6 shadow-md space-y-6">
+        <h3 className="font-serif text-lg font-bold text-[#855f18] border-b border-[#faf8f5] pb-2">
+          {currentStatus === "published" ? "Link & Privacy Settings" : "Link Settings"}
+        </h3>
 
-            {/* Check slug availability output status */}
-            <div className="mt-2 flex items-center gap-2">
-              {checking && <span className="text-[10px] text-gray-500">Checking availability...</span>}
-              {!checking && available === true && (
-                <span className="text-[10px] text-green-600 font-bold">✓ This link slug is available</span>
-              )}
-              {!checking && available === false && (
-                <span className="text-[10px] text-red-600 font-bold">✗ Link slug is unavailable or invalid</span>
-              )}
-            </div>
+        {errorMsg && (
+          <div className="p-3 bg-red-50 text-red-700 text-xs rounded border border-red-200">
+            {errorMsg}
+          </div>
+        )}
 
-            {/* Privacy Settings Options */}
-            <div className="mt-4 border-t border-[#eae6df] pt-4 space-y-3">
-              <label className="block text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider">
-                Privacy Option
-              </label>
-              
-              <div className="grid grid-cols-1 gap-3">
-                {/* Public Option */}
-                <label className="flex items-start gap-3 p-3 border border-[#eae6df] hover:bg-[#faf8f5] rounded-xl cursor-pointer transition-all">
-                  <input
-                    type="radio"
-                    name="privacy"
-                    checked={privacy === "public"}
-                    onChange={() => handlePrivacyChange("public")}
-                    disabled={publishing}
-                    className="mt-0.5 text-[#855f18] focus:ring-[#855f18]"
-                  />
-                  <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-[#1a1a1a]">Public (Recommended)</span>
-                    <p className="text-[10px] text-[#666] leading-relaxed">
-                      Your invitation will have a clean URL (e.g. <code>getmyinvite.in/priya-and-arjun</code>), is searchable on Google, and is indexed on the sitemap.
-                    </p>
-                  </div>
-                </label>
-
-                {/* Unlisted Option */}
-                <label className="flex items-start gap-3 p-3 border border-[#eae6df] hover:bg-[#faf8f5] rounded-xl cursor-pointer transition-all">
-                  <input
-                    type="radio"
-                    name="privacy"
-                    checked={privacy === "unlisted"}
-                    onChange={() => handlePrivacyChange("unlisted")}
-                    disabled={publishing}
-                    className="mt-0.5 text-[#855f18] focus:ring-[#855f18]"
-                  />
-                  <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-[#1a1a1a]">Unlisted / Private</span>
-                    <p className="text-[10px] text-[#666] leading-relaxed">
-                      Appends a random suffix to make your URL unguessable (e.g. <code>getmyinvite.in/priya-and-arjun-k3xq9f2p</code>). Excluded from search indexing and sitemaps.
-                    </p>
-                  </div>
-                </label>
-              </div>
-            </div>
+        <div>
+          <label className="block text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-2">
+            Choose URL Slug (link path)
+          </label>
+          <div className="flex items-center">
+            <span className="px-3 py-2 bg-[#faf8f5] border border-r-0 border-[#eae6df] text-xs text-[#777] rounded-l">
+              getmyinvite.in/
+            </span>
+            <input
+              type="text"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-"))}
+              disabled={publishing}
+              className="flex-1 px-3 py-2 border border-[#eae6df] rounded-r text-xs focus:outline-none focus:border-[#855f18] disabled:opacity-50"
+              placeholder="couple-names"
+            />
           </div>
 
-          <button
-            onClick={handlePublish}
-            disabled={publishing || checking || available === false}
-            className="w-full py-3 bg-[#855f18] text-white hover:bg-[#6c4c12] font-bold rounded uppercase tracking-wider transition-all shadow-md disabled:opacity-50"
-          >
-            {publishing ? "Publishing Site..." : "Publish Invitation"}
-          </button>
+          {/* Check slug availability output status */}
+          <div className="mt-2 flex items-center gap-2">
+            {checking && <span className="text-[10px] text-gray-500">Checking availability...</span>}
+            {!checking && (available === true || currentSlug === slug) && (
+              <span className="text-[10px] text-green-600 font-bold">✓ This link slug is available</span>
+            )}
+            {!checking && available === false && currentSlug !== slug && (
+              <span className="text-[10px] text-red-600 font-bold">✗ Link slug is unavailable or invalid</span>
+            )}
+          </div>
+
+          {/* Privacy Settings Options */}
+          <div className="mt-4 border-t border-[#eae6df] pt-4 space-y-3">
+            <label className="block text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider">
+              Privacy Option
+            </label>
+            
+            <div className="grid grid-cols-1 gap-3">
+              {/* Public Option */}
+              <label className="flex items-start gap-3 p-3 border border-[#eae6df] hover:bg-[#faf8f5] rounded-xl cursor-pointer transition-all">
+                <input
+                  type="radio"
+                  name="privacy"
+                  checked={privacy === "public"}
+                  onChange={() => handlePrivacyChange("public")}
+                  disabled={publishing}
+                  className="mt-0.5 text-[#855f18] focus:ring-[#855f18]"
+                />
+                <div className="space-y-0.5">
+                  <span className="text-xs font-bold text-[#1a1a1a]">Public (Recommended)</span>
+                  <p className="text-[10px] text-[#666] leading-relaxed">
+                    Your invitation will have a clean URL (e.g. <code>getmyinvite.in/priya-and-arjun</code>), is searchable on Google, and is indexed on the sitemap.
+                  </p>
+                </div>
+              </label>
+
+              {/* Unlisted Option */}
+              <label className="flex items-start gap-3 p-3 border border-[#eae6df] hover:bg-[#faf8f5] rounded-xl cursor-pointer transition-all">
+                <input
+                  type="radio"
+                  name="privacy"
+                  checked={privacy === "unlisted"}
+                  onChange={() => handlePrivacyChange("unlisted")}
+                  disabled={publishing}
+                  className="mt-0.5 text-[#855f18] focus:ring-[#855f18]"
+                />
+                <div className="space-y-0.5">
+                  <span className="text-xs font-bold text-[#1a1a1a]">Unlisted / Private</span>
+                  <p className="text-[10px] text-[#666] leading-relaxed">
+                    Appends a random suffix to make your URL unguessable (e.g. <code>getmyinvite.in/priya-and-arjun-k3xq9f2p</code>). Excluded from search indexing and sitemaps.
+                  </p>
+                </div>
+              </label>
+            </div>
+          </div>
         </div>
+
+        <button
+          onClick={handlePublish}
+          disabled={publishing || checking || (available === false && currentSlug !== slug)}
+          className="w-full py-3 bg-[#855f18] text-white hover:bg-[#6c4c12] font-bold rounded uppercase tracking-wider transition-all shadow-md disabled:opacity-50"
+        >
+          {publishing 
+            ? (currentStatus === "published" ? "Updating Settings..." : "Publishing Site...") 
+            : (currentStatus === "published" ? "Update Settings" : "Publish Invitation")}
+        </button>
+      </div>
       )}
     </div>
   );

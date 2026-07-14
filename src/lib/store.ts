@@ -8,6 +8,7 @@ interface WizardState {
   colorSchemeId: string;
   slug: string;
   status: "draft" | "published";
+  privacy: "public" | "unlisted";
   currentStep: number;
   saveStatus: "idle" | "saving" | "saved" | "error";
   saveError: string | null;
@@ -18,6 +19,7 @@ interface WizardState {
   setColorSchemeId: (id: string) => void;
   setSlug: (slug: string) => void;
   setStatus: (status: "draft" | "published") => void;
+  setPrivacy: (privacy: "public" | "unlisted") => void;
   updateData: (fields: Partial<InvitationData>) => void;
   updateNestedData: <K extends keyof InvitationData>(
     key: K,
@@ -35,6 +37,7 @@ export const useWizardStore = create<WizardState>((set) => ({
   colorSchemeId: "gold-light",
   slug: "",
   status: "draft",
+  privacy: "public",
   currentStep: 0,
   saveStatus: "idle",
   saveError: null,
@@ -45,6 +48,7 @@ export const useWizardStore = create<WizardState>((set) => ({
   setColorSchemeId: (id) => set({ colorSchemeId: id }),
   setSlug: (slug) => set({ slug }),
   setStatus: (status) => set({ status }),
+  setPrivacy: (privacy) => set({ privacy }),
   updateData: (fields) =>
     set((state) => ({
       data: state.data ? { ...state.data, ...fields } : null,

@@ -29,6 +29,13 @@ export async function saveInvitationDraft(id: string, content: InvitationData) {
   try {
     const user = await getAuthenticatedUser();
     await queries.updateInvitationContent(id, user.id, content);
+    
+    // Auto-revalidate the cached path if the invitation is already published
+    const inv = await queries.getInvitationById(id, user.id);
+    if (inv && inv.status === "published") {
+      revalidatePath(`/${inv.slug}`);
+    }
+    
     return { ok: true };
   } catch (err: any) {
     console.error("saveInvitationDraft error:", err);

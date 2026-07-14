@@ -129,6 +129,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
     setStatus,
     setCurrentStep,
     setSaveStatus,
+    setPrivacy,
   } = useWizardStore();
 
   const [mounted, setMounted] = useState(false);
@@ -145,13 +146,14 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
     setColorSchemeId(invitation.colorSchemeId);
     setSlug(invitation.slug);
     setStatus(invitation.status);
+    setPrivacy(invitation.privacy || "public");
     setMounted(true);
     
     // Set hydrated reference after initial load
     setTimeout(() => {
       isHydrated.current = true;
     }, 100);
-  }, [invitation, setInvitationId, setData, setTemplateId, setColorSchemeId, setSlug, setStatus]);
+  }, [invitation, setInvitationId, setData, setTemplateId, setColorSchemeId, setSlug, setStatus, setPrivacy]);
 
   // 2. Debounced autosave effect
   useEffect(() => {
