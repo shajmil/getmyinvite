@@ -413,7 +413,7 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
       </section>
 
       {/* -------------------- EVENT LOCATION 1 PARALLAX -------------------- */}
-      <ParallaxBanner image={data.wedding.venue.photo || "/templates/barcelona/church.jpeg"}>
+      <ParallaxBanner image={data.wedding.venue.photo || "/templates/barcelona/ai-church.png"}>
         <ScrollReveal>
           <h2 className="font-serif text-3xl md:text-5xl font-semibold text-white drop-shadow-md mb-6">
             {data.wedding.venue.name}

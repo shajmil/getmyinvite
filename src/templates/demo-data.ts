@@ -4,7 +4,7 @@ export const demoInvitationData: InvitationData = {
   partner1: {
     firstName: "Sophia",
     lastName: "John",
-    photo: "/templates/barcelona/bride.png",
+    photo: "/templates/barcelona/ai-bride.png",
     parents: "Mrs. Toncy Bosco & John Bosco Kuzhikkadan",
     facebookUrl: "https://facebook.com",
     instagramUrl: "https://instagram.com",
@@ -12,7 +12,7 @@ export const demoInvitationData: InvitationData = {
   partner2: {
     firstName: "Garyson",
     lastName: "George",
-    photo: "/templates/barcelona/groom.png",
+    photo: "/templates/barcelona/ai-groom.png",
     parents: "Mrs. Latha George & Konnoth Antony George",
     facebookUrl: "https://facebook.com",
     instagramUrl: "https://instagram.com",
@@ -27,7 +27,7 @@ export const demoInvitationData: InvitationData = {
       address: "Church Road, High Street",
       city: "Thrissur, Kerala",
       mapUrl: "https://maps.app.goo.gl/GHjV8syg8MgxcXjp8",
-      photo: "/templates/barcelona/church.jpeg",
+      photo: "/templates/barcelona/ai-church.png",
     },
   },
   events: [
@@ -39,7 +39,7 @@ export const demoInvitationData: InvitationData = {
       venue: "Infant Jesus Church",
       dressCode: "Formal / White Suit",
       note: "Join us in our sacred prayers.",
-      photo: "/templates/barcelona/couple_pic1.jpeg",
+      photo: "/templates/barcelona/ai-couple1.png",
     },
     {
       id: "evt-2",
@@ -49,7 +49,7 @@ export const demoInvitationData: InvitationData = {
       venue: "Vaz Arena",
       dressCode: "Cocktail Attire",
       note: "Dinner and celebration follows.",
-      photo: "/templates/barcelona/couple_pic2.jpeg",
+      photo: "/templates/barcelona/ai-couple2.png",
     },
   ],
   story: {
@@ -65,12 +65,12 @@ export const demoInvitationData: InvitationData = {
     ],
   },
   gallery: [
-    { url: "/templates/barcelona/pic1.jpeg", alt: "Memory 1", order: 1 },
-    { url: "/templates/barcelona/pic2.jpeg", alt: "Memory 2", order: 2 },
-    { url: "/templates/barcelona/pic3.jpeg", alt: "Memory 3", order: 3 },
-    { url: "/templates/barcelona/pic4.jpeg", alt: "Memory 4", order: 4 },
-    { url: "/templates/barcelona/pic5.jpeg", alt: "Memory 5", order: 5 },
-    { url: "/templates/barcelona/pic6.jpeg", alt: "Memory 6", order: 6 },
+    { url: "/templates/barcelona/ai-pic1.png", alt: "Memory 1", order: 1 },
+    { url: "/templates/barcelona/ai-pic2.png", alt: "Memory 2", order: 2 },
+    { url: "/templates/barcelona/ai-pic3.png", alt: "Memory 3", order: 3 },
+    { url: "/templates/barcelona/ai-pic4.png", alt: "Memory 4", order: 4 },
+    { url: "/templates/barcelona/ai-pic5.png", alt: "Memory 5", order: 5 },
+    { url: "/templates/barcelona/ai-pic6.png", alt: "Memory 6", order: 6 },
   ],
   hero: {
     mainPhoto: "/templates/barcelona/background.png",
@@ -96,14 +96,14 @@ export const demoInvitationData: InvitationData = {
         name: "Bosco Kuzhikkadan",
         phone: "+91 96456 85457",
         role: "Bride's Brother",
-        photo: "/templates/classic/pic01.jpg",
+        photo: "/templates/classic/ai-brother.png",
       },
       {
         id: "c-2",
         name: "Konoth Antony George",
         phone: "+91 96456 85457",
         role: "Groom's Father",
-        photo: "/templates/classic/pic02.jpg",
+        photo: "/templates/classic/ai-father.png",
       },
     ],
     keyGuests: [
