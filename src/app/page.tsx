@@ -9,14 +9,48 @@ import { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "GetMyInvite | Free Wedding Website Builder & Digital Invitations",
-  description: "Create a stunning, mobile-responsive wedding website and digital invitation in minutes. Customize templates, collect guest RSVPs, and share your live link for free.",
-  openGraph: {
-    title: "GetMyInvite | Free Wedding Website Builder & Digital Invitations",
-    description: "Create a stunning wedding website and digital invitation. Customize designs, collect RSVPs, and publish instantly.",
-    type: "website",
-    siteName: "GetMyInvite",
+  title: "GetMyInvite | Best Digital Wedding Invitation & Website Builder",
+  description: "Create the best digital wedding invitation websites in minutes. GetMyInvite lets you design stunning, mobile-responsive wedding websites with photo galleries, online RSVP tracking, maps, and music loops for free.",
+  keywords: [
+    "best wedding invitation site",
+    "get my invite",
+    "getmyinvite",
+    "digital wedding card",
+    "online RSVP wedding invitation",
+    "custom wedding website builder",
+    "wedding card online",
+    "wedding invitations free",
+    "best online wedding invitation",
+    "MakeMyInvite",
+    "getmyinvite.in"
+  ],
+  alternates: {
+    canonical: "https://getmyinvite.in",
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    title: "GetMyInvite | Best Digital Wedding Invitation & Website Builder",
+    description: "Build the best digital wedding invitation websites. Create custom responsive parallax layout pages, coordinate locations, sync colors, and gather RSVPs online.",
+    url: "https://getmyinvite.in",
+    siteName: "GetMyInvite",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "GetMyInvite | Best Digital Wedding Invitation & Website Builder",
+    description: "Build your premium wedding website and custom digital invitation cards in minutes.",
+  }
 };
 
 export default async function LandingPage() {
