@@ -2,9 +2,10 @@ import { MetadataRoute } from "next";
 import { db } from "@/lib/db";
 import { invitations } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { siteUrl } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://getmyinvite.in";
+  const baseUrl = siteUrl;
 
   // Fetch all published invitation paths to index in Google Search Console
   let invitationRoutes: MetadataRoute.Sitemap = [];
