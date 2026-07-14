@@ -1,4 +1,4 @@
-import { eq, and, desc, inArray } from "drizzle-orm";
+import { eq, and, desc, inArray, lt } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   invitations,
@@ -65,6 +65,21 @@ export async function checkSlugAvailable(slug: string, excludeInvitationId?: str
 }
 
 export async function getInvitationsByUser(userId: string) {
+  // Automatically clean up drafts older than 7 days on dashboard load
+  try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    await db
+      .delete(invitations)
+      .where(
+        and(
+          eq(invitations.status, "draft"),
+          lt(invitations.createdAt, sevenDaysAgo)
+        )
+      );
+  } catch (err) {
+    console.error("Dashboard cleanup drafts error:", err);
+  }
+
   const list = await db
     .select({
       invitation: invitations,
