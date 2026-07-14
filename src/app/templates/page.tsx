@@ -75,6 +75,48 @@ export default async function TemplatesPage() {
 
         <TemplatesList isLoggedIn={isLoggedIn} />
       </main>
+
+      {/* Footer */}
+      <footer className="py-12 border-t border-[#eae6df] text-center text-xs text-[#666] uppercase tracking-wider space-y-4">
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] text-[#855f18] font-semibold">
+          <Link href="/kerala-wedding-invitation-website" className="hover:underline">Kerala Wedding Website</Link>
+          <span className="text-gray-300">•</span>
+          <Link href="/malayalam-wedding-invitation-online" className="hover:underline">Malayalam Invitation Online</Link>
+          <span className="text-gray-300">•</span>
+          <Link href="/free-wedding-rsvp-website-india" className="hover:underline">Free RSVP Website India</Link>
+        </div>
+        <div className="space-y-1">
+          <p>&copy; {new Date().getFullYear()} GetMyInvite. All rights reserved.</p>
+          <p className="text-[10px] text-gray-400">Website by Shajmil</p>
+        </div>
+      </footer>
+
+      {/* JSON-LD Structured Data Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "name": "Wedding Invitation Templates Gallery",
+            "description": "Explore the list of responsive parallax and overlay wedding invitation template designs available on GetMyInvite.",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Barcelona Template",
+                "description": "Elegant mobile-responsive design featuring smooth full-viewport parallax scrolling, photo slide-ins, and customizable palettes.",
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Classic Template",
+                "description": "Sophisticated overlay card design with floral backdrops, looping music, and floating RSVP controls.",
+              },
+            ],
+          }),
+        }}
+      />
     </div>
   );
 }

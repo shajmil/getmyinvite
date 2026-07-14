@@ -216,10 +216,86 @@ export default async function LandingPage() {
       </section>
 
       {/* ------------------ FOOTER ------------------ */}
-      <footer className="py-12 border-t border-[#eae6df] text-center text-xs text-[#666] uppercase tracking-wider space-y-2">
-        <p>&copy; {new Date().getFullYear()} GetMyInvite. All rights reserved.</p>
-        <p className="text-[10px] text-gray-400">Website by Shajmil</p>
+      <footer className="py-12 border-t border-[#eae6df] text-center text-xs text-[#666] uppercase tracking-wider space-y-4">
+        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] text-[#855f18] font-semibold">
+          <Link href="/kerala-wedding-invitation-website" className="hover:underline">Kerala Wedding Website</Link>
+          <span className="text-gray-300">•</span>
+          <Link href="/malayalam-wedding-invitation-online" className="hover:underline">Malayalam Invitation Online</Link>
+          <span className="text-gray-300">•</span>
+          <Link href="/free-wedding-rsvp-website-india" className="hover:underline">Free RSVP Website India</Link>
+        </div>
+        <div className="space-y-1">
+          <p>&copy; {new Date().getFullYear()} GetMyInvite. All rights reserved.</p>
+          <p className="text-[10px] text-gray-400">Website by Shajmil</p>
+        </div>
       </footer>
+
+      {/* JSON-LD Structured Data Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Organization",
+                "@id": "https://getmyinvite.in/#organization",
+                "name": "GetMyInvite",
+                "url": "https://getmyinvite.in",
+              },
+              {
+                "@type": "WebSite",
+                "@id": "https://getmyinvite.in/#website",
+                "url": "https://getmyinvite.in",
+                "name": "GetMyInvite",
+                "publisher": {
+                  "@id": "https://getmyinvite.in/#organization",
+                },
+              },
+              {
+                "@type": "SoftwareApplication",
+                "name": "GetMyInvite Wedding Website Builder",
+                "applicationCategory": "BrowserApplication",
+                "operatingSystem": "All",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "0.00",
+                  "priceCurrency": "INR",
+                },
+              },
+              {
+                "@type": "FAQPage",
+                "mainEntity": [
+                  {
+                    "@type": "Question",
+                    "name": "Is GetMyInvite really free?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Yes, it is 100% free. You can create, customize, preview, and publish your wedding website to a unique link without paying anything.",
+                    },
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "Can I collect RSVPs from guests?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Yes. Both templates feature a built-in guest RSVP form. Guests submit their response, and it updates instantly on your dashboard where you can see counts, preferences, and download CSV sheets.",
+                    },
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "Can I update the details after publishing?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Yes, you can edit your website settings, photos, dates, or stories at any time. Saving changes updates the live website immediately.",
+                    },
+                  },
+                ],
+              },
+            ],
+          }),
+        }}
+      />
     </div>
   );
 }

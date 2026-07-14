@@ -17,6 +17,18 @@ interface SlugPageProps {
 
 export async function generateMetadata(props: SlugPageProps) {
   const { slug } = await props.params;
+
+  const systemPaths = ["sitemap.xml", "robots.txt", "favicon.ico"];
+  if (systemPaths.includes(slug) || slug.includes(".")) {
+    return {
+      title: "Not Found",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
   const invitation = await getCachedInvitationBySlug(slug);
 
   // If the invite is unpublished or not found: return robots: { index: false }
@@ -83,6 +95,12 @@ export async function generateMetadata(props: SlugPageProps) {
 
 export default async function PublishedSlugPage(props: SlugPageProps) {
   const { slug } = await props.params;
+
+  const systemPaths = ["sitemap.xml", "robots.txt", "favicon.ico"];
+  if (systemPaths.includes(slug) || slug.includes(".")) {
+    notFound();
+  }
+
   const invitation = await getCachedInvitationBySlug(slug);
 
   if (!invitation || invitation.status !== "published") {
@@ -148,6 +166,37 @@ export default async function PublishedSlugPage(props: SlugPageProps) {
   ];
   const icsDataUri = `data:text/calendar;charset=utf-8,${encodeURIComponent(icsLines.join("\r\n"))}`;
 
+  const partner1Val = invitation.content.partner1.firstName;
+  const partner2Val = invitation.content.partner2.firstName;
+  const namesVal = `${partner1Val} & ${partner2Val}`;
+  const appUrlVal = "https://getmyinvite.in";
+  
+  const ogUrlVal = new URL(`${appUrlVal}/api/og`);
+  ogUrlVal.searchParams.set("names", namesVal);
+  ogUrlVal.searchParams.set("date", invitation.content.wedding.date);
+  if (invitation.content.coupleTagline) {
+    ogUrlVal.searchParams.set("tagline", invitation.content.coupleTagline);
+  }
+  const heroImageVal = invitation.content.hero.mainPhoto || ogUrlVal.toString();
+
+  const eventSchema = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": `${namesVal} Wedding Invitation`,
+    "startDate": invitation.content.wedding.date,
+    "location": {
+      "@type": "Place",
+      "name": invitation.content.wedding.venue.name,
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": invitation.content.wedding.venue.address || "",
+        "addressLocality": invitation.content.wedding.venue.city || "",
+        "addressCountry": "IN"
+      }
+    },
+    "image": heroImageVal
+  };
+
   return (
     <div className="relative flex-1 min-h-screen">
       {/* Universal Floating Add-To-Calendar Action Bar */}
@@ -174,6 +223,14 @@ export default async function PublishedSlugPage(props: SlugPageProps) {
       </div>
 
       <TemplateComponent data={dataWithId} colorSchemeId={invitation.colorSchemeId} />
+
+      {/* JSON-LD Structured Data Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(eventSchema),
+        }}
+      />
     </div>
   );
 }

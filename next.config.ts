@@ -1,6 +1,28 @@
 import type { NextConfig } from "next";
 
+const r2Url = process.env.R2_PUBLIC_URL;
+let r2Hostname = "";
+if (r2Url) {
+  try {
+    r2Hostname = new URL(r2Url).hostname;
+  } catch (e) {
+    console.error("Invalid R2_PUBLIC_URL:", r2Url);
+  }
+}
+
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      ...(r2Hostname
+        ? [
+            {
+              protocol: "https" as const,
+              hostname: r2Hostname,
+            },
+          ]
+        : []),
+    ],
+  },
   async headers() {
     return [
       {
