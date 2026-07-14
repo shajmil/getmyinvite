@@ -309,6 +309,7 @@ export function StepPublish({ onPublishSuccess }: StepPublishProps) {
           {publishing 
             ? (currentStatus === "published" ? "Updating Settings..." : "Publishing Site...") 
             : (currentStatus === "published" ? "Update Settings" : "Publish Invitation")}
+        </button>
       </div>
     </div>
   );
