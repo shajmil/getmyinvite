@@ -47,6 +47,7 @@ export default async function EditInvitationPage(
     templateId: invitation.templateId,
     colorSchemeId: invitation.colorSchemeId,
     status: invitation.status,
+    privacy: invitation.privacy,
     content: initialContent,
   };
 

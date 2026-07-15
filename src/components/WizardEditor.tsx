@@ -24,6 +24,7 @@ interface WizardEditorProps {
     templateId: string;
     colorSchemeId: string;
     status: "draft" | "published";
+    privacy: "public" | "unlisted";
     content: any;
   };
 }
