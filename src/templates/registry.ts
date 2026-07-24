@@ -35,7 +35,7 @@ export const templateRegistry: Record<string, Template> = {
     name: "Barcelona",
     description: "Modern parallax-based invitation with fluid scroll triggers and gorgeous media frames.",
     thumbnail: "/templates/barcelona-thumb.jpg",
-    supportedSections: ["couple", "events", "gallery", "keyGuests", "countdown"],
+    supportedSections: ["couple", "events", "gallery", "keyGuests", "contactPersons", "countdown"],
     fonts: {
       heading: "'Cormorant Garamond', serif",
       body: "'Josefin Sans', sans-serif",
@@ -84,7 +84,7 @@ export const templateRegistry: Record<string, Template> = {
     name: "Classic",
     description: "Dimension style modal tab interface featuring immersive background music and loop video overlays.",
     thumbnail: "/templates/classic-thumb.jpg",
-    supportedSections: ["couple", "events", "contactPersons", "invitationCard", "videoBg", "audioMusic"],
+    supportedSections: ["couple", "events", "contactPersons", "keyGuests", "invitationCard", "videoBg", "audioMusic"],
     fonts: {
       heading: "'Merienda', serif",
       body: "'Meddon', serif",

@@ -585,6 +585,48 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
         </section>
       )}
 
+      {/* -------------------- CONTACT PERSONS -------------------- */}
+      {data.extras.contactPersons && data.extras.contactPersons.length > 0 && (
+        <section className="py-16 max-w-5xl mx-auto px-6 border-t border-[#eae6df]">
+          <ScrollReveal>
+            <div className="text-center mb-12 space-y-2">
+              <h6 className="text-xs font-semibold tracking-widest text-var(--gold) uppercase">Contact Info</h6>
+              <h2 className="font-serif text-3xl md:text-4xl text-var(--dark)">For Any Enquiries</h2>
+            </div>
+          </ScrollReveal>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-center">
+            {data.extras.contactPersons.map((contact) => (
+              <ScrollReveal key={contact.id}>
+                <div className="flex items-center gap-4 bg-white border border-[#eae6df] rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
+                  <div className="relative w-14 h-14 rounded-full overflow-hidden flex-shrink-0 border border-var(--gold)" style={{ position: "relative" }}>
+                    {contact.photo ? (
+                      <Image src={contact.photo} alt={contact.name} fill className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full bg-[#f0ebd9] flex items-center justify-center font-serif text-var(--gold) text-lg font-bold">
+                        {contact.name ? contact.name.charAt(0) : "C"}
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-0.5 overflow-hidden">
+                    <h4 className="font-serif text-base text-var(--dark) font-semibold truncate">{contact.name || "Contact"}</h4>
+                    {contact.role && (
+                      <p className="text-xs font-medium uppercase tracking-wider text-var(--gold)">{contact.role}</p>
+                    )}
+                    {contact.phone && (
+                      <a href={`tel:${contact.phone}`} className="text-xs text-var(--text) hover:text-var(--gold) block font-mono">
+                        📞 {contact.phone}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </ScrollReveal>
+            ))}
+          </div>
+        </section>
+      )}
+
+
       {/* -------------------- RSVP FORM -------------------- */}
       {data.rsvpConfig.enabled && (
         <section id="rsvp" className="py-24 bg-var(--bg-cream) border-t border-[#eae6df]">

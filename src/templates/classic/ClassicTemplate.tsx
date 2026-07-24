@@ -219,7 +219,7 @@ export function ClassicTemplate({ data, colorSchemeId, isPreview = false }: Clas
                       Location
                     </button>
                   </li>
-                  {data.extras.contactPersons && data.extras.contactPersons.length > 0 && (
+                  {((data.extras.contactPersons && data.extras.contactPersons.length > 0) || (data.extras.keyGuests && data.extras.keyGuests.length > 0)) && (
                     <li>
                       <button
                         onClick={() => setActiveTab("contact")}
@@ -321,33 +321,70 @@ export function ClassicTemplate({ data, colorSchemeId, isPreview = false }: Clas
               {activeTab === "contact" && (
                 <div className="space-y-6">
                   <h2 className="font-serif text-2xl font-semibold tracking-wider text-var(--header-color) border-b border-white/20 pb-3 uppercase">
-                    Contacts
+                    Contacts &amp; Special Guests
                   </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {data.extras.contactPersons.map((contact) => (
-                      <div
-                        key={contact.id}
-                        className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-4 shadow"
-                      >
-                        <div className="relative w-16 h-16 rounded-full overflow-hidden border border-var(--accent-color)">
-                          {contact.photo ? (
-                            <Image src={contact.photo} alt={contact.name} fill className="object-cover" />
-                          ) : (
-                            <div className="w-full h-full bg-[#f0ebd9] flex items-center justify-center font-serif text-[#1a1a1a] text-xl font-bold">
-                              {contact.name.charAt(0)}
+                  {data.extras.contactPersons && data.extras.contactPersons.length > 0 && (
+                    <div className="space-y-3">
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-var(--accent-color)">Event Contacts</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {data.extras.contactPersons.map((contact) => (
+                          <div
+                            key={contact.id}
+                            className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-4 shadow"
+                          >
+                            <div className="relative w-14 h-14 rounded-full overflow-hidden border border-var(--accent-color) flex-shrink-0">
+                              {contact.photo ? (
+                                <Image src={contact.photo} alt={contact.name} fill className="object-cover" />
+                              ) : (
+                                <div className="w-full h-full bg-[#f0ebd9] flex items-center justify-center font-serif text-[#1a1a1a] text-xl font-bold">
+                                  {contact.name ? contact.name.charAt(0) : "C"}
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                        <div className="space-y-1">
-                          <h4 className="font-serif text-md text-white font-bold">{contact.name}</h4>
-                          <p className="text-xs uppercase tracking-wider text-var(--accent-color)">{contact.role}</p>
-                          <a href={`tel:${contact.phone}`} className="text-xs text-white/60 hover:text-white block">
-                            📞 {contact.phone}
-                          </a>
-                        </div>
+                            <div className="space-y-1 overflow-hidden">
+                              <h4 className="font-serif text-md text-white font-bold truncate">{contact.name || "Contact"}</h4>
+                              <p className="text-xs uppercase tracking-wider text-var(--accent-color)">{contact.role}</p>
+                              {contact.phone && (
+                                <a href={`tel:${contact.phone}`} className="text-xs text-white/60 hover:text-white block font-mono">
+                                  📞 {contact.phone}
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  )}
+
+                  {data.extras.keyGuests && data.extras.keyGuests.length > 0 && (
+                    <div className="space-y-3 pt-4 border-t border-white/10">
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-var(--accent-color)">Special Guests</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {data.extras.keyGuests.map((guest) => (
+                          <div
+                            key={guest.id}
+                            className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-4 shadow"
+                          >
+                            <div className="relative w-14 h-14 rounded-full overflow-hidden border border-var(--accent-color) flex-shrink-0">
+                              {guest.photo ? (
+                                <Image src={guest.photo} alt={guest.name} fill className="object-cover" />
+                              ) : (
+                                <div className="w-full h-full bg-[#f0ebd9] flex items-center justify-center font-serif text-[#1a1a1a] text-xl font-bold">
+                                  {guest.name ? guest.name.charAt(0) : "G"}
+                                </div>
+                              )}
+                            </div>
+                            <div className="space-y-1 overflow-hidden">
+                              <h4 className="font-serif text-md text-white font-bold truncate">{guest.name || "Special Guest"}</h4>
+                              {guest.relationship && (
+                                <p className="text-xs uppercase tracking-wider text-var(--accent-color)">{guest.relationship}</p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

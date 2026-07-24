@@ -8,6 +8,7 @@ export function StepRSVPExtras() {
   const { data, updateNestedData, updateData } = useWizardStore();
   const [newMeal, setNewMeal] = useState("");
   const [uploadingContactId, setUploadingContactId] = useState<string | null>(null);
+  const [uploadingKeyGuestId, setUploadingKeyGuestId] = useState<string | null>(null);
 
   if (!data) return null;
 
@@ -35,8 +36,8 @@ export function StepRSVPExtras() {
     const contacts = data.extras.contactPersons || [];
     const newContact = {
       id: `c-${Date.now()}`,
-      name: "New Contact",
-      phone: "+91 96456 85457",
+      name: "",
+      phone: "",
       role: "Host",
       photo: "",
     };
@@ -77,11 +78,56 @@ export function StepRSVPExtras() {
     }
   };
 
+  const handleAddKeyGuest = () => {
+    const keyGuests = data.extras.keyGuests || [];
+    const newGuest = {
+      id: `kg-${Date.now()}`,
+      name: "",
+      relationship: "Special Guest",
+      photo: "",
+    };
+
+    updateNestedData("extras", {
+      keyGuests: [...keyGuests, newGuest],
+    });
+  };
+
+  const handleUpdateKeyGuest = (id: string, fields: any) => {
+    const keyGuests = data.extras.keyGuests || [];
+    updateNestedData("extras", {
+      keyGuests: keyGuests.map((g) => (g.id === id ? { ...g, ...fields } : g)),
+    });
+  };
+
+  const handleRemoveKeyGuest = (id: string) => {
+    const keyGuests = data.extras.keyGuests || [];
+    updateNestedData("extras", {
+      keyGuests: keyGuests.filter((g) => g.id !== id),
+    });
+  };
+
+  const handleKeyGuestPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingKeyGuestId(id);
+
+    try {
+      const { url } = await uploadFile(file);
+      handleUpdateKeyGuest(id, { photo: url });
+    } catch (err) {
+      alert("Failed to upload photo for special guest. Please try again.");
+      console.error(err);
+    } finally {
+      setUploadingKeyGuestId(null);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="border-b border-[#eae6df] pb-4">
         <h2 className="text-xl font-serif font-bold text-[#1a1a1a]">Step 5 — RSVP & Extras</h2>
-        <p className="text-xs text-[#666]">Configure guest RSVP forms, hashtags, and family contact details</p>
+        <p className="text-xs text-[#666]">Configure guest RSVP forms, special guests, and family contact details</p>
       </div>
 
       {/* RSVP Toggles & Form Config */}
@@ -165,51 +211,76 @@ export function StepRSVPExtras() {
         )}
       </div>
 
-      {/* Extras: Hashtags, Dress Codes, Gift Notes - Hidden as they are not rendered by the active templates */}
-      {false && (
-        <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
-          <h3 className="font-serif text-lg font-semibold text-[#855f18] border-b border-[#faf8f5] pb-2">Event Extras</h3>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Wedding Hashtag</label>
-              <input
-                type="text"
-                value={data?.extras?.hashtag || ""}
-                onChange={(e) => updateNestedData("extras", { hashtag: e.target.value })}
-                className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
-                placeholder="ArunMeera2026"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Overall Dress Code</label>
-              <input
-                type="text"
-                value={data?.extras?.dressCode || ""}
-                onChange={(e) => updateNestedData("extras", { dressCode: e.target.value })}
-                className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
-                placeholder="Formals / Traditional"
-              />
-            </div>
-          </div>
-
+      {/* Special / Key Guests List */}
+      <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
+        <div className="flex justify-between items-center border-b border-[#faf8f5] pb-2">
           <div>
-            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Gift Note / Note on Registry</label>
-            <input
-              type="text"
-              value={data?.extras?.giftNote || ""}
-              onChange={(e) => updateNestedData("extras", { giftNote: e.target.value })}
-              className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none"
-              placeholder="Your presence is our present..."
-            />
+            <h3 className="font-serif text-lg font-semibold text-[#855f18]">Special Guests</h3>
+            <p className="text-[11px] text-[#777]">VIP guests, bridesmaids, groomsmen, or family members to highlight</p>
           </div>
+          <button
+            onClick={handleAddKeyGuest}
+            className="px-2.5 py-1 border border-[#855f18] text-[#855f18] hover:bg-[#855f18]/10 text-xs font-semibold rounded"
+          >
+            + Add Special Guest
+          </button>
         </div>
-      )}
+
+        {(data.extras.keyGuests || []).length === 0 ? (
+          <p className="text-xs text-[#777] italic text-center py-4">No special guests added.</p>
+        ) : (
+          <div className="space-y-4">
+            {data.extras.keyGuests.map((guest) => (
+              <div key={guest.id} className="border border-[#faf8f5] p-3 rounded-lg bg-[#faf8f5]/50 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs font-semibold text-[#855f18]">{guest.relationship || "Special Guest"}</span>
+                  <button
+                    onClick={() => handleRemoveKeyGuest(guest.id)}
+                    className="text-[10px] text-red-600 hover:underline font-bold"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={guest.name}
+                    onChange={(e) => handleUpdateKeyGuest(guest.id, { name: e.target.value })}
+                    className="px-2 py-1 border border-[#eae6df] rounded text-xs focus:outline-none"
+                    placeholder="Guest Name (e.g. Thobias & Henna)"
+                  />
+                  <input
+                    type="text"
+                    value={guest.relationship || ""}
+                    onChange={(e) => handleUpdateKeyGuest(guest.id, { relationship: e.target.value })}
+                    className="px-2 py-1 border border-[#eae6df] rounded text-xs focus:outline-none"
+                    placeholder="Title/Relation (e.g. Best Friend)"
+                  />
+                </div>
+                <div className="pt-1">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleKeyGuestPhotoUpload(e, guest.id)}
+                    className="w-full text-xs text-[#777] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
+                  />
+                  {uploadingKeyGuestId === guest.id && (
+                    <p className="text-[10px] text-[#855f18] mt-1">Uploading photo...</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Contacts List */}
       <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
         <div className="flex justify-between items-center border-b border-[#faf8f5] pb-2">
-          <h3 className="font-serif text-lg font-semibold text-[#855f18]">Contact Persons</h3>
+          <div>
+            <h3 className="font-serif text-lg font-semibold text-[#855f18]">Contact Persons</h3>
+            <p className="text-[11px] text-[#777]">Hosts and family members for event enquiries</p>
+          </div>
           <button
             onClick={handleAddContact}
             className="px-2.5 py-1 border border-[#855f18] text-[#855f18] hover:bg-[#855f18]/10 text-xs font-semibold rounded"
