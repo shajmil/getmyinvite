@@ -131,12 +131,25 @@ export function StepCouple() {
 
           <div>
             <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Photo Upload</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handlePhotoUpload(e, "partner1")}
-              className="w-full text-xs text-[#777] file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
-            />
+            {data.partner1.photo ? (
+              <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-[#eae6df] group mb-2">
+                <img src={data.partner1.photo} alt="Partner 1" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => updateNestedData("partner1", { photo: "" })}
+                  className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-all"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handlePhotoUpload(e, "partner1")}
+                className="w-full text-xs text-[#777] file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
+              />
+            )}
             {uploading === "partner1" && (
               <p className="text-[10px] text-[#855f18] mt-1">Uploading: {progress}%</p>
             )}
@@ -183,12 +196,25 @@ export function StepCouple() {
 
           <div>
             <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Photo Upload</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handlePhotoUpload(e, "partner2")}
-              className="w-full text-xs text-[#777] file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
-            />
+            {data.partner2.photo ? (
+              <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-[#eae6df] group mb-2">
+                <img src={data.partner2.photo} alt="Partner 2" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => updateNestedData("partner2", { photo: "" })}
+                  className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-all"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handlePhotoUpload(e, "partner2")}
+                className="w-full text-xs text-[#777] file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
+              />
+            )}
             {uploading === "partner2" && (
               <p className="text-[10px] text-[#855f18] mt-1">Uploading: {progress}%</p>
             )}
@@ -202,34 +228,54 @@ export function StepCouple() {
         <div className={`grid grid-cols-1 ${templateId === "classic" ? "md:grid-cols-2" : ""} gap-4`}>
           <div>
             <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Hero Background Image</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleHeroUpload}
-              className="w-full text-xs text-[#777] file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
-            />
+            {data.hero?.mainPhoto ? (
+              <div className="relative w-full h-24 rounded-lg overflow-hidden border border-[#eae6df] group mb-2">
+                <img src={data.hero.mainPhoto} alt="Hero background" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => updateNestedData("hero", { ...(data.hero || {}), mainPhoto: "" })}
+                  className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-all"
+                >
+                  Remove Image
+                </button>
+              </div>
+            ) : (
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleHeroUpload}
+                className="w-full text-xs text-[#777] file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
+              />
+            )}
             {uploadingHero && (
               <p className="text-[10px] text-[#855f18] mt-1">Uploading: {heroProgress}%</p>
-            )}
-            {data.hero?.mainPhoto && (
-              <p className="text-[10px] text-green-600 mt-1 font-medium">✓ Background image loaded</p>
             )}
           </div>
 
           {templateId === "classic" && (
             <div>
               <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Digital Invitation Card Image (Kalyana Kuri)</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleCardUpload}
-                className="w-full text-xs text-[#777] file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
-              />
+              {data.hero?.invitationCardUrl ? (
+                <div className="relative w-24 h-28 rounded-lg overflow-hidden border border-[#eae6df] group mb-2">
+                  <img src={data.hero.invitationCardUrl} alt="Invitation card" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => updateNestedData("hero", { ...(data.hero || {}), invitationCardUrl: "" })}
+                    className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-all"
+                  >
+                    Remove Card
+                  </button>
+                </div>
+              ) : (
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCardUpload}
+                  className="w-full text-xs text-[#777] file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
+                />
+              )}
               {uploadingCard && (
                 <p className="text-[10px] text-[#855f18] mt-1">Uploading: {cardProgress}%</p>
-              )}
-              {data.hero?.invitationCardUrl && (
-                <p className="text-[10px] text-green-600 mt-1 font-medium">✓ Invitation card image loaded</p>
               )}
             </div>
           )}

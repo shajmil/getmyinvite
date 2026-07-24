@@ -294,12 +294,25 @@ export function StepRSVPExtras() {
                   />
                 </div>
                 <div className="pt-1">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleKeyGuestPhotoUpload(e, guest.id)}
-                    className="w-full text-xs text-[#777] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
-                  />
+                  {guest.photo ? (
+                    <div className="relative w-14 h-14 rounded-full overflow-hidden border border-[#eae6df] group mb-1">
+                      <img src={guest.photo} alt={guest.name} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateKeyGuest(guest.id, { photo: "" })}
+                        className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[9px] font-bold transition-all"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleKeyGuestPhotoUpload(e, guest.id)}
+                      className="w-full text-xs text-[#777] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
+                    />
+                  )}
                   {uploadingKeyGuestId === guest.id && (
                     <p className="text-[10px] text-[#855f18] mt-1">Uploading photo...</p>
                   )}
@@ -364,12 +377,25 @@ export function StepRSVPExtras() {
                   />
                 </div>
                 <div className="pt-1">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleContactPhotoUpload(e, contact.id)}
-                    className="w-full text-xs text-[#777] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
-                  />
+                  {contact.photo ? (
+                    <div className="relative w-14 h-14 rounded-full overflow-hidden border border-[#eae6df] group mb-1">
+                      <img src={contact.photo} alt={contact.name} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateContact(contact.id, { photo: "" })}
+                        className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[9px] font-bold transition-all"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleContactPhotoUpload(e, contact.id)}
+                      className="w-full text-xs text-[#777] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
+                    />
+                  )}
                   {uploadingContactId === contact.id && (
                     <p className="text-[10px] text-[#855f18] mt-1">Uploading...</p>
                   )}

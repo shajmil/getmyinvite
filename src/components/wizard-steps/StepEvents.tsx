@@ -186,12 +186,25 @@ export function StepEvents() {
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Event Photo</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleEventPhotoUpload(e, event.id)}
-                    className="w-full text-xs text-[#777] file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
-                  />
+                  {event.photo ? (
+                    <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-[#eae6df] group mb-2">
+                      <img src={event.photo} alt={event.name} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateEvent(event.id, { photo: "" })}
+                        className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-all"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleEventPhotoUpload(e, event.id)}
+                      className="w-full text-xs text-[#777] file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
+                    />
+                  )}
                   {uploadingId === event.id && (
                     <p className="text-[10px] text-[#855f18] mt-1">Uploading: {progress}%</p>
                   )}
