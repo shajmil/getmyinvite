@@ -155,7 +155,11 @@ export function StepWedding() {
               <img src={data.wedding.venue.photo} alt="Venue" className="w-full h-full object-cover" />
               <button
                 type="button"
-                onClick={() => handleVenueChange({ photo: "" })}
+                onClick={() => {
+                  if (window.confirm("Are you sure you want to remove this venue cover image? (Press Update Draft to save changes)")) {
+                    handleVenueChange({ photo: "" });
+                  }
+                }}
                 className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-all"
               >
                 Remove Venue Image

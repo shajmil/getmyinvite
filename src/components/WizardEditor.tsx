@@ -136,7 +136,9 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
   const [mounted, setMounted] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<"mobile" | "desktop">("mobile");
   
-  // Reference to track first hydration to avoid instant autosave on mount
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  
+  // Reference to track first hydration to avoid instant unsaved state on mount
   const isHydrated = useRef(false);
 
   // 1. Initialise Zustand store from database props
@@ -149,34 +151,37 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
     setStatus(invitation.status);
     setPrivacy(invitation.privacy || "public");
     setMounted(true);
+    setHasUnsavedChanges(false);
     
     // Set hydrated reference after initial load
     setTimeout(() => {
       isHydrated.current = true;
-    }, 100);
+    }, 200);
   }, [invitation, setInvitationId, setData, setTemplateId, setColorSchemeId, setSlug, setStatus, setPrivacy]);
 
-  // 2. Debounced autosave effect
+  // Track data edits to flag unsaved changes
   useEffect(() => {
     if (!mounted || !isHydrated.current || !data) return;
+    setHasUnsavedChanges(true);
+    setSaveStatus("idle");
+  }, [data, mounted, setSaveStatus]);
 
+  const handleSaveDraft = async () => {
+    if (!data) return;
     setSaveStatus("saving");
 
-    const timer = setTimeout(async () => {
-      try {
-        const res = await saveInvitationDraft(invitationId, data);
-        if (res.ok) {
-          setSaveStatus("saved");
-        } else {
-          setSaveStatus("error");
-        }
-      } catch (err) {
+    try {
+      const res = await saveInvitationDraft(invitationId, data);
+      if (res.ok) {
+        setSaveStatus("saved");
+        setHasUnsavedChanges(false);
+      } else {
         setSaveStatus("error");
       }
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [data, invitationId, mounted, setSaveStatus]);
+    } catch (err) {
+      setSaveStatus("error");
+    }
+  };
 
   const stepsCount = templateId === "barcelona" ? 7 : 5;
 
@@ -260,20 +265,35 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
           </h1>
         </div>
 
-        {/* Autosave Status Badge */}
-        <div className="flex items-center gap-2">
+        {/* Manual Save / Update Controls & Status Badge */}
+        <div className="flex items-center gap-3">
           {saveStatus === "saving" && (
             <span className="inline-flex items-center gap-1.5 text-xs text-[#855f18]">
               <span className="w-1.5 h-1.5 bg-[#855f18] rounded-full animate-ping" />
-              Autosaving...
+              Saving...
             </span>
           )}
-          {saveStatus === "saved" && (
+          {saveStatus === "saved" && !hasUnsavedChanges && (
             <span className="text-xs text-green-600 font-medium">✓ Draft Saved</span>
           )}
           {saveStatus === "error" && (
             <span className="text-xs text-red-600 font-medium">✗ Save Failed</span>
           )}
+          {hasUnsavedChanges && saveStatus !== "saving" && (
+            <span className="text-xs text-amber-700 font-medium hidden sm:inline">Unsaved Changes</span>
+          )}
+
+          <button
+            onClick={handleSaveDraft}
+            disabled={saveStatus === "saving" || !hasUnsavedChanges}
+            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              hasUnsavedChanges
+                ? "bg-[#855f18] text-white hover:bg-[#6c4c12] shadow-sm cursor-pointer"
+                : "bg-[#eae6df] text-[#888] cursor-default"
+            }`}
+          >
+            {saveStatus === "saving" ? "Saving..." : "Update Draft"}
+          </button>
         </div>
       </header>
 
@@ -323,7 +343,10 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
 
             <button
               disabled={currentStep === stepsCount - 1}
-              onClick={() => setCurrentStep(currentStep + 1)}
+              onClick={() => {
+                if (hasUnsavedChanges) handleSaveDraft();
+                setCurrentStep(currentStep + 1);
+              }}
               className="px-5 py-2.5 bg-[#855f18] text-white text-xs font-semibold rounded-lg hover:bg-[#6c4c12] active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all"
             >
               Next Step

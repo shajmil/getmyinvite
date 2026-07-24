@@ -299,7 +299,11 @@ export function StepRSVPExtras() {
                       <img src={guest.photo} alt={guest.name} className="w-full h-full object-cover" />
                       <button
                         type="button"
-                        onClick={() => handleUpdateKeyGuest(guest.id, { photo: "" })}
+                        onClick={() => {
+                          if (window.confirm("Are you sure you want to remove this photo? (Press Update Draft to save changes)")) {
+                            handleUpdateKeyGuest(guest.id, { photo: "" });
+                          }
+                        }}
                         className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[9px] font-bold transition-all"
                       >
                         Remove
@@ -382,7 +386,11 @@ export function StepRSVPExtras() {
                       <img src={contact.photo} alt={contact.name} className="w-full h-full object-cover" />
                       <button
                         type="button"
-                        onClick={() => handleUpdateContact(contact.id, { photo: "" })}
+                        onClick={() => {
+                          if (window.confirm("Are you sure you want to remove this contact photo? (Press Update Draft to save changes)")) {
+                            handleUpdateContact(contact.id, { photo: "" });
+                          }
+                        }}
                         className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[9px] font-bold transition-all"
                       >
                         Remove

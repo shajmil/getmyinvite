@@ -191,7 +191,11 @@ export function StepEvents() {
                       <img src={event.photo} alt={event.name} className="w-full h-full object-cover" />
                       <button
                         type="button"
-                        onClick={() => handleUpdateEvent(event.id, { photo: "" })}
+                        onClick={() => {
+                          if (window.confirm("Are you sure you want to remove this event photo? (Press Update Draft to save changes)")) {
+                            handleUpdateEvent(event.id, { photo: "" });
+                          }
+                        }}
                         className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-all"
                       >
                         Remove

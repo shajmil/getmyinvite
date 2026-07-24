@@ -136,7 +136,11 @@ export function StepCouple() {
                 <img src={data.partner1.photo} alt="Partner 1" className="w-full h-full object-cover" />
                 <button
                   type="button"
-                  onClick={() => updateNestedData("partner1", { photo: "" })}
+                  onClick={() => {
+                    if (window.confirm("Are you sure you want to remove this photo? (Press Update Draft to save changes)")) {
+                      updateNestedData("partner1", { photo: "" });
+                    }
+                  }}
                   className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-all"
                 >
                   Remove
@@ -201,7 +205,11 @@ export function StepCouple() {
                 <img src={data.partner2.photo} alt="Partner 2" className="w-full h-full object-cover" />
                 <button
                   type="button"
-                  onClick={() => updateNestedData("partner2", { photo: "" })}
+                  onClick={() => {
+                    if (window.confirm("Are you sure you want to remove this photo? (Press Update Draft to save changes)")) {
+                      updateNestedData("partner2", { photo: "" });
+                    }
+                  }}
                   className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-all"
                 >
                   Remove
@@ -233,7 +241,11 @@ export function StepCouple() {
                 <img src={data.hero.mainPhoto} alt="Hero background" className="w-full h-full object-cover" />
                 <button
                   type="button"
-                  onClick={() => updateNestedData("hero", { ...(data.hero || {}), mainPhoto: "" })}
+                  onClick={() => {
+                    if (window.confirm("Are you sure you want to remove this background image? (Press Update Draft to save changes)")) {
+                      updateNestedData("hero", { ...(data.hero || {}), mainPhoto: "" });
+                    }
+                  }}
                   className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-all"
                 >
                   Remove Image
@@ -260,7 +272,11 @@ export function StepCouple() {
                   <img src={data.hero.invitationCardUrl} alt="Invitation card" className="w-full h-full object-cover" />
                   <button
                     type="button"
-                    onClick={() => updateNestedData("hero", { ...(data.hero || {}), invitationCardUrl: "" })}
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to remove this card image? (Press Update Draft to save changes)")) {
+                        updateNestedData("hero", { ...(data.hero || {}), invitationCardUrl: "" });
+                      }
+                    }}
                     className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-all"
                   >
                     Remove Card
