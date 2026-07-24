@@ -795,27 +795,41 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
       )}
 
       {/* -------------------- FOOTER -------------------- */}
-      <footer className="py-16 text-center border-t border-[#eae6df] relative z-10 bg-white">
-        <div className="max-w-xl mx-auto px-6 space-y-4">
-          <h2 className="font-serif text-3xl font-semibold text-var(--dark)">
-            {data.partner1.firstName} {`&`} {data.partner2.firstName}
-          </h2>
-          {data.extras.hashtag && (
-            <p className="text-var(--gold) font-semibold tracking-wider font-sans text-sm">
-              #{data.extras.hashtag}
-            </p>
-          )}
-          {data.extras.footerMessage && (
-            <p className="text-sm text-[#777] italic font-serif max-w-sm mx-auto">
-              "{data.extras.footerMessage}"
-            </p>
-          )}
-          <div className="text-[11px] text-[#999] tracking-wider pt-6 font-semibold uppercase space-y-1">
-            <p>&copy; {new Date().getFullYear()} GetMyInvite. All rights reserved.</p>
-            <p className="text-xs mt-2 italic">Created via GetMyInvite Wedding Builder</p>
-          </div>
-        </div>
-      </footer>
+      {(() => {
+        const customHashtag = data.extras?.hashtag?.trim()?.replace(/^#/, "");
+        const p1Clean = data.partner1?.firstName ? data.partner1.firstName.replace(/[^a-zA-Z0-9]/g, "") : "";
+        const p2Clean = data.partner2?.firstName ? data.partner2.firstName.replace(/[^a-zA-Z0-9]/g, "") : "";
+        const year = data.wedding?.date ? new Date(data.wedding.date).getFullYear() : 2026;
+        
+        let hashtagToDisplay = customHashtag;
+        if (!hashtagToDisplay || hashtagToDisplay === "GarysonSophia2026") {
+          hashtagToDisplay = p1Clean || p2Clean ? `${p1Clean}${p2Clean}${year}` : "";
+        }
+
+        return (
+          <footer className="py-16 text-center border-t border-[#eae6df] relative z-10 bg-white">
+            <div className="max-w-xl mx-auto px-6 space-y-4">
+              <h2 className="font-serif text-3xl font-semibold text-var(--dark)">
+                {data.partner1.firstName} {`&`} {data.partner2.firstName}
+              </h2>
+              {hashtagToDisplay && (
+                <p className="text-var(--gold) font-semibold tracking-wider font-sans text-sm">
+                  #{hashtagToDisplay}
+                </p>
+              )}
+              {data.extras.footerMessage && (
+                <p className="text-sm text-[#777] italic font-serif max-w-sm mx-auto">
+                  "{data.extras.footerMessage}"
+                </p>
+              )}
+              <div className="text-[11px] text-[#999] tracking-wider pt-6 font-semibold uppercase space-y-1">
+                <p>&copy; {new Date().getFullYear()} GetMyInvite. All rights reserved.</p>
+                <p className="text-xs mt-2 italic">Created via GetMyInvite Wedding Builder</p>
+              </div>
+            </div>
+          </footer>
+        );
+      })()}
     </div>
   );
 }

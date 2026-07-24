@@ -89,7 +89,7 @@ export const demoInvitationData: InvitationData = {
   extras: {
     dressCode: "Elegant",
     giftNote: "Your presence is our present. No gifts required.",
-    hashtag: "GarysonSophia2026",
+    hashtag: "",
     contactPersons: [
       {
         id: "c-1",

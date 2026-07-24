@@ -211,6 +211,42 @@ export function StepRSVPExtras() {
         )}
       </div>
 
+      {/* Wedding Hashtag & Footer Message */}
+      <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
+        <h3 className="font-serif text-lg font-semibold text-[#855f18] border-b border-[#faf8f5] pb-2">Wedding Hashtag &amp; Extras</h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Wedding Hashtag</label>
+            <div className="flex items-center">
+              <span className="px-2.5 py-2 bg-[#eae6df]/50 border border-r-0 border-[#eae6df] rounded-l text-xs text-[#777] font-semibold">#</span>
+              <input
+                type="text"
+                value={data?.extras?.hashtag || ""}
+                onChange={(e) => updateNestedData("extras", { hashtag: e.target.value.replace(/^#/, "") })}
+                className="w-full px-3 py-2 border border-[#eae6df] rounded-r text-xs focus:outline-none focus:border-[#855f18]"
+                placeholder={
+                  data.partner1?.firstName && data.partner2?.firstName
+                    ? `${data.partner1.firstName.replace(/[^a-zA-Z0-9]/g, "")}${data.partner2.firstName.replace(/[^a-zA-Z0-9]/g, "")}2026`
+                    : "ArunMeera2026"
+                }
+              />
+            </div>
+            <p className="text-[10px] text-[#777] mt-1">Leave empty to automatically use Bride &amp; Groom names</p>
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Footer Message</label>
+            <input
+              type="text"
+              value={data?.extras?.footerMessage || ""}
+              onChange={(e) => updateNestedData("extras", { footerMessage: e.target.value })}
+              className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+              placeholder="Thank you for sharing in our happiness!"
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Special / Key Guests List */}
       <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
         <div className="flex justify-between items-center border-b border-[#faf8f5] pb-2">
