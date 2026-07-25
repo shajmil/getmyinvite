@@ -3,11 +3,21 @@
 import React, { useState } from "react";
 import { useWizardStore } from "@/lib/store";
 import { uploadFile } from "@/lib/compress";
+import { ImageCropModal, AspectRatioType } from "@/components/ImageCropModal";
+import { Crop, Trash2 } from "lucide-react";
 
 export function StepStoryGallery() {
   const { data, updateData, templateId } = useWizardStore();
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [galleryProgress, setGalleryProgress] = useState(0);
+
+  const [cropModal, setCropModal] = useState<{
+    isOpen: boolean;
+    imageSrc: string;
+    title: string;
+    aspectRatio: AspectRatioType;
+    onCropComplete: (blob: Blob) => Promise<void>;
+  } | null>(null);
 
   if (!data) return null;
 
@@ -49,7 +59,7 @@ export function StepStoryGallery() {
     });
   };
 
-  // Gallery file upload trigger
+  // Gallery file upload trigger with Crop modal
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -59,28 +69,70 @@ export function StepStoryGallery() {
       return;
     }
 
-    setUploadingGallery(true);
-    setGalleryProgress(0);
-
-    const uploadedImages = [...data.gallery];
-
-    try {
-      for (let i = 0; i < files.length; i++) {
-        setGalleryProgress(Math.round((i / files.length) * 100));
-        const { url } = await uploadFile(files[i]);
-        uploadedImages.push({
-          url,
-          alt: `Gallery photo ${uploadedImages.length + 1}`,
-          order: uploadedImages.length + 1,
+    const firstFile = files[0];
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      if (evt.target?.result) {
+        setCropModal({
+          isOpen: true,
+          imageSrc: evt.target.result as string,
+          title: "Crop Gallery Image",
+          aspectRatio: "free", // free aspect ratio by default for gallery
+          onCropComplete: async (croppedBlob) => {
+            setUploadingGallery(true);
+            setGalleryProgress(10);
+            try {
+              const { url } = await uploadFile(croppedBlob, (pct) => setGalleryProgress(pct));
+              const uploadedImages = [
+                ...data.gallery,
+                {
+                  url,
+                  alt: `Gallery photo ${data.gallery.length + 1}`,
+                  order: data.gallery.length + 1,
+                },
+              ];
+              updateData({ gallery: uploadedImages });
+            } catch (err) {
+              alert("Failed to upload gallery image.");
+              console.error(err);
+            } finally {
+              setUploadingGallery(false);
+              setCropModal(null);
+            }
+          },
         });
       }
-      updateData({ gallery: uploadedImages });
-    } catch (err) {
-      alert("Failed to upload some gallery images. Please try again.");
-      console.error(err);
-    } finally {
-      setUploadingGallery(false);
-    }
+    };
+    reader.readAsDataURL(firstFile);
+    e.target.value = "";
+  };
+
+  const handleReCropGalleryImage = (index: number) => {
+    const img = data.gallery[index];
+    if (!img) return;
+
+    setCropModal({
+      isOpen: true,
+      imageSrc: img.url,
+      title: `Re-crop Gallery Photo #${index + 1}`,
+      aspectRatio: "free",
+      onCropComplete: async (croppedBlob) => {
+        setUploadingGallery(true);
+        try {
+          const { url } = await uploadFile(croppedBlob);
+          const updatedGallery = data.gallery.map((item, i) =>
+            i === index ? { ...item, url } : item
+          );
+          updateData({ gallery: updatedGallery });
+        } catch (err) {
+          alert("Failed to re-crop image.");
+          console.error(err);
+        } finally {
+          setUploadingGallery(false);
+          setCropModal(null);
+        }
+      },
+    });
   };
 
   const handleRemoveGalleryImage = (index: number) => {
@@ -94,6 +146,18 @@ export function StepStoryGallery() {
 
   return (
     <div className="space-y-6">
+      {/* Active Crop Modal */}
+      {cropModal?.isOpen && (
+        <ImageCropModal
+          isOpen={cropModal.isOpen}
+          imageSrc={cropModal.imageSrc}
+          title={cropModal.title}
+          aspectRatio={cropModal.aspectRatio}
+          onCropComplete={cropModal.onCropComplete}
+          onCancel={() => setCropModal(null)}
+        />
+      )}
+
       <div className="border-b border-[#eae6df] pb-4">
         <h2 className="text-xl font-serif font-bold text-[#1a1a1a]">
           {isBarcelona ? "Step 4 — Media Gallery" : "Step 4 — Story & Gallery"}
@@ -105,7 +169,7 @@ export function StepStoryGallery() {
         </p>
       </div>
 
-      {/* Love Story Details - Hidden for templates that don't display a story timeline */}
+      {/* Love Story Details */}
       {!isBarcelona && templateId !== "classic" && (
         <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
           <div className="flex justify-between items-center border-b border-[#faf8f5] pb-2">
@@ -168,10 +232,9 @@ export function StepStoryGallery() {
         <h3 className="font-serif text-lg font-semibold text-[#855f18] border-b border-[#faf8f5] pb-2">Media Gallery</h3>
         
         <div>
-          <label className="block text-[10px] font-bold uppercase text-[#777] mb-2">Upload Photo Assets (WebP Crop on client)</label>
+          <label className="block text-[10px] font-bold uppercase text-[#777] mb-2">Upload Photo Assets (Interactive Crop)</label>
           <input
             type="file"
-            multiple
             accept="image/*"
             onChange={handleGalleryUpload}
             className="w-full text-xs text-[#777] file:mr-2 file:py-2 file:px-3.5 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
@@ -182,21 +245,37 @@ export function StepStoryGallery() {
         </div>
 
         {data.gallery.length > 0 && (
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 pt-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
             {data.gallery.map((img, idx) => (
-              <div key={idx} className="relative aspect-square rounded-lg border border-[#eae6df] overflow-hidden group">
+              <div key={idx} className="relative aspect-square rounded-lg border border-[#eae6df] overflow-hidden group shadow-sm">
                 <img src={img.url} alt={img.alt || ""} className="w-full h-full object-cover" />
+                
+                {/* Red Remove Button — Always visible (top-right badge) for touch/mobile */}
                 <button
                   type="button"
-                  onClick={() => {
-                    if (window.confirm("Are you sure you want to remove this gallery photo? (Press Update Draft to save changes)")) {
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (window.confirm("Are you sure you want to remove this gallery photo?")) {
                       handleRemoveGalleryImage(idx);
                     }
                   }}
-                  className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-all"
+                  title="Remove Photo"
+                  aria-label="Remove photo"
+                  className="absolute top-1.5 right-1.5 z-10 bg-red-600 text-white p-1.5 rounded-full shadow-md hover:bg-red-700 active:scale-90 transition-all flex items-center justify-center border border-white/20"
                 >
-                  Remove
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
+
+                {/* Crop / Re-frame Action Bar */}
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-1.5 flex justify-center items-center">
+                  <button
+                    type="button"
+                    onClick={() => handleReCropGalleryImage(idx)}
+                    className="w-full py-1 px-2 bg-[#d4af37] text-black text-[10px] font-bold rounded flex items-center justify-center gap-1 shadow hover:bg-[#c29f2f] active:scale-95 transition-all"
+                  >
+                    <Crop className="w-3 h-3" /> Crop / Re-frame
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -205,3 +284,4 @@ export function StepStoryGallery() {
     </div>
   );
 }
+

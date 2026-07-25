@@ -3,12 +3,22 @@
 import React, { useState } from "react";
 import { useWizardStore } from "@/lib/store";
 import { uploadFile } from "@/lib/compress";
+import { ImageCropModal, AspectRatioType } from "@/components/ImageCropModal";
+import { Crop, Trash2 } from "lucide-react";
 
 export function StepRSVPExtras() {
   const { data, updateNestedData, updateData } = useWizardStore();
   const [newMeal, setNewMeal] = useState("");
   const [uploadingContactId, setUploadingContactId] = useState<string | null>(null);
   const [uploadingKeyGuestId, setUploadingKeyGuestId] = useState<string | null>(null);
+
+  const [cropModal, setCropModal] = useState<{
+    isOpen: boolean;
+    imageSrc: string;
+    title: string;
+    aspectRatio: AspectRatioType;
+    onCropComplete: (blob: Blob) => Promise<void>;
+  } | null>(null);
 
   if (!data) return null;
 
@@ -61,21 +71,36 @@ export function StepRSVPExtras() {
     });
   };
 
-  const handleContactPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
+  const handleContactPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, id: string, name: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadingContactId(id);
-
-    try {
-      const { url } = await uploadFile(file);
-      handleUpdateContact(id, { photo: url });
-    } catch (err) {
-      alert("Failed to upload contact photo. Please try again.");
-      console.error(err);
-    } finally {
-      setUploadingContactId(null);
-    }
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      if (evt.target?.result) {
+        setCropModal({
+          isOpen: true,
+          imageSrc: evt.target.result as string,
+          title: `Crop ${name || "Contact"} Photo`,
+          aspectRatio: 1, // 1:1 square for contact portrait
+          onCropComplete: async (croppedBlob) => {
+            setUploadingContactId(id);
+            try {
+              const { url } = await uploadFile(croppedBlob);
+              handleUpdateContact(id, { photo: url });
+            } catch (err) {
+              alert("Failed to upload contact photo.");
+              console.error(err);
+            } finally {
+              setUploadingContactId(null);
+              setCropModal(null);
+            }
+          },
+        });
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
   };
 
   const handleAddKeyGuest = () => {
@@ -106,27 +131,68 @@ export function StepRSVPExtras() {
     });
   };
 
-  const handleKeyGuestPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
+  const handleKeyGuestPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, id: string, name: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadingKeyGuestId(id);
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      if (evt.target?.result) {
+        setCropModal({
+          isOpen: true,
+          imageSrc: evt.target.result as string,
+          title: `Crop ${name || "Special Guest"} Photo`,
+          aspectRatio: 1, // 1:1 square
+          onCropComplete: async (croppedBlob) => {
+            setUploadingKeyGuestId(id);
+            try {
+              const { url } = await uploadFile(croppedBlob);
+              handleUpdateKeyGuest(id, { photo: url });
+            } catch (err) {
+              alert("Failed to upload photo for special guest.");
+              console.error(err);
+            } finally {
+              setUploadingKeyGuestId(null);
+              setCropModal(null);
+            }
+          },
+        });
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
 
-    try {
-      const { url } = await uploadFile(file);
-      handleUpdateKeyGuest(id, { photo: url });
-    } catch (err) {
-      alert("Failed to upload photo for special guest. Please try again.");
-      console.error(err);
-    } finally {
-      setUploadingKeyGuestId(null);
-    }
+  const handleReCropPhoto = (
+    url: string,
+    title: string,
+    onComplete: (blob: Blob) => Promise<void>
+  ) => {
+    setCropModal({
+      isOpen: true,
+      imageSrc: url,
+      title,
+      aspectRatio: 1,
+      onCropComplete: onComplete,
+    });
   };
 
   return (
     <div className="space-y-6">
+      {/* Active Crop Modal */}
+      {cropModal?.isOpen && (
+        <ImageCropModal
+          isOpen={cropModal.isOpen}
+          imageSrc={cropModal.imageSrc}
+          title={cropModal.title}
+          aspectRatio={cropModal.aspectRatio}
+          onCropComplete={cropModal.onCropComplete}
+          onCancel={() => setCropModal(null)}
+        />
+      )}
+
       <div className="border-b border-[#eae6df] pb-4">
-        <h2 className="text-xl font-serif font-bold text-[#1a1a1a]">Step 5 — RSVP & Extras</h2>
+        <h2 className="text-xl font-serif font-bold text-[#1a1a1a]">Step 5 — RSVP &amp; Extras</h2>
         <p className="text-xs text-[#666]">Configure guest RSVP forms, special guests, and family contact details</p>
       </div>
 
@@ -295,25 +361,51 @@ export function StepRSVPExtras() {
                 </div>
                 <div className="pt-1">
                   {guest.photo ? (
-                    <div className="relative w-14 h-14 rounded-full overflow-hidden border border-[#eae6df] group mb-1">
-                      <img src={guest.photo} alt={guest.name} className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (window.confirm("Are you sure you want to remove this photo? (Press Update Draft to save changes)")) {
-                            handleUpdateKeyGuest(guest.id, { photo: "" });
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-14 h-14 rounded-full overflow-hidden border border-[#eae6df]">
+                        <img src={guest.photo} alt={guest.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleReCropPhoto(
+                              guest.photo!,
+                              `Re-crop ${guest.name || "Special Guest"} Photo`,
+                              async (croppedBlob) => {
+                                setUploadingKeyGuestId(guest.id);
+                                try {
+                                  const { url } = await uploadFile(croppedBlob);
+                                  handleUpdateKeyGuest(guest.id, { photo: url });
+                                } finally {
+                                  setUploadingKeyGuestId(null);
+                                  setCropModal(null);
+                                }
+                              }
+                            )
                           }
-                        }}
-                        className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[9px] font-bold transition-all"
-                      >
-                        Remove
-                      </button>
+                          className="flex items-center gap-1 px-2 py-1 bg-[#855f18]/10 text-[#855f18] hover:bg-[#855f18]/20 text-[10px] font-semibold rounded transition-colors"
+                        >
+                          <Crop className="w-3 h-3" /> Crop / Re-frame
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm("Are you sure you want to remove this photo?")) {
+                              handleUpdateKeyGuest(guest.id, { photo: "" });
+                            }
+                          }}
+                          className="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 text-[10px] font-semibold rounded transition-colors"
+                        >
+                          <Trash2 className="w-3 h-3" /> Remove
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => handleKeyGuestPhotoUpload(e, guest.id)}
+                      onChange={(e) => handleKeyGuestPhotoUpload(e, guest.id, guest.name)}
                       className="w-full text-xs text-[#777] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
                     />
                   )}
@@ -382,25 +474,51 @@ export function StepRSVPExtras() {
                 </div>
                 <div className="pt-1">
                   {contact.photo ? (
-                    <div className="relative w-14 h-14 rounded-full overflow-hidden border border-[#eae6df] group mb-1">
-                      <img src={contact.photo} alt={contact.name} className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (window.confirm("Are you sure you want to remove this contact photo? (Press Update Draft to save changes)")) {
-                            handleUpdateContact(contact.id, { photo: "" });
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-14 h-14 rounded-full overflow-hidden border border-[#eae6df]">
+                        <img src={contact.photo} alt={contact.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleReCropPhoto(
+                              contact.photo!,
+                              `Re-crop ${contact.name || "Contact"} Photo`,
+                              async (croppedBlob) => {
+                                setUploadingContactId(contact.id);
+                                try {
+                                  const { url } = await uploadFile(croppedBlob);
+                                  handleUpdateContact(contact.id, { photo: url });
+                                } finally {
+                                  setUploadingContactId(null);
+                                  setCropModal(null);
+                                }
+                              }
+                            )
                           }
-                        }}
-                        className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[9px] font-bold transition-all"
-                      >
-                        Remove
-                      </button>
+                          className="flex items-center gap-1 px-2 py-1 bg-[#855f18]/10 text-[#855f18] hover:bg-[#855f18]/20 text-[10px] font-semibold rounded transition-colors"
+                        >
+                          <Crop className="w-3 h-3" /> Crop / Re-frame
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm("Are you sure you want to remove this contact photo?")) {
+                              handleUpdateContact(contact.id, { photo: "" });
+                            }
+                          }}
+                          className="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 text-[10px] font-semibold rounded transition-colors"
+                        >
+                          <Trash2 className="w-3 h-3" /> Remove
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => handleContactPhotoUpload(e, contact.id)}
+                      onChange={(e) => handleContactPhotoUpload(e, contact.id, contact.name)}
                       className="w-full text-xs text-[#777] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
                     />
                   )}

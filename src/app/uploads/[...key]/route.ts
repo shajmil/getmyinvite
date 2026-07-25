@@ -7,9 +7,9 @@ export const runtime = "nodejs";
 
 export async function GET(
   req: Request,
-  props: { params: Promise<{ key: string[] }> }
+  { params }: { params: Promise<{ key: string[] }> }
 ) {
-  const { key } = await props.params;
+  const { key } = await params;
   const filePath = key.join("/");
 
   // 1. If Vercel Blob is active in production, fetch and stream the file

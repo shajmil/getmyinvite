@@ -159,7 +159,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
     }, 200);
   }, [invitation, setInvitationId, setData, setTemplateId, setColorSchemeId, setSlug, setStatus, setPrivacy]);
 
-  // Track data edits to flag unsaved changes
+  // Track data edits to flag unsaved changes (no automatic DB writes until user clicks Update Draft)
   useEffect(() => {
     if (!mounted || !isHydrated.current || !data) return;
     setHasUnsavedChanges(true);

@@ -3,11 +3,21 @@
 import React, { useState } from "react";
 import { useWizardStore } from "@/lib/store";
 import { uploadFile } from "@/lib/compress";
+import { ImageCropModal, AspectRatioType } from "@/components/ImageCropModal";
+import { Crop, Trash2 } from "lucide-react";
 
 export function StepEvents() {
   const { data, updateData } = useWizardStore();
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+
+  const [cropModal, setCropModal] = useState<{
+    isOpen: boolean;
+    imageSrc: string;
+    title: string;
+    aspectRatio: AspectRatioType;
+    onCropComplete: (blob: Blob) => Promise<void>;
+  } | null>(null);
 
   if (!data) return null;
 
@@ -52,26 +62,75 @@ export function StepEvents() {
     updateData({ events: list });
   };
 
-  const handleEventPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
+  const handleEventPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, id: string, eventName: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadingId(id);
-    setProgress(0);
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      if (evt.target?.result) {
+        setCropModal({
+          isOpen: true,
+          imageSrc: evt.target.result as string,
+          title: `Crop ${eventName || "Event"} Photo`,
+          aspectRatio: 1.3333333333333333, // 4:3 landscape default for event cards
+          onCropComplete: async (croppedBlob) => {
+            setUploadingId(id);
+            setProgress(0);
+            try {
+              const { url } = await uploadFile(croppedBlob, (percent) => setProgress(percent));
+              handleUpdateEvent(id, { photo: url });
+            } catch (err) {
+              alert("Failed to upload event photo.");
+              console.error(err);
+            } finally {
+              setUploadingId(null);
+              setCropModal(null);
+            }
+          },
+        });
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
 
-    try {
-      const { url } = await uploadFile(file, (percent) => setProgress(percent));
-      handleUpdateEvent(id, { photo: url });
-    } catch (err) {
-      alert("Failed to upload event photo. Please try again.");
-      console.error(err);
-    } finally {
-      setUploadingId(null);
-    }
+  const handleReCropEventPhoto = (id: string, currentUrl: string, eventName: string) => {
+    setCropModal({
+      isOpen: true,
+      imageSrc: currentUrl,
+      title: `Re-crop ${eventName || "Event"} Photo`,
+      aspectRatio: 1.3333333333333333,
+      onCropComplete: async (croppedBlob) => {
+        setUploadingId(id);
+        try {
+          const { url } = await uploadFile(croppedBlob);
+          handleUpdateEvent(id, { photo: url });
+        } catch (err) {
+          alert("Failed to re-crop event photo.");
+          console.error(err);
+        } finally {
+          setUploadingId(null);
+          setCropModal(null);
+        }
+      },
+    });
   };
 
   return (
     <div className="space-y-6">
+      {/* Active Crop Modal */}
+      {cropModal?.isOpen && (
+        <ImageCropModal
+          isOpen={cropModal.isOpen}
+          imageSrc={cropModal.imageSrc}
+          title={cropModal.title}
+          aspectRatio={cropModal.aspectRatio}
+          onCropComplete={cropModal.onCropComplete}
+          onCancel={() => setCropModal(null)}
+        />
+      )}
+
       <div className="border-b border-[#eae6df] pb-4 flex justify-between items-center">
         <div>
           <h2 className="text-xl font-serif font-bold text-[#1a1a1a]">Step 3 — Events List</h2>
@@ -185,27 +244,38 @@ export function StepEvents() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Event Photo</label>
+                  <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Event Photo (Crop &amp; Set)</label>
                   {event.photo ? (
-                    <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-[#eae6df] group mb-2">
-                      <img src={event.photo} alt={event.name} className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (window.confirm("Are you sure you want to remove this event photo? (Press Update Draft to save changes)")) {
-                            handleUpdateEvent(event.id, { photo: "" });
-                          }
-                        }}
-                        className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[10px] font-bold transition-all"
-                      >
-                        Remove
-                      </button>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-[#eae6df]">
+                        <img src={event.photo} alt={event.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleReCropEventPhoto(event.id, event.photo!, event.name)}
+                          className="flex items-center gap-1 px-2.5 py-1 bg-[#855f18]/10 text-[#855f18] hover:bg-[#855f18]/20 text-[11px] font-semibold rounded transition-colors"
+                        >
+                          <Crop className="w-3 h-3" /> Crop / Re-frame
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm("Are you sure you want to remove this event photo?")) {
+                              handleUpdateEvent(event.id, { photo: "" });
+                            }
+                          }}
+                          className="flex items-center gap-1 px-2.5 py-1 bg-red-50 text-red-600 hover:bg-red-100 text-[11px] font-semibold rounded transition-colors"
+                        >
+                          <Trash2 className="w-3 h-3" /> Remove
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => handleEventPhotoUpload(e, event.id)}
+                      onChange={(e) => handleEventPhotoUpload(e, event.id, event.name)}
                       className="w-full text-xs text-[#777] file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
                     />
                   )}

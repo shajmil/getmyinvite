@@ -69,22 +69,24 @@ export async function compressImage(
 }
 
 /**
- * Perform a file upload (presigned url request then upload chunk)
+ * Perform a file upload (presigned url request then upload chunk).
+ * Accepts File or Blob.
  */
 export async function uploadFile(
-  file: File,
-  onProgress?: (percent: number) => void
+  file: File | Blob,
+  onProgress?: (percent: number) => void,
+  customFilename?: string
 ): Promise<{ url: string; key: string }> {
-  // Compress first if it's an image
+  // Compress first if it's a raw non-WebP image File
   let uploadData: Blob = file;
-  let uploadType = file.type;
-  let uploadName = file.name;
+  let uploadType = file.type || "image/webp";
+  let uploadName = customFilename || (file instanceof File ? file.name : `cropped-${Date.now()}.webp`);
 
-  if (file.type.startsWith("image/") && file.type !== "image/gif") {
+  if (file instanceof File && file.type.startsWith("image/") && file.type !== "image/gif" && file.type !== "image/webp") {
     try {
       uploadData = await compressImage(file);
       uploadType = "image/webp";
-      uploadName = file.name.replace(/\.[^/.]+$/, "") + ".webp";
+      uploadName = uploadName.replace(/\.[^/.]+$/, "") + ".webp";
     } catch (err) {
       console.warn("Client compression failed, uploading raw image", err);
     }
