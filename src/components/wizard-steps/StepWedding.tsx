@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useWizardStore } from "@/lib/store";
 import { uploadFile } from "@/lib/compress";
+import { Trash2 } from "lucide-react";
 
 export function StepWedding() {
   const { data, updateNestedData, setData } = useWizardStore();
@@ -157,19 +158,26 @@ export function StepWedding() {
         <div>
           <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Venue Cover Image</label>
           {data.wedding.venue.photo ? (
-            <div className="relative w-full h-32 rounded-lg overflow-hidden border border-[#eae6df] group mb-2">
-              <img src={data.wedding.venue.photo} alt="Venue" className="w-full h-full object-cover" />
+            <div className="relative w-full h-36 rounded-lg overflow-hidden border border-[#eae6df] group mb-2 shadow-xs">
+              <img src={data.wedding.venue.photo} alt="Venue Cover" className="w-full h-full object-cover" />
+              
+              {/* Top-Right Always-Visible Remove Trash Button */}
               <button
                 type="button"
                 onClick={() => {
-                  if (window.confirm("Are you sure you want to remove this venue cover image? (Press Update Draft to save changes)")) {
+                  if (window.confirm("Are you sure you want to remove this venue cover image?")) {
                     handleVenueChange({ photo: "" });
                   }
                 }}
-                className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-all"
+                className="absolute top-2.5 right-2.5 z-20 bg-red-600/90 hover:bg-red-700 text-white p-2 rounded-full active:scale-95 transition-all shadow-md flex items-center justify-center gap-1.5 text-xs font-bold"
+                title="Remove Venue Image"
               >
-                Remove Venue Image
+                <Trash2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Remove</span>
               </button>
+
+              {/* Desktop Hover Dark Overlay */}
+              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
             </div>
           ) : (
             <input
