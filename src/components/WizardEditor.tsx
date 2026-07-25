@@ -255,7 +255,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
   const ActiveTemplateComponent = templateRegistry[templateId]?.component || templateRegistry.barcelona.component;
 
   return (
-    <div className="flex-1 flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden">
+    <div className="flex-1 flex flex-col h-full max-h-full w-full overflow-hidden">
       {/* ----------------- TOP NAVIGATION BAR ----------------- */}
       <header className="h-14 sm:h-16 bg-white border-b border-[#eae6df] px-3 sm:px-6 flex items-center justify-between flex-shrink-0 z-20 shadow-sm">
         <div className="flex items-center gap-2 sm:gap-4">
@@ -340,13 +340,13 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
       </div>
 
       {/* ----------------- CONTENT SPLIT LAYOUT ----------------- */}
-      <div className="flex-1 flex overflow-hidden relative">
+      <div className="flex-1 flex h-full min-h-0 overflow-hidden relative">
         
         {/* Left Form Panel */}
         <div
           className={`${
             mobileTab === "edit" ? "flex" : "hidden"
-          } md:flex w-full md:w-1/2 flex-col h-full min-h-0 border-r border-[#eae6df] bg-[#faf8f5] relative`}
+          } md:flex w-full md:w-1/2 flex-col h-full min-h-0 border-r border-[#eae6df] bg-[#faf8f5] relative overflow-hidden`}
         >
           {/* Step Badges Navigation */}
           <div className="px-4 sm:px-6 py-3 bg-white border-b border-[#eae6df] overflow-x-auto flex gap-1.5 scrollbar-none flex-shrink-0">
@@ -426,9 +426,11 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
         {/* Right Preview Panel (Visible on Desktop OR Mobile preview mode) */}
         <div
           className={`${
-            mobileTab === "preview" ? "flex w-full h-full min-h-[500px]" : "hidden md:flex md:w-1/2 h-full min-h-[500px]"
+            mobileTab === "preview" ? "flex w-full h-full" : "hidden md:flex md:w-1/2 h-full min-h-0"
           } bg-[#efede8] flex-col relative overflow-hidden transition-all duration-300 ${
-            previewDevice === "mobile" ? "items-center justify-center p-3 sm:p-6" : "items-stretch justify-stretch p-3 sm:p-6"
+            previewDevice === "mobile"
+              ? "items-center justify-center p-2 sm:p-4 md:p-6"
+              : "items-stretch justify-stretch p-3 sm:p-4 md:p-6"
           }`}
         >
           {/* Mobile Preview Top Header Bar */}
@@ -471,8 +473,8 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
           <div
             className={`transition-all duration-500 ease-in-out shadow-2xl bg-white border border-[#eae6df] overflow-hidden relative ${
               previewDevice === "mobile"
-                ? "w-full max-w-[375px] h-[680px] sm:h-[768px] rounded-[24px] sm:rounded-[36px] border-[6px] sm:border-[12px] border-[#1a1a1a] z-10"
-                : "w-full h-full min-h-[500px] rounded-2xl z-10"
+                ? "w-full max-w-[380px] h-full max-h-[820px] rounded-[24px] sm:rounded-[36px] border-[6px] sm:border-[12px] border-[#1a1a1a] z-10 flex flex-col"
+                : "w-full h-full rounded-2xl z-10 flex flex-col"
             }`}
           >
             {/* The Actual Template Client Render */}
