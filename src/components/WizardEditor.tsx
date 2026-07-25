@@ -366,7 +366,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
           </div>
 
           {/* Form Scroll Body */}
-          <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 pb-44 sm:pb-48">
+          <div className="flex-1 min-h-0 overflow-y-auto h-[calc(100vh-140px)] max-h-[calc(100vh-140px)] p-4 sm:p-6 md:p-8 space-y-6 pb-36">
             {renderStepContent()}
           </div>
 
@@ -426,8 +426,8 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
         {/* Right Preview Panel (Visible on Desktop OR Mobile preview mode) */}
         <div
           className={`${
-            mobileTab === "preview" ? "flex w-full h-[70vh]" : "hidden md:flex md:w-1/2 h-[70vh]"
-          } bg-[#efede8] flex-col p-6 relative transition-all duration-300 ${
+            mobileTab === "preview" ? "flex w-full h-full min-h-0" : "hidden md:flex md:w-1/2 h-full min-h-0"
+          } bg-[#efede8] flex-col p-6 relative overflow-hidden transition-all duration-300 ${
             previewDevice === "mobile" ? "items-center justify-center" : "items-stretch justify-stretch"
           }`}
         >
@@ -471,7 +471,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
           <div
             className={`transition-all duration-500 ease-in-out shadow-2xl bg-white border border-[#eae6df] overflow-hidden relative ${
               previewDevice === "mobile"
-                ? "w-[375px] h-[768px] rounded-[36px] border-[12px] border-[#1a1a1a] z-10"
+                ? "w-[375px] h-[768px] max-h-full rounded-[36px] border-[12px] border-[#1a1a1a] z-10"
                 : "flex-1 w-full rounded-2xl z-10"
             }`}
           >
