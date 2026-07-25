@@ -426,7 +426,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
         {/* Right Preview Panel (Visible on Desktop OR Mobile preview mode) */}
         <div
           className={`${
-            mobileTab === "preview" ? "flex w-full h-full" : "hidden md:flex md:w-1/2 h-full min-h-0"
+            mobileTab === "preview" ? "flex w-full h-full" : "hidden md:flex md:w-1/2 h-full md:h-[calc(100vh-68px)]"
           } bg-[#efede8] md:bg-[#efede8] flex-col p-0 sm:p-4 md:p-6 relative overflow-hidden transition-all duration-300 ${
             previewDevice === "mobile" ? "items-center justify-center" : "items-stretch justify-stretch"
           }`}
@@ -465,10 +465,10 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
 
           {/* Preview Container Frame */}
           <div
-            className={`transition-all duration-500 ease-in-out bg-white overflow-hidden relative w-full h-full ${
+            className={`transition-all duration-500 ease-in-out bg-white overflow-hidden relative w-full ${
               previewDevice === "mobile"
-                ? "md:w-[375px] md:h-[768px] md:max-h-full md:rounded-[36px] md:border-[12px] md:border-[#1a1a1a] md:shadow-2xl z-10"
-                : "w-full h-full rounded-none md:rounded-2xl z-10"
+                ? "h-full md:w-[375px] md:h-[calc(100vh-120px)] md:max-h-[768px] md:rounded-[36px] md:border-[12px] md:border-[#1a1a1a] md:shadow-2xl z-10"
+                : "w-full h-full md:h-[calc(100vh-120px)] rounded-none md:rounded-2xl z-10"
             }`}
           >
             {/* The Actual Template Client Render */}
