@@ -554,10 +554,10 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
             </div>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+          <div className="flex flex-wrap justify-center items-stretch gap-6 md:gap-8 max-w-5xl mx-auto">
             {data.extras.keyGuests.map((guest) => (
               <ScrollReveal key={guest.id}>
-                <div className="flex flex-col items-center text-center bg-white border border-[#eae6df] rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300">
+                <div className="w-full sm:w-[280px] md:w-[300px] flex flex-col items-center text-center bg-white border border-[#eae6df] rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 h-full">
                   <div className="relative w-36 h-36 rounded-full overflow-hidden mb-4 border-2 border-var(--gold)" style={{ position: "relative" }}>
                     {guest.photo ? (
                       <Image
@@ -595,10 +595,10 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
             </div>
           </ScrollReveal>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-center">
+          <div className="flex flex-wrap justify-center items-stretch gap-6 max-w-5xl mx-auto">
             {data.extras.contactPersons.map((contact) => (
               <ScrollReveal key={contact.id}>
-                <div className="flex items-center gap-4 bg-white border border-[#eae6df] rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
+                <div className="w-full sm:w-[300px] md:w-[320px] flex items-center gap-4 bg-white border border-[#eae6df] rounded-xl p-4 shadow-sm hover:shadow-md transition-all h-full">
                   <div className="relative w-14 h-14 rounded-full overflow-hidden flex-shrink-0 border border-var(--gold)" style={{ position: "relative" }}>
                     {contact.photo ? (
                       <Image src={contact.photo} alt={contact.name} fill className="object-cover" />

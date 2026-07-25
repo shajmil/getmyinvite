@@ -326,11 +326,11 @@ export function ClassicTemplate({ data, colorSchemeId, isPreview = false }: Clas
                   {data.extras.contactPersons && data.extras.contactPersons.length > 0 && (
                     <div className="space-y-3">
                       <h3 className="text-xs font-semibold uppercase tracking-wider text-var(--accent-color)">Event Contacts</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="flex flex-wrap justify-center gap-4">
                         {data.extras.contactPersons.map((contact) => (
                           <div
                             key={contact.id}
-                            className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-4 shadow"
+                            className="w-full sm:w-[260px] flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-4 shadow"
                           >
                             <div className="relative w-14 h-14 rounded-full overflow-hidden border border-var(--accent-color) flex-shrink-0">
                               {contact.photo ? (
@@ -359,11 +359,11 @@ export function ClassicTemplate({ data, colorSchemeId, isPreview = false }: Clas
                   {data.extras.keyGuests && data.extras.keyGuests.length > 0 && (
                     <div className="space-y-3 pt-4 border-t border-white/10">
                       <h3 className="text-xs font-semibold uppercase tracking-wider text-var(--accent-color)">Special Guests</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="flex flex-wrap justify-center gap-4">
                         {data.extras.keyGuests.map((guest) => (
                           <div
                             key={guest.id}
-                            className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-4 shadow"
+                            className="w-full sm:w-[260px] flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-4 shadow"
                           >
                             <div className="relative w-14 h-14 rounded-full overflow-hidden border border-var(--accent-color) flex-shrink-0">
                               {guest.photo ? (
