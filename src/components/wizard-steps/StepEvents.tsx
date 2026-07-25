@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useWizardStore } from "@/lib/store";
 import { uploadFile } from "@/lib/compress";
 import { ImageCropModal, AspectRatioType } from "@/components/ImageCropModal";
-import { Crop, Trash2 } from "lucide-react";
+import { Crop, Trash2, Loader2 } from "lucide-react";
 
 export function StepEvents() {
   const { data, updateData } = useWizardStore();
@@ -16,7 +16,11 @@ export function StepEvents() {
     imageSrc: string;
     title: string;
     aspectRatio: AspectRatioType;
-    onCropComplete: (blob: Blob) => Promise<void>;
+    onCropComplete: (
+      blob: Blob,
+      dataUrl?: string,
+      onProgress?: (pct: number) => void
+    ) => Promise<void>;
   } | null>(null);
 
   if (!data) return null;
@@ -74,11 +78,14 @@ export function StepEvents() {
           imageSrc: evt.target.result as string,
           title: `Crop ${eventName || "Event"} Photo`,
           aspectRatio: 1.3333333333333333, // 4:3 landscape default for event cards
-          onCropComplete: async (croppedBlob) => {
+          onCropComplete: async (croppedBlob, _, onProgress) => {
             setUploadingId(id);
             setProgress(0);
             try {
-              const { url } = await uploadFile(croppedBlob, (percent) => setProgress(percent));
+              const { url } = await uploadFile(croppedBlob, (percent) => {
+                setProgress(percent);
+                if (onProgress) onProgress(percent);
+              });
               handleUpdateEvent(id, { photo: url });
             } catch (err) {
               alert("Failed to upload event photo.");
@@ -101,10 +108,13 @@ export function StepEvents() {
       imageSrc: currentUrl,
       title: `Re-crop ${eventName || "Event"} Photo`,
       aspectRatio: 1.3333333333333333,
-      onCropComplete: async (croppedBlob) => {
+      onCropComplete: async (croppedBlob, _, onProgress) => {
         setUploadingId(id);
         try {
-          const { url } = await uploadFile(croppedBlob);
+          const { url } = await uploadFile(croppedBlob, (percent) => {
+            setProgress(percent);
+            if (onProgress) onProgress(percent);
+          });
           handleUpdateEvent(id, { photo: url });
         } catch (err) {
           alert("Failed to re-crop event photo.");
@@ -280,7 +290,20 @@ export function StepEvents() {
                     />
                   )}
                   {uploadingId === event.id && (
-                    <p className="text-[10px] text-[#855f18] mt-1">Uploading: {progress}%</p>
+                    <div className="mt-2 space-y-1 bg-[#855f18]/5 p-2 rounded-lg border border-[#855f18]/20">
+                      <div className="flex items-center justify-between text-xs text-[#855f18] font-bold">
+                        <span className="flex items-center gap-1">
+                          <Loader2 className="w-3 h-3 animate-spin text-[#855f18]" /> Uploading photo...
+                        </span>
+                        <span className="font-mono text-xs">{progress}%</span>
+                      </div>
+                      <div className="w-full bg-[#eae6df] rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="bg-[#855f18] h-full rounded-full transition-all duration-200"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>

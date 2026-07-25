@@ -1,18 +1,22 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Check, X, RotateCw, ZoomIn, ZoomOut, Crop, Move, Eye } from "lucide-react";
+import { Check, X, RotateCw, ZoomIn, ZoomOut, Crop, Move, Eye, Sparkles, Loader2 } from "lucide-react";
 
 export type AspectRatioType = 1 | 1.7777777777777777 | 1.3333333333333333 | 0.75 | "free";
 export type CropShapeType = "rect" | "circle";
 
-interface ImageCropModalProps {
+export interface ImageCropModalProps {
   isOpen: boolean;
   imageSrc: string;
   title?: string;
   aspectRatio?: AspectRatioType;
   cropShape?: CropShapeType;
-  onCropComplete: (croppedBlob: Blob, croppedDataUrl: string) => void;
+  onCropComplete: (
+    croppedBlob: Blob,
+    croppedDataUrl: string,
+    onProgress?: (pct: number) => void
+  ) => Promise<void> | void;
   onCancel: () => void;
 }
 
@@ -28,7 +32,7 @@ export function ImageCropModal({
   const [selectedAspect, setSelectedAspect] = useState<AspectRatioType>(initialAspect);
   const [zoom, setZoom] = useState<number>(1);
   const [rotation, setRotation] = useState<number>(0); // 0, 90, 180, 270
-  
+
   // Crop selection coordinates normalized (percentages: 0 to 100)
   const [crop, setCrop] = useState<{ x: number; y: number; width: number; height: number }>({
     x: 10,
@@ -43,6 +47,12 @@ export function ImageCropModal({
   const [imageLoaded, setImageLoaded] = useState<boolean>(false);
   const [imgNaturalSize, setImgNaturalSize] = useState<{ w: number; h: number }>({ w: 800, h: 600 });
   const [livePreviewUrl, setLivePreviewUrl] = useState<string>("");
+
+  // Mobile optimization states
+  const [mobileTab, setMobileTab] = useState<"crop" | "preview">("crop");
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [processingStatus, setProcessingStatus] = useState<string>("Cropping & Optimizing...");
+  const [processingProgress, setProcessingProgress] = useState<number>(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -89,6 +99,9 @@ export function ImageCropModal({
       setRotation(0);
       setImageLoaded(false);
       setLivePreviewUrl("");
+      setIsProcessing(false);
+      setProcessingProgress(0);
+      setMobileTab("crop");
     }
   }, [isOpen, initialAspect, cropShape, imageSrc]);
 
@@ -264,58 +277,149 @@ export function ImageCropModal({
     });
   }, [crop, imgNaturalSize]);
 
-  // Update live preview URL as user crops or zooms
+  // Update live preview URL (Debounced & skipped while dragging for 60fps performance)
   useEffect(() => {
-    if (!imageLoaded) return;
+    if (!imageLoaded || isDragging) return;
     const timer = setTimeout(() => {
       generateCroppedBlob()
         .then(({ dataUrl }) => setLivePreviewUrl(dataUrl))
         .catch(() => {});
-    }, 50);
+    }, 150);
 
     return () => clearTimeout(timer);
-  }, [crop, zoom, rotation, imageLoaded, generateCroppedBlob]);
+  }, [crop, zoom, rotation, imageLoaded, isDragging, generateCroppedBlob]);
 
   const handleApply = async () => {
+    if (isProcessing) return;
+
+    setIsProcessing(true);
+    setProcessingStatus("Optimizing & Cropping...");
+    setProcessingProgress(20);
+
     try {
+      // Micro delay to allow UI to render spinner smoothly
+      await new Promise((r) => setTimeout(r, 60));
+
       const { blob, dataUrl } = await generateCroppedBlob();
-      onCropComplete(blob, dataUrl);
+
+      setProcessingStatus("Uploading Image...");
+      setProcessingProgress(45);
+
+      const handleUploadProgress = (pct: number) => {
+        const mapped = Math.min(98, Math.max(45, Math.round(45 + pct * 0.52)));
+        setProcessingProgress(mapped);
+      };
+
+      // Execute callback & await if async upload promise returned
+      await Promise.resolve(onCropComplete(blob, dataUrl, handleUploadProgress));
+
+      setProcessingProgress(100);
+      setProcessingStatus("Complete!");
+      await new Promise((r) => setTimeout(r, 120));
     } catch (err) {
       console.error("Failed to crop image:", err);
       alert("Error cropping image. Please try again.");
+      setIsProcessing(false);
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 overflow-y-auto">
-      <div className="bg-[#1c1b18] border border-[#3d372e] text-[#f4efe6] rounded-2xl max-w-4xl w-full p-6 shadow-2xl flex flex-col space-y-5 relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-6 overflow-y-auto">
+      <div className="bg-[#1c1b18] border border-[#3d372e] text-[#f4efe6] rounded-2xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl flex flex-col space-y-4 relative max-h-[95vh] overflow-y-auto">
         
+        {/* Interactive Processing & Uploading Overlay */}
+        {isProcessing && (
+          <div className="absolute inset-0 z-40 bg-[#1c1b18]/92 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center p-6 text-center space-y-5 animate-in fade-in duration-200">
+            <div className="relative flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full border-4 border-[#d4af37]/20 border-t-[#d4af37] animate-spin" />
+              <div className="absolute w-14 h-14 rounded-full bg-[#d4af37]/10 animate-ping" />
+              <Sparkles className="absolute w-7 h-7 text-[#d4af37] animate-pulse" />
+            </div>
+
+            <div className="space-y-1.5 max-w-xs">
+              <h4 className="font-serif text-lg font-bold text-[#f4efe6] tracking-wide">
+                {processingStatus}
+              </h4>
+              <p className="text-xs text-gray-400">
+                Optimizing image for fast mobile rendering...
+              </p>
+            </div>
+
+            {/* Glowing Interactive Progress Bar */}
+            <div className="w-full max-w-xs space-y-1.5">
+              <div className="w-full bg-[#292621] rounded-full h-3 p-0.5 border border-[#3d372e] shadow-inner overflow-hidden">
+                <div
+                  className="bg-gradient-to-r from-[#d4af37] via-[#f4efe6] to-[#d4af37] h-full rounded-full transition-all duration-300 shadow-[0_0_12px_rgba(212,175,55,0.8)]"
+                  style={{ width: `${processingProgress}%` }}
+                />
+              </div>
+              <div className="flex justify-between items-center text-[11px] font-mono font-bold text-[#d4af37] px-1">
+                <span>Progress</span>
+                <span>{processingProgress}%</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex justify-between items-center border-b border-[#3d372e] pb-3">
           <div className="flex items-center gap-2">
             <Crop className="w-5 h-5 text-[#d4af37]" />
-            <h3 className="font-serif text-lg font-bold text-[#f4efe6] tracking-wide">{title}</h3>
+            <h3 className="font-serif text-base sm:text-lg font-bold text-[#f4efe6] tracking-wide">
+              {title}
+            </h3>
           </div>
           <button
             type="button"
             onClick={onCancel}
-            className="p-1.5 text-gray-400 hover:text-white rounded-full hover:bg-white/10 transition-colors"
+            disabled={isProcessing}
+            className="p-1.5 text-gray-400 hover:text-white rounded-full hover:bg-white/10 transition-colors disabled:opacity-50"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
+        {/* Mobile View Switcher Tabs (De-congest mobile modal view) */}
+        <div className="flex sm:hidden bg-[#292621] p-1 rounded-xl border border-[#3d372e]">
+          <button
+            type="button"
+            onClick={() => setMobileTab("crop")}
+            className={`flex-1 py-1.5 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+              mobileTab === "crop"
+                ? "bg-[#d4af37] text-black shadow-md"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            <Crop className="w-3.5 h-3.5" />
+            ✂️ Crop &amp; Frame
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileTab("preview")}
+            className={`flex-1 py-1.5 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-all ${
+              mobileTab === "preview"
+                ? "bg-[#d4af37] text-black shadow-md"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            <Eye className="w-3.5 h-3.5" />
+            👁️ Live Preview
+          </button>
+        </div>
+
         {/* Aspect Ratio Toolbar (Disabled if circle crop shape) */}
         {cropShape !== "circle" ? (
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs bg-[#292621] p-2.5 rounded-xl border border-[#3d372e]">
-            <span className="text-gray-400 font-semibold uppercase tracking-wider text-[10px]">Crop Aspect:</span>
-            <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex items-center justify-between gap-2 text-xs bg-[#292621] p-2.5 rounded-xl border border-[#3d372e] overflow-x-auto">
+            <span className="text-gray-400 font-semibold uppercase tracking-wider text-[10px] hidden sm:inline">
+              Crop Aspect:
+            </span>
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto pb-0.5 sm:pb-0">
               <button
                 type="button"
                 onClick={() => handleAspectChange(1)}
-                className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+                className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition-all ${
                   selectedAspect === 1
                     ? "bg-[#d4af37] text-black shadow"
                     : "bg-[#1c1b18] text-gray-300 hover:bg-[#38332b]"
@@ -326,7 +430,7 @@ export function ImageCropModal({
               <button
                 type="button"
                 onClick={() => handleAspectChange(1.7777777777777777)}
-                className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+                className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition-all ${
                   selectedAspect === 1.7777777777777777
                     ? "bg-[#d4af37] text-black shadow"
                     : "bg-[#1c1b18] text-gray-300 hover:bg-[#38332b]"
@@ -337,7 +441,7 @@ export function ImageCropModal({
               <button
                 type="button"
                 onClick={() => handleAspectChange(0.75)}
-                className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+                className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition-all ${
                   selectedAspect === 0.75
                     ? "bg-[#d4af37] text-black shadow"
                     : "bg-[#1c1b18] text-gray-300 hover:bg-[#38332b]"
@@ -348,7 +452,7 @@ export function ImageCropModal({
               <button
                 type="button"
                 onClick={() => handleAspectChange(1.3333333333333333)}
-                className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+                className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition-all ${
                   selectedAspect === 1.3333333333333333
                     ? "bg-[#d4af37] text-black shadow"
                     : "bg-[#1c1b18] text-gray-300 hover:bg-[#38332b]"
@@ -359,7 +463,7 @@ export function ImageCropModal({
               <button
                 type="button"
                 onClick={() => handleAspectChange("free")}
-                className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+                className={`px-2.5 py-1 rounded-lg font-semibold whitespace-nowrap transition-all ${
                   selectedAspect === "free"
                     ? "bg-[#d4af37] text-black shadow"
                     : "bg-[#1c1b18] text-gray-300 hover:bg-[#38332b]"
@@ -379,13 +483,17 @@ export function ImageCropModal({
         )}
 
         {/* Main Workspace: Interactive Cropper Viewport (Left) + Live Template Preview (Right) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
           
           {/* Interactive Canvas Viewport (2 Cols) */}
-          <div className="md:col-span-2 relative w-full h-[320px] bg-black/60 rounded-xl border border-[#3d372e] overflow-hidden flex items-center justify-center select-none">
+          <div
+            className={`md:col-span-2 relative w-full h-[280px] xs:h-[320px] bg-black/60 rounded-xl border border-[#3d372e] overflow-hidden flex items-center justify-center select-none touch-none ${
+              mobileTab === "crop" ? "block" : "hidden sm:block"
+            }`}
+          >
             <div
               ref={containerRef}
-              className="relative max-w-full max-h-full inline-block overflow-hidden"
+              className="relative max-w-full max-h-full inline-block overflow-hidden touch-none select-none"
               style={{
                 transform: `scale(${zoom}) rotate(${rotation}deg)`,
                 transition: isDragging ? "none" : "transform 0.2s ease-out",
@@ -398,7 +506,7 @@ export function ImageCropModal({
                 alt="Crop preview source"
                 onLoad={handleImageLoad}
                 crossOrigin="anonymous"
-                className="max-h-[310px] w-auto object-contain block mx-auto pointer-events-none"
+                className="max-h-[270px] xs:max-h-[310px] w-auto object-contain block mx-auto pointer-events-none"
               />
 
               {/* Darkened Overlay outside crop box */}
@@ -439,7 +547,7 @@ export function ImageCropModal({
               {imageLoaded && (
                 <div
                   onPointerDown={(e) => handlePointerDown(e, null)}
-                  className={`absolute border-2 border-[#d4af37] shadow-[0_0_20px_rgba(212,175,55,0.5)] cursor-move ${
+                  className={`absolute border-2 border-[#d4af37] shadow-[0_0_20px_rgba(212,175,55,0.5)] cursor-move touch-none ${
                     cropShape === "circle" ? "rounded-full" : "rounded-none"
                   }`}
                   style={{
@@ -471,22 +579,22 @@ export function ImageCropModal({
                     </span>
                   </div>
 
-                  {/* Resize Handles */}
+                  {/* Touch-optimized Resize Handles */}
                   <div
                     onPointerDown={(e) => handlePointerDown(e, "nw")}
-                    className="absolute -top-2 -left-2 w-4 h-4 bg-[#d4af37] border-2 border-black rounded-full cursor-nwse-resize shadow"
+                    className="absolute -top-2.5 -left-2.5 w-5 h-5 bg-[#d4af37] border-2 border-black rounded-full cursor-nwse-resize shadow-md touch-none"
                   />
                   <div
                     onPointerDown={(e) => handlePointerDown(e, "ne")}
-                    className="absolute -top-2 -right-2 w-4 h-4 bg-[#d4af37] border-2 border-black rounded-full cursor-nesw-resize shadow"
+                    className="absolute -top-2.5 -right-2.5 w-5 h-5 bg-[#d4af37] border-2 border-black rounded-full cursor-nesw-resize shadow-md touch-none"
                   />
                   <div
                     onPointerDown={(e) => handlePointerDown(e, "sw")}
-                    className="absolute -bottom-2 -left-2 w-4 h-4 bg-[#d4af37] border-2 border-black rounded-full cursor-nesw-resize shadow"
+                    className="absolute -bottom-2.5 -left-2.5 w-5 h-5 bg-[#d4af37] border-2 border-black rounded-full cursor-nesw-resize shadow-md touch-none"
                   />
                   <div
                     onPointerDown={(e) => handlePointerDown(e, "se")}
-                    className="absolute -bottom-2 -right-2 w-4 h-4 bg-[#d4af37] border-2 border-black rounded-full cursor-nwse-resize shadow"
+                    className="absolute -bottom-2.5 -right-2.5 w-5 h-5 bg-[#d4af37] border-2 border-black rounded-full cursor-nwse-resize shadow-md touch-none"
                   />
                 </div>
               )}
@@ -494,7 +602,11 @@ export function ImageCropModal({
           </div>
 
           {/* Live Website Template Preview Panel (1 Col) */}
-          <div className="bg-[#292621] border border-[#3d372e] rounded-xl p-4 flex flex-col items-center justify-center space-y-3 min-h-[320px]">
+          <div
+            className={`bg-[#292621] border border-[#3d372e] rounded-xl p-4 flex-col items-center justify-center space-y-3 min-h-[280px] xs:min-h-[320px] ${
+              mobileTab === "preview" ? "flex" : "hidden sm:flex"
+            }`}
+          >
             <div className="flex items-center gap-1.5 text-xs text-[#d4af37] font-bold uppercase tracking-wider">
               <Eye className="w-4 h-4 text-[#d4af37]" />
               Website Live Preview
@@ -520,7 +632,7 @@ export function ImageCropModal({
                 )
               ) : (
                 <div className="w-32 h-32 rounded-full border border-dashed border-gray-600 flex items-center justify-center text-xs text-gray-500">
-                  Loading preview...
+                  Rendering preview...
                 </div>
               )}
             </div>
@@ -535,13 +647,13 @@ export function ImageCropModal({
         </div>
 
         {/* Controls: Zoom & Rotate */}
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-[#292621] p-3 rounded-xl border border-[#3d372e]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#292621] p-3 rounded-xl border border-[#3d372e]">
           {/* Zoom Slider */}
-          <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+          <div className="flex items-center gap-2 w-full sm:flex-1 min-w-[200px]">
             <button
               type="button"
               onClick={() => setZoom((z) => Math.max(1, z - 0.1))}
-              className="p-1 text-gray-400 hover:text-white rounded hover:bg-white/10"
+              className="p-1.5 text-gray-400 hover:text-white rounded-lg hover:bg-white/10"
               title="Zoom out"
             >
               <ZoomOut className="w-4 h-4" />
@@ -553,12 +665,12 @@ export function ImageCropModal({
               step="0.05"
               value={zoom}
               onChange={(e) => setZoom(parseFloat(e.target.value))}
-              className="w-full accent-[#d4af37] cursor-pointer"
+              className="w-full accent-[#d4af37] cursor-pointer h-2 bg-[#1c1b18] rounded-lg"
             />
             <button
               type="button"
               onClick={() => setZoom((z) => Math.min(3, z + 0.1))}
-              className="p-1 text-gray-400 hover:text-white rounded hover:bg-white/10"
+              className="p-1.5 text-gray-400 hover:text-white rounded-lg hover:bg-white/10"
               title="Zoom in"
             >
               <ZoomIn className="w-4 h-4" />
@@ -567,11 +679,11 @@ export function ImageCropModal({
           </div>
 
           {/* Rotate Button */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setRotation((r) => (r + 90) % 360)}
-              className="flex items-center gap-1 px-3 py-1.5 bg-[#1c1b18] hover:bg-[#38332b] text-gray-300 text-xs font-semibold rounded-lg border border-[#3d372e] transition-colors"
+              className="flex items-center justify-center gap-1.5 px-3 py-2 bg-[#1c1b18] hover:bg-[#38332b] text-gray-300 text-xs font-semibold rounded-lg border border-[#3d372e] transition-colors w-full sm:w-auto"
             >
               <RotateCw className="w-3.5 h-3.5 text-[#d4af37]" />
               Rotate 90°
@@ -584,17 +696,28 @@ export function ImageCropModal({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-xs font-semibold text-gray-400 hover:text-white bg-transparent hover:bg-white/5 rounded-xl transition-colors"
+            disabled={isProcessing}
+            className="px-4 py-2.5 text-xs font-semibold text-gray-400 hover:text-white bg-transparent hover:bg-white/5 rounded-xl transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleApply}
-            className="flex items-center gap-1.5 px-5 py-2 text-xs font-bold text-black bg-[#d4af37] hover:bg-[#c29f2f] rounded-xl shadow-lg hover:shadow-[#d4af37]/20 transition-all transform active:scale-95"
+            disabled={isProcessing}
+            className="flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-black bg-[#d4af37] hover:bg-[#c29f2f] rounded-xl shadow-lg hover:shadow-[#d4af37]/20 transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px]"
           >
-            <Check className="w-4 h-4" />
-            Crop &amp; Upload
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-black" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <Check className="w-4 h-4" />
+                Crop &amp; Upload
+              </>
+            )}
           </button>
         </div>
 

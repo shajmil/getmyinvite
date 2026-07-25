@@ -18,7 +18,11 @@ export function StepRSVPExtras() {
     title: string;
     aspectRatio: AspectRatioType;
     cropShape?: CropShapeType;
-    onCropComplete: (blob: Blob) => Promise<void>;
+    onCropComplete: (
+      blob: Blob,
+      dataUrl?: string,
+      onProgress?: (pct: number) => void
+    ) => Promise<void>;
   } | null>(null);
 
   if (!data) return null;
@@ -46,10 +50,10 @@ export function StepRSVPExtras() {
   const handleAddContact = () => {
     const contacts = data.extras.contactPersons || [];
     const newContact = {
-      id: `c-${Date.now()}`,
+      id: `cnt-${Date.now()}`,
       name: "",
-      phone: "",
       role: "Host",
+      phone: "",
       photo: "",
     };
 
@@ -85,10 +89,12 @@ export function StepRSVPExtras() {
           title: `Crop ${name || "Contact"} Photo`,
           aspectRatio: 1, // 1:1 square for contact portrait
           cropShape: "circle",
-          onCropComplete: async (croppedBlob) => {
+          onCropComplete: async (croppedBlob, _, onProgress) => {
             setUploadingContactId(id);
             try {
-              const { url } = await uploadFile(croppedBlob);
+              const { url } = await uploadFile(croppedBlob, (pct) => {
+                if (onProgress) onProgress(pct);
+              });
               handleUpdateContact(id, { photo: url });
             } catch (err) {
               alert("Failed to upload contact photo.");
@@ -146,10 +152,12 @@ export function StepRSVPExtras() {
           title: `Crop ${name || "Special Guest"} Photo`,
           aspectRatio: 1, // 1:1 square
           cropShape: "circle",
-          onCropComplete: async (croppedBlob) => {
+          onCropComplete: async (croppedBlob, _, onProgress) => {
             setUploadingKeyGuestId(id);
             try {
-              const { url } = await uploadFile(croppedBlob);
+              const { url } = await uploadFile(croppedBlob, (pct) => {
+                if (onProgress) onProgress(pct);
+              });
               handleUpdateKeyGuest(id, { photo: url });
             } catch (err) {
               alert("Failed to upload photo for special guest.");
@@ -169,7 +177,11 @@ export function StepRSVPExtras() {
   const handleReCropPhoto = (
     url: string,
     title: string,
-    onComplete: (blob: Blob) => Promise<void>
+    onComplete: (
+      blob: Blob,
+      dataUrl?: string,
+      onProgress?: (pct: number) => void
+    ) => Promise<void>
   ) => {
     setCropModal({
       isOpen: true,

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useWizardStore } from "@/lib/store";
 import { uploadFile } from "@/lib/compress";
 import { ImageCropModal, AspectRatioType } from "@/components/ImageCropModal";
-import { Crop, Trash2 } from "lucide-react";
+import { Crop, Trash2, Loader2 } from "lucide-react";
 
 export function StepStoryGallery() {
   const { data, updateData, templateId } = useWizardStore();
@@ -16,7 +16,11 @@ export function StepStoryGallery() {
     imageSrc: string;
     title: string;
     aspectRatio: AspectRatioType;
-    onCropComplete: (blob: Blob) => Promise<void>;
+    onCropComplete: (
+      blob: Blob,
+      dataUrl?: string,
+      onProgress?: (pct: number) => void
+    ) => Promise<void>;
   } | null>(null);
 
   if (!data) return null;
@@ -78,11 +82,14 @@ export function StepStoryGallery() {
           imageSrc: evt.target.result as string,
           title: "Crop Gallery Image",
           aspectRatio: "free", // free aspect ratio by default for gallery
-          onCropComplete: async (croppedBlob) => {
+          onCropComplete: async (croppedBlob, _, onProgress) => {
             setUploadingGallery(true);
             setGalleryProgress(10);
             try {
-              const { url } = await uploadFile(croppedBlob, (pct) => setGalleryProgress(pct));
+              const { url } = await uploadFile(croppedBlob, (pct) => {
+                setGalleryProgress(pct);
+                if (onProgress) onProgress(pct);
+              });
               const uploadedImages = [
                 ...data.gallery,
                 {
@@ -116,10 +123,13 @@ export function StepStoryGallery() {
       imageSrc: img.url,
       title: `Re-crop Gallery Photo #${index + 1}`,
       aspectRatio: "free",
-      onCropComplete: async (croppedBlob) => {
+      onCropComplete: async (croppedBlob, _, onProgress) => {
         setUploadingGallery(true);
         try {
-          const { url } = await uploadFile(croppedBlob);
+          const { url } = await uploadFile(croppedBlob, (pct) => {
+            setGalleryProgress(pct);
+            if (onProgress) onProgress(pct);
+          });
           const updatedGallery = data.gallery.map((item, i) =>
             i === index ? { ...item, url } : item
           );
@@ -240,7 +250,20 @@ export function StepStoryGallery() {
             className="w-full text-xs text-[#777] file:mr-2 file:py-2 file:px-3.5 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#855f18]/10 file:text-[#855f18] hover:file:bg-[#855f18]/20 file:cursor-pointer"
           />
           {uploadingGallery && (
-            <p className="text-[10px] text-[#855f18] mt-1.5 font-bold">Uploading: {galleryProgress}%</p>
+            <div className="mt-2.5 space-y-1 bg-[#855f18]/5 p-2.5 rounded-lg border border-[#855f18]/20">
+              <div className="flex items-center justify-between text-xs text-[#855f18] font-bold">
+                <span className="flex items-center gap-1.5">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#855f18]" /> Uploading gallery photo...
+                </span>
+                <span className="font-mono text-xs">{galleryProgress}%</span>
+              </div>
+              <div className="w-full bg-[#eae6df] rounded-full h-1.5 overflow-hidden">
+                <div
+                  className="bg-[#855f18] h-full rounded-full transition-all duration-200"
+                  style={{ width: `${galleryProgress}%` }}
+                />
+              </div>
+            </div>
           )}
         </div>
 

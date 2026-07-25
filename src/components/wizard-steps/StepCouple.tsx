@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useWizardStore } from "@/lib/store";
 import { uploadFile } from "@/lib/compress";
 import { ImageCropModal, AspectRatioType, CropShapeType } from "@/components/ImageCropModal";
-import { Crop, Trash2 } from "lucide-react";
+import { Crop, Trash2, Loader2 } from "lucide-react";
 
 export function StepCouple() {
   const { data, updateNestedData, updateData, templateId } = useWizardStore();
@@ -22,7 +22,11 @@ export function StepCouple() {
     title: string;
     aspectRatio: AspectRatioType;
     cropShape?: CropShapeType;
-    onCropComplete: (blob: Blob) => Promise<void>;
+    onCropComplete: (
+      blob: Blob,
+      dataUrl?: string,
+      onProgress?: (pct: number) => void
+    ) => Promise<void>;
   } | null>(null);
 
   if (!data) return null;
@@ -32,7 +36,11 @@ export function StepCouple() {
     title: string,
     aspectRatio: AspectRatioType,
     cropShape: CropShapeType,
-    onComplete: (blob: Blob) => Promise<void>
+    onComplete: (
+      blob: Blob,
+      dataUrl?: string,
+      onProgress?: (pct: number) => void
+    ) => Promise<void>
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -59,7 +67,11 @@ export function StepCouple() {
     title: string,
     aspectRatio: AspectRatioType,
     cropShape: CropShapeType,
-    onComplete: (blob: Blob) => Promise<void>
+    onComplete: (
+      blob: Blob,
+      dataUrl?: string,
+      onProgress?: (pct: number) => void
+    ) => Promise<void>
   ) => {
     setCropModal({
       isOpen: true,
@@ -78,11 +90,14 @@ export function StepCouple() {
       `Crop & Frame ${partnerName} Photo`,
       1,
       "circle",
-      async (croppedBlob) => {
+      async (croppedBlob, _, onProgress) => {
         setUploading(partnerKey);
         setProgress(0);
         try {
-          const { url } = await uploadFile(croppedBlob, (pct) => setProgress(pct));
+          const { url } = await uploadFile(croppedBlob, (pct) => {
+            setProgress(pct);
+            if (onProgress) onProgress(pct);
+          });
           updateNestedData(partnerKey, { photo: url });
         } catch (err) {
           alert(`Failed to upload ${partnerName} photo.`);
@@ -101,11 +116,14 @@ export function StepCouple() {
       "Crop & Frame Hero Background Image",
       1.7777777777777777, // 16:9
       "rect",
-      async (croppedBlob) => {
+      async (croppedBlob, _, onProgress) => {
         setUploadingHero(true);
         setHeroProgress(0);
         try {
-          const { url } = await uploadFile(croppedBlob, (pct) => setHeroProgress(pct));
+          const { url } = await uploadFile(croppedBlob, (pct) => {
+            setHeroProgress(pct);
+            if (onProgress) onProgress(pct);
+          });
           updateNestedData("hero", { ...(data.hero || {}), mainPhoto: url });
         } catch (err) {
           alert("Failed to upload background image.");
@@ -124,11 +142,14 @@ export function StepCouple() {
       "Crop & Frame Digital Invitation Card Image",
       0.75, // 3:4 portrait
       "rect",
-      async (croppedBlob) => {
+      async (croppedBlob, _, onProgress) => {
         setUploadingCard(true);
         setCardProgress(0);
         try {
-          const { url } = await uploadFile(croppedBlob, (pct) => setCardProgress(pct));
+          const { url } = await uploadFile(croppedBlob, (pct) => {
+            setCardProgress(pct);
+            if (onProgress) onProgress(pct);
+          });
           updateNestedData("hero", { ...(data.hero || {}), invitationCardUrl: url });
         } catch (err) {
           alert("Failed to upload invitation card.");
