@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useWizardStore } from "@/lib/store";
 import { uploadFile } from "@/lib/compress";
-import { ImageCropModal, AspectRatioType } from "@/components/ImageCropModal";
+import { ImageCropModal, AspectRatioType, CropShapeType } from "@/components/ImageCropModal";
 import { Crop, Trash2 } from "lucide-react";
 
 export function StepCouple() {
@@ -21,6 +21,7 @@ export function StepCouple() {
     imageSrc: string;
     title: string;
     aspectRatio: AspectRatioType;
+    cropShape?: CropShapeType;
     onCropComplete: (blob: Blob) => Promise<void>;
   } | null>(null);
 
@@ -30,6 +31,7 @@ export function StepCouple() {
     e: React.ChangeEvent<HTMLInputElement>,
     title: string,
     aspectRatio: AspectRatioType,
+    cropShape: CropShapeType,
     onComplete: (blob: Blob) => Promise<void>
   ) => {
     const file = e.target.files?.[0];
@@ -43,12 +45,12 @@ export function StepCouple() {
           imageSrc: evt.target.result as string,
           title,
           aspectRatio,
+          cropShape,
           onCropComplete: onComplete,
         });
       }
     };
     reader.readAsDataURL(file);
-    // reset input value so re-selecting same file triggers onChange
     e.target.value = "";
   };
 
@@ -56,6 +58,7 @@ export function StepCouple() {
     url: string,
     title: string,
     aspectRatio: AspectRatioType,
+    cropShape: CropShapeType,
     onComplete: (blob: Blob) => Promise<void>
   ) => {
     setCropModal({
@@ -63,6 +66,7 @@ export function StepCouple() {
       imageSrc: url,
       title,
       aspectRatio,
+      cropShape,
       onCropComplete: onComplete,
     });
   };
@@ -73,6 +77,7 @@ export function StepCouple() {
       e,
       `Crop & Frame ${partnerName} Photo`,
       1,
+      "circle",
       async (croppedBlob) => {
         setUploading(partnerKey);
         setProgress(0);
@@ -95,6 +100,7 @@ export function StepCouple() {
       e,
       "Crop & Frame Hero Background Image",
       1.7777777777777777, // 16:9
+      "rect",
       async (croppedBlob) => {
         setUploadingHero(true);
         setHeroProgress(0);
@@ -117,6 +123,7 @@ export function StepCouple() {
       e,
       "Crop & Frame Digital Invitation Card Image",
       0.75, // 3:4 portrait
+      "rect",
       async (croppedBlob) => {
         setUploadingCard(true);
         setCardProgress(0);
@@ -143,6 +150,7 @@ export function StepCouple() {
           imageSrc={cropModal.imageSrc}
           title={cropModal.title}
           aspectRatio={cropModal.aspectRatio}
+          cropShape={cropModal.cropShape}
           onCropComplete={cropModal.onCropComplete}
           onCancel={() => setCropModal(null)}
         />
@@ -221,12 +229,14 @@ export function StepCouple() {
                         data.partner1.photo!,
                         "Re-crop First Partner Photo",
                         1,
+                        "circle",
                         async (croppedBlob) => {
                           setUploading("partner1");
                           try {
                             const { url } = await uploadFile(croppedBlob);
                             updateNestedData("partner1", { photo: url });
                           } finally {
+                            setUploading("null" as any);
                             setUploading(null);
                             setCropModal(null);
                           }
@@ -317,6 +327,7 @@ export function StepCouple() {
                         data.partner2.photo!,
                         "Re-crop Second Partner Photo",
                         1,
+                        "circle",
                         async (croppedBlob) => {
                           setUploading("partner2");
                           try {
@@ -380,6 +391,7 @@ export function StepCouple() {
                         data.hero.mainPhoto!,
                         "Re-crop Hero Background Image",
                         1.7777777777777777,
+                        "rect",
                         async (croppedBlob) => {
                           setUploadingHero(true);
                           try {
@@ -438,6 +450,7 @@ export function StepCouple() {
                           data.hero.invitationCardUrl!,
                           "Re-crop Digital Invitation Card",
                           0.75,
+                          "rect",
                           async (croppedBlob) => {
                             setUploadingCard(true);
                             try {

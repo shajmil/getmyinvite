@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useWizardStore } from "@/lib/store";
 import { uploadFile } from "@/lib/compress";
-import { ImageCropModal, AspectRatioType } from "@/components/ImageCropModal";
+import { ImageCropModal, AspectRatioType, CropShapeType } from "@/components/ImageCropModal";
 import { Crop, Trash2 } from "lucide-react";
 
 export function StepRSVPExtras() {
@@ -17,6 +17,7 @@ export function StepRSVPExtras() {
     imageSrc: string;
     title: string;
     aspectRatio: AspectRatioType;
+    cropShape?: CropShapeType;
     onCropComplete: (blob: Blob) => Promise<void>;
   } | null>(null);
 
@@ -83,6 +84,7 @@ export function StepRSVPExtras() {
           imageSrc: evt.target.result as string,
           title: `Crop ${name || "Contact"} Photo`,
           aspectRatio: 1, // 1:1 square for contact portrait
+          cropShape: "circle",
           onCropComplete: async (croppedBlob) => {
             setUploadingContactId(id);
             try {
@@ -143,6 +145,7 @@ export function StepRSVPExtras() {
           imageSrc: evt.target.result as string,
           title: `Crop ${name || "Special Guest"} Photo`,
           aspectRatio: 1, // 1:1 square
+          cropShape: "circle",
           onCropComplete: async (croppedBlob) => {
             setUploadingKeyGuestId(id);
             try {
@@ -173,6 +176,7 @@ export function StepRSVPExtras() {
       imageSrc: url,
       title,
       aspectRatio: 1,
+      cropShape: "circle",
       onCropComplete: onComplete,
     });
   };
@@ -186,6 +190,7 @@ export function StepRSVPExtras() {
           imageSrc={cropModal.imageSrc}
           title={cropModal.title}
           aspectRatio={cropModal.aspectRatio}
+          cropShape={cropModal.cropShape}
           onCropComplete={cropModal.onCropComplete}
           onCancel={() => setCropModal(null)}
         />
