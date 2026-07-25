@@ -189,6 +189,22 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
 
   const stepsCount = templateId === "barcelona" ? 7 : 5;
 
+  // Reference for step badge buttons to auto-scroll horizontal stepper bar into view
+  const stepBadgeRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Automatically scroll active step badge into view on step change
+  useEffect(() => {
+    if (!mounted) return;
+    const activeBadge = stepBadgeRefs.current[currentStep];
+    if (activeBadge) {
+      activeBadge.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "center",
+      });
+    }
+  }, [currentStep, mounted]);
+
   // Safety check: ensure currentStep index is within bounds if steps array shrinks
   useEffect(() => {
     if (currentStep >= stepsCount) {
@@ -353,6 +369,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
             {stepTitles.map((title, i) => (
               <button
                 key={i}
+                ref={(el) => { stepBadgeRefs.current[i] = el; }}
                 onClick={() => setCurrentStep(i)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all whitespace-nowrap ${
                   currentStep === i
