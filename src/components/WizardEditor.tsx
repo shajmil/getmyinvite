@@ -426,25 +426,21 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
         {/* Right Preview Panel (Visible on Desktop OR Mobile preview mode) */}
         <div
           className={`${
-            mobileTab === "preview" ? "flex w-full h-full min-h-0" : "hidden md:flex md:w-1/2 h-full min-h-0"
-          } bg-[#efede8] flex-col p-6 relative overflow-hidden transition-all duration-300 ${
+            mobileTab === "preview" ? "flex w-full h-full" : "hidden md:flex md:w-1/2 h-full min-h-0"
+          } bg-[#efede8] md:bg-[#efede8] flex-col p-0 sm:p-4 md:p-6 relative overflow-hidden transition-all duration-300 ${
             previewDevice === "mobile" ? "items-center justify-center" : "items-stretch justify-stretch"
           }`}
         >
-          {/* Mobile Preview Top Header Bar */}
-          <div className="flex md:hidden items-center justify-between bg-white border-b border-[#eae6df] px-4 py-2 w-full flex-shrink-0 shadow-xs z-30 mb-2 rounded-xl">
+          {/* Mobile Floating Back to Edit Pill */}
+          <div className="flex md:hidden absolute top-3 left-1/2 -translate-x-1/2 z-40">
             <button
               type="button"
               onClick={() => setMobileTab("edit")}
-              className="flex items-center gap-1.5 text-xs font-bold text-[#855f18] bg-[#855f18]/10 px-3 py-1.5 rounded-lg border border-[#855f18]/20 active:scale-95 transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-[#855f18] bg-white/95 backdrop-blur-md rounded-full border border-[#855f18]/30 shadow-lg active:scale-95 transition-all"
             >
               <Edit3 className="w-3.5 h-3.5" />
-              ← Edit Form
+              <span>← Edit Form</span>
             </button>
-
-            <span className="text-xs font-serif font-bold text-[#1a1a1a] flex items-center gap-1">
-              <Eye className="w-3.5 h-3.5 text-[#855f18]" /> Live Mobile View
-            </span>
           </div>
 
           {/* Desktop Device View Controls Bar */}
@@ -469,10 +465,10 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
 
           {/* Preview Container Frame */}
           <div
-            className={`transition-all duration-500 ease-in-out shadow-2xl bg-white border border-[#eae6df] overflow-hidden relative ${
+            className={`transition-all duration-500 ease-in-out bg-white overflow-hidden relative w-full h-full ${
               previewDevice === "mobile"
-                ? "w-[375px] h-[768px] max-h-full rounded-[36px] border-[12px] border-[#1a1a1a] z-10"
-                : "flex-1 w-full rounded-2xl z-10"
+                ? "md:w-[375px] md:h-[768px] md:max-h-full md:rounded-[36px] md:border-[12px] md:border-[#1a1a1a] md:shadow-2xl z-10"
+                : "w-full h-full rounded-none md:rounded-2xl z-10"
             }`}
           >
             {/* The Actual Template Client Render */}
@@ -482,46 +478,12 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
               </IframePreview>
             </div>
 
-            {/* Mobile Notch overlay */}
+            {/* Mobile Notch overlay (Desktop view only) */}
             {previewDevice === "mobile" && (
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 sm:w-40 h-4 sm:h-5 bg-[#1a1a1a] rounded-b-2xl z-40 flex justify-center items-center">
-                <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-black/80 rounded-full mr-2" />
-                <span className="w-10 sm:w-12 h-1 bg-white/20 rounded-full" />
+              <div className="hidden md:flex absolute top-0 left-1/2 -translate-x-1/2 w-40 h-5 bg-[#1a1a1a] rounded-b-2xl z-40 justify-center items-center">
+                <span className="w-2.5 h-2.5 bg-black/80 rounded-full mr-2" />
+                <span className="w-12 h-1 bg-white/20 rounded-full" />
               </div>
-            )}
-          </div>
-
-          {/* Mobile Bottom Sticky Navigation Bar when inside Preview Mode */}
-          <div
-            className="flex md:hidden sticky bottom-0 inset-x-0 z-30 bg-white/98 backdrop-blur-md border-t border-[#eae6df] px-4 py-2.5 items-center justify-between shadow-[0_-4px_16px_rgba(0,0,0,0.12)] flex-shrink-0 w-full mt-2 rounded-xl"
-            style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
-          >
-            <button
-              disabled={currentStep === 0}
-              onClick={() => setCurrentStep(currentStep - 1)}
-              className="flex items-center gap-1 px-3.5 py-2 border-2 border-[#855f18]/30 text-[#855f18] text-xs font-extrabold rounded-xl bg-white active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all"
-            >
-              <ChevronLeft className="w-4 h-4 text-[#855f18]" />
-              Back
-            </button>
-
-            <span className="text-xs font-serif font-bold text-[#1a1a1a]">
-              Step {currentStep + 1}/{stepsCount}: {steps[currentStep]?.title}
-            </span>
-
-            {currentStep < stepsCount - 1 ? (
-              <button
-                onClick={() => {
-                  if (hasUnsavedChanges) handleSaveDraft();
-                  setCurrentStep(currentStep + 1);
-                }}
-                className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-[#855f18] to-[#6c4c12] text-white text-xs font-extrabold rounded-xl active:scale-95 transition-all shadow-md"
-              >
-                <span>Next</span>
-                <ChevronRight className="w-4 h-4 text-white" />
-              </button>
-            ) : (
-              <div className="w-14" />
             )}
           </div>
         </div>
