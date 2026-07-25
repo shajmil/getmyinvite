@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Edit3, Sparkles } from "lucide-react";
 import { useWizardStore } from "@/lib/store";
 import { saveInvitationDraft, updateInvitationSettingsAction } from "@/app/actions";
 import { templateRegistry } from "@/templates/registry";
@@ -138,6 +138,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
 
   const [mounted, setMounted] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<"mobile" | "desktop">("mobile");
+  const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
   
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
@@ -256,33 +257,61 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
   return (
     <div className="flex-1 flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden">
       {/* ----------------- TOP NAVIGATION BAR ----------------- */}
-      <header className="h-14 sm:h-16 bg-white border-b border-[#eae6df] px-4 sm:px-6 flex items-center justify-between flex-shrink-0 z-20 shadow-sm">
-        <div className="flex items-center gap-3 sm:gap-4">
+      <header className="h-14 sm:h-16 bg-white border-b border-[#eae6df] px-3 sm:px-6 flex items-center justify-between flex-shrink-0 z-20 shadow-sm">
+        <div className="flex items-center gap-2 sm:gap-4">
           <Link
             href="/dashboard"
-            className="text-xs font-semibold text-[#666] hover:text-[#1a1a1a] flex items-center gap-1 transition-colors border border-[#eae6df] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-[#faf8f5]"
+            className="text-xs font-semibold text-[#666] hover:text-[#1a1a1a] flex items-center gap-1 transition-colors border border-[#eae6df] px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-[#faf8f5]"
           >
             ← Exit
           </Link>
-          <span className="h-4 w-px bg-[#eae6df]" />
-          <h1 className="text-sm sm:text-md font-serif font-bold text-[#1a1a1a]">
+          <span className="h-4 w-px bg-[#eae6df] hidden xs:inline" />
+          <h1 className="text-xs sm:text-md font-serif font-bold text-[#1a1a1a] hidden xs:block">
             Invitation Builder
           </h1>
+        </div>
+
+        {/* Mobile Segmented Mode Switcher: Edit vs Preview */}
+        <div className="flex md:hidden bg-[#faf8f5] p-0.5 rounded-xl border border-[#eae6df]">
+          <button
+            type="button"
+            onClick={() => setMobileTab("edit")}
+            className={`px-2.5 py-1 text-[11px] font-extrabold rounded-lg flex items-center gap-1 transition-all ${
+              mobileTab === "edit"
+                ? "bg-[#855f18] text-white shadow-xs"
+                : "text-[#666] hover:text-[#1a1a1a]"
+            }`}
+          >
+            <Edit3 className="w-3 h-3" />
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileTab("preview")}
+            className={`px-2.5 py-1 text-[11px] font-extrabold rounded-lg flex items-center gap-1 transition-all ${
+              mobileTab === "preview"
+                ? "bg-[#855f18] text-white shadow-xs"
+                : "text-[#666] hover:text-[#1a1a1a]"
+            }`}
+          >
+            <Eye className="w-3 h-3" />
+            Preview
+          </button>
         </div>
 
         {/* Manual Save / Update Controls & Status Badge */}
         <div className="flex items-center gap-2 sm:gap-3">
           {saveStatus === "saving" && (
-            <span className="inline-flex items-center gap-1.5 text-xs text-[#855f18]">
+            <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs text-[#855f18]">
               <span className="w-1.5 h-1.5 bg-[#855f18] rounded-full animate-ping" />
               Saving...
             </span>
           )}
           {saveStatus === "saved" && !hasUnsavedChanges && (
-            <span className="text-xs text-green-600 font-medium">✓ Saved</span>
+            <span className="text-[11px] sm:text-xs text-green-600 font-medium">✓ Saved</span>
           )}
           {saveStatus === "error" && (
-            <span className="text-xs text-red-600 font-medium">✗ Failed</span>
+            <span className="text-[11px] sm:text-xs text-red-600 font-medium">✗ Failed</span>
           )}
           {hasUnsavedChanges && saveStatus !== "saving" && (
             <span className="text-xs text-amber-700 font-medium hidden sm:inline">Unsaved Changes</span>
@@ -311,9 +340,14 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
       </div>
 
       {/* ----------------- CONTENT SPLIT LAYOUT ----------------- */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
+        
         {/* Left Form Panel */}
-        <div className="w-full md:w-1/2 flex flex-col h-full min-h-0 border-r border-[#eae6df] bg-[#faf8f5] relative">
+        <div
+          className={`${
+            mobileTab === "edit" ? "flex" : "hidden"
+          } md:flex w-full md:w-1/2 flex-col h-full min-h-0 border-r border-[#eae6df] bg-[#faf8f5] relative`}
+        >
           {/* Step Badges Navigation */}
           <div className="px-4 sm:px-6 py-3 bg-white border-b border-[#eae6df] overflow-x-auto flex gap-1.5 scrollbar-none flex-shrink-0">
             {stepTitles.map((title, i) => (
@@ -335,6 +369,17 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 pb-28">
             {renderStepContent()}
           </div>
+
+          {/* Floating Quick Live Preview FAB for Mobile (Visible on mobile edit mode) */}
+          <button
+            type="button"
+            onClick={() => setMobileTab("preview")}
+            className="fixed bottom-20 right-4 z-40 md:hidden flex items-center gap-2 px-4 py-2.5 bg-[#855f18] text-white text-xs font-extrabold rounded-full shadow-2xl hover:bg-[#6c4c12] active:scale-95 transition-all border-2 border-white/40 shadow-[#855f18]/30"
+          >
+            <Eye className="w-4 h-4 text-white" />
+            <span>Live Preview</span>
+            <Sparkles className="w-3.5 h-3.5 text-[#d4af37]" />
+          </button>
 
           {/* Bottom Nav Actions Bar (Sticky & Safe Area Optimized for Safari Mobile) */}
           <div
@@ -374,14 +419,32 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
           </div>
         </div>
 
-        {/* Right Preview Panel */}
+        {/* Right Preview Panel (Visible on Desktop OR Mobile preview mode) */}
         <div
-          className={`hidden md:flex w-1/2 bg-[#efede8] flex-col p-6 relative h-[70vh] transition-all duration-300 ${
-            previewDevice === "mobile" ? "items-center justify-center" : "items-stretch justify-stretch"
+          className={`${
+            mobileTab === "preview" ? "flex w-full" : "hidden md:flex md:w-1/2"
+          } bg-[#efede8] flex-col relative h-full overflow-hidden transition-all duration-300 ${
+            previewDevice === "mobile" ? "items-center justify-center p-2 sm:p-6" : "items-stretch justify-stretch p-3 sm:p-6"
           }`}
         >
-          {/* Device and Preview Controls Bar */}
-          <div className="absolute top-4 right-4 bg-white border border-[#eae6df] rounded-xl p-1 shadow-lg flex items-center gap-1 z-30">
+          {/* Mobile Preview Top Header Bar */}
+          <div className="flex md:hidden items-center justify-between bg-white border-b border-[#eae6df] px-4 py-2 w-full flex-shrink-0 shadow-xs z-30 mb-2 rounded-xl">
+            <button
+              type="button"
+              onClick={() => setMobileTab("edit")}
+              className="flex items-center gap-1.5 text-xs font-bold text-[#855f18] bg-[#855f18]/10 px-3 py-1.5 rounded-lg border border-[#855f18]/20 active:scale-95 transition-all"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              ← Edit Form
+            </button>
+
+            <span className="text-xs font-serif font-bold text-[#1a1a1a] flex items-center gap-1">
+              <Eye className="w-3.5 h-3.5 text-[#855f18]" /> Live Mobile View
+            </span>
+          </div>
+
+          {/* Desktop Device View Controls Bar */}
+          <div className="absolute top-4 right-4 bg-white border border-[#eae6df] rounded-xl p-1 shadow-lg hidden md:flex items-center gap-1 z-30">
             <button
               onClick={() => setPreviewDevice("mobile")}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all ${
@@ -402,10 +465,10 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
 
           {/* Preview Container Frame */}
           <div
-            className={`transition-all duration-500 ease-in-out shadow-2xl bg-white border border-[#eae6df] overflow-hidden relative ${
+            className={`transition-all duration-500 ease-in-out shadow-2xl bg-white border border-[#eae6df] overflow-hidden relative flex-1 ${
               previewDevice === "mobile"
-                ? "w-[375px] h-[768px] rounded-[36px] border-[12px] border-[#1a1a1a] z-10"
-                : "flex-1 w-full rounded-2xl z-10"
+                ? "w-full max-w-[375px] max-h-[768px] h-full rounded-[24px] sm:rounded-[36px] border-[6px] sm:border-[12px] border-[#1a1a1a] z-10"
+                : "w-full rounded-2xl z-10"
             }`}
           >
             {/* The Actual Template Client Render */}
@@ -417,13 +480,45 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
 
             {/* Mobile Notch overlay */}
             {previewDevice === "mobile" && (
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-5 bg-[#1a1a1a] rounded-b-2xl z-40 flex justify-center items-center">
-                <span className="w-2.5 h-2.5 bg-black/80 rounded-full mr-2" />
-                <span className="w-12 h-1 bg-white/20 rounded-full" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 sm:w-40 h-4 sm:h-5 bg-[#1a1a1a] rounded-b-2xl z-40 flex justify-center items-center">
+                <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-black/80 rounded-full mr-2" />
+                <span className="w-10 sm:w-12 h-1 bg-white/20 rounded-full" />
               </div>
             )}
           </div>
+
+          {/* Mobile Bottom Sticky Navigation Bar when inside Preview Mode */}
+          <div
+            className="flex md:hidden sticky bottom-0 inset-x-0 z-30 bg-white/98 backdrop-blur-md border-t border-[#eae6df] px-4 py-2.5 items-center justify-between shadow-[0_-4px_16px_rgba(0,0,0,0.12)] flex-shrink-0 w-full mt-2 rounded-xl"
+            style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
+          >
+            <button
+              disabled={currentStep === 0}
+              onClick={() => setCurrentStep(currentStep - 1)}
+              className="flex items-center gap-1 px-3.5 py-2 border-2 border-[#855f18]/30 text-[#855f18] text-xs font-extrabold rounded-xl bg-white active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all"
+            >
+              <ChevronLeft className="w-4 h-4 text-[#855f18]" />
+              Back
+            </button>
+
+            <span className="text-xs font-serif font-bold text-[#1a1a1a]">
+              Step {currentStep + 1}/{stepsCount}: {steps[currentStep]?.title}
+            </span>
+
+            <button
+              disabled={currentStep === stepsCount - 1}
+              onClick={() => {
+                if (hasUnsavedChanges) handleSaveDraft();
+                setCurrentStep(currentStep + 1);
+              }}
+              className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-[#855f18] to-[#6c4c12] text-white text-xs font-extrabold rounded-xl active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all shadow-md"
+            >
+              <span>Next</span>
+              <ChevronRight className="w-4 h-4 text-white" />
+            </button>
+          </div>
         </div>
+
       </div>
     </div>
   );
