@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useWizardStore } from "@/lib/store";
 import { saveInvitationDraft, updateInvitationSettingsAction } from "@/app/actions";
 import { templateRegistry } from "@/templates/registry";
@@ -331,19 +332,30 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
           </div>
 
           {/* Form Scroll Body */}
-          <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 pb-24">
             {renderStepContent()}
           </div>
 
-          {/* Bottom Nav Actions Bar */}
-          <div className="h-20 bg-white border-t border-[#eae6df] px-6 flex items-center justify-between flex-shrink-0">
+          {/* Bottom Nav Actions Bar (Sticky & Mobile Optimized) */}
+          <div className="sticky bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-[#eae6df] px-4 sm:px-6 py-3 flex items-center justify-between shadow-[0_-4px_16px_rgba(0,0,0,0.08)] flex-shrink-0">
             <button
               disabled={currentStep === 0}
               onClick={() => setCurrentStep(currentStep - 1)}
-              className="px-5 py-2.5 border border-[#eae6df] text-xs font-semibold rounded-lg hover:bg-[#faf8f5] active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all"
+              className="flex items-center gap-1 px-4 py-2.5 sm:px-5 sm:py-2.5 border-2 border-[#855f18]/30 text-[#855f18] text-xs font-extrabold rounded-xl bg-white hover:bg-[#855f18]/10 hover:border-[#855f18] active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all shadow-xs"
             >
+              <ChevronLeft className="w-4 h-4 text-[#855f18]" />
               Back
             </button>
+
+            {/* Mobile Current Step Counter Pill */}
+            <div className="flex flex-col items-center justify-center text-center">
+              <span className="text-[10px] uppercase font-extrabold text-[#855f18] tracking-widest font-mono">
+                Step {currentStep + 1} of {stepsCount}
+              </span>
+              <span className="text-xs font-serif font-bold text-[#1a1a1a] max-w-[120px] sm:max-w-none truncate">
+                {steps[currentStep]?.title}
+              </span>
+            </div>
 
             <button
               disabled={currentStep === stepsCount - 1}
@@ -351,9 +363,10 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
                 if (hasUnsavedChanges) handleSaveDraft();
                 setCurrentStep(currentStep + 1);
               }}
-              className="px-5 py-2.5 bg-[#855f18] text-white text-xs font-semibold rounded-lg hover:bg-[#6c4c12] active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all"
+              className="flex items-center gap-1.5 px-5 py-2.5 sm:px-6 sm:py-2.5 bg-gradient-to-r from-[#855f18] to-[#6c4c12] text-white text-xs font-extrabold rounded-xl hover:shadow-lg hover:shadow-[#855f18]/25 active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all shadow-md"
             >
-              Next Step
+              <span>{currentStep === stepsCount - 1 ? "Finish" : "Next Step"}</span>
+              <ChevronRight className="w-4 h-4 text-white" />
             </button>
           </div>
         </div>
