@@ -254,24 +254,24 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
   const ActiveTemplateComponent = templateRegistry[templateId]?.component || templateRegistry.barcelona.component;
 
   return (
-    <div className="flex-1 flex flex-col h-screen overflow-hidden">
+    <div className="flex-1 flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden">
       {/* ----------------- TOP NAVIGATION BAR ----------------- */}
-      <header className="h-16 bg-white border-b border-[#eae6df] px-6 flex items-center justify-between flex-shrink-0 z-20 shadow-sm">
-        <div className="flex items-center gap-4">
+      <header className="h-14 sm:h-16 bg-white border-b border-[#eae6df] px-4 sm:px-6 flex items-center justify-between flex-shrink-0 z-20 shadow-sm">
+        <div className="flex items-center gap-3 sm:gap-4">
           <Link
             href="/dashboard"
-            className="text-xs font-semibold text-[#666] hover:text-[#1a1a1a] flex items-center gap-1.5 transition-colors border border-[#eae6df] px-3 py-1.5 rounded-lg bg-[#faf8f5]"
+            className="text-xs font-semibold text-[#666] hover:text-[#1a1a1a] flex items-center gap-1 transition-colors border border-[#eae6df] px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg bg-[#faf8f5]"
           >
             ← Exit
           </Link>
           <span className="h-4 w-px bg-[#eae6df]" />
-          <h1 className="text-md font-serif font-bold text-[#1a1a1a]">
+          <h1 className="text-sm sm:text-md font-serif font-bold text-[#1a1a1a]">
             Invitation Builder
           </h1>
         </div>
 
         {/* Manual Save / Update Controls & Status Badge */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {saveStatus === "saving" && (
             <span className="inline-flex items-center gap-1.5 text-xs text-[#855f18]">
               <span className="w-1.5 h-1.5 bg-[#855f18] rounded-full animate-ping" />
@@ -279,10 +279,10 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
             </span>
           )}
           {saveStatus === "saved" && !hasUnsavedChanges && (
-            <span className="text-xs text-green-600 font-medium">✓ Draft Saved</span>
+            <span className="text-xs text-green-600 font-medium">✓ Saved</span>
           )}
           {saveStatus === "error" && (
-            <span className="text-xs text-red-600 font-medium">✗ Save Failed</span>
+            <span className="text-xs text-red-600 font-medium">✗ Failed</span>
           )}
           {hasUnsavedChanges && saveStatus !== "saving" && (
             <span className="text-xs text-amber-700 font-medium hidden sm:inline">Unsaved Changes</span>
@@ -291,7 +291,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
           <button
             onClick={handleSaveDraft}
             disabled={saveStatus === "saving" || !hasUnsavedChanges}
-            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`px-3 py-1 sm:px-4 sm:py-1.5 rounded-lg text-xs font-bold transition-all ${
               hasUnsavedChanges
                 ? "bg-[#855f18] text-white hover:bg-[#6c4c12] shadow-sm cursor-pointer"
                 : "bg-[#eae6df] text-[#888] cursor-default"
@@ -313,16 +313,16 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
       {/* ----------------- CONTENT SPLIT LAYOUT ----------------- */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Form Panel */}
-        <div className="w-full md:w-1/2 flex flex-col h-full border-r border-[#eae6df] bg-[#faf8f5]">
+        <div className="w-full md:w-1/2 flex flex-col h-full min-h-0 border-r border-[#eae6df] bg-[#faf8f5] relative">
           {/* Step Badges Navigation */}
-          <div className="px-6 py-4 bg-white border-b border-[#eae6df] overflow-x-auto flex gap-1.5 scrollbar-none flex-shrink-0">
+          <div className="px-4 sm:px-6 py-3 bg-white border-b border-[#eae6df] overflow-x-auto flex gap-1.5 scrollbar-none flex-shrink-0">
             {stepTitles.map((title, i) => (
               <button
                 key={i}
                 onClick={() => setCurrentStep(i)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all whitespace-nowrap ${
                   currentStep === i
-                    ? "bg-[#855f18] text-white"
+                    ? "bg-[#855f18] text-white shadow-sm"
                     : "bg-[#faf8f5] text-[#666] hover:bg-[#eae6df]/50"
                 }`}
               >
@@ -332,12 +332,15 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
           </div>
 
           {/* Form Scroll Body */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 pb-24">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 pb-28">
             {renderStepContent()}
           </div>
 
-          {/* Bottom Nav Actions Bar (Sticky & Mobile Optimized) */}
-          <div className="sticky bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur-md border-t border-[#eae6df] px-4 sm:px-6 py-3 flex items-center justify-between shadow-[0_-4px_16px_rgba(0,0,0,0.08)] flex-shrink-0">
+          {/* Bottom Nav Actions Bar (Sticky & Safe Area Optimized for Safari Mobile) */}
+          <div
+            className="sticky bottom-0 inset-x-0 z-30 bg-white/98 backdrop-blur-md border-t border-[#eae6df] px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between shadow-[0_-4px_16px_rgba(0,0,0,0.12)] flex-shrink-0"
+            style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+          >
             <button
               disabled={currentStep === 0}
               onClick={() => setCurrentStep(currentStep - 1)}

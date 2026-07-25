@@ -52,7 +52,7 @@ export default async function EditInvitationPage(
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen bg-[#faf8f5]">
+    <div className="flex-1 flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden bg-[#faf8f5]">
       <WizardEditor invitation={serializableInvitation} />
     </div>
   );
