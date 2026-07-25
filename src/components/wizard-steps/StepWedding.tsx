@@ -59,44 +59,50 @@ export function StepWedding() {
         <p className="text-xs text-[#666]">Enter the date, time, and main location for your wedding</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-2">
-            Wedding Date
-          </label>
-          <input
-            type="date"
-            value={data.wedding.date}
-            onChange={(e) => updateNestedData("wedding", { date: e.target.value })}
-            className="w-full px-4 py-2 border border-[#eae6df] rounded bg-white text-sm focus:outline-none focus:border-[#855f18]"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-2">
-            Time (24h)
-          </label>
-          <input
-            type="time"
-            value={data.wedding.time}
-            onChange={(e) => updateNestedData("wedding", { time: e.target.value })}
-            className="w-full px-4 py-2 border border-[#eae6df] rounded bg-white text-sm focus:outline-none focus:border-[#855f18]"
-          />
-        </div>
-        <div>
-          <label className="block text-xs font-semibold text-[#1a1a1a] uppercase tracking-wider mb-2">
-            Timezone
-          </label>
-          <select
-            value={data.wedding.timezone}
-            onChange={(e) => updateNestedData("wedding", { timezone: e.target.value })}
-            className="w-full px-4 py-2.5 border border-[#eae6df] rounded bg-white text-sm focus:outline-none focus:border-[#855f18]"
-          >
-            {timezones.map((tz) => (
-              <option key={tz} value={tz}>
-                {tz}
-              </option>
-            ))}
-          </select>
+      <div className="bg-white border border-[#eae6df] rounded-xl p-4 sm:p-5 space-y-4 shadow-sm">
+        <h3 className="font-serif text-lg font-semibold text-[#855f18] border-b border-[#faf8f5] pb-2">
+          Date &amp; Time Settings
+        </h3>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#777] mb-1">
+              Wedding Date
+            </label>
+            <input
+              type="date"
+              value={data.wedding.date}
+              onChange={(e) => updateNestedData("wedding", { date: e.target.value })}
+              className="w-full px-2.5 py-2 border border-[#eae6df] rounded bg-white text-xs text-[#1a1a1a] focus:outline-none focus:border-[#855f18]"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#777] mb-1">
+              Time (24h)
+            </label>
+            <input
+              type="time"
+              value={data.wedding.time}
+              onChange={(e) => updateNestedData("wedding", { time: e.target.value })}
+              className="w-full px-2.5 py-2 border border-[#eae6df] rounded bg-white text-xs text-[#1a1a1a] focus:outline-none focus:border-[#855f18]"
+            />
+          </div>
+          <div className="col-span-2 sm:col-span-1">
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-[#777] mb-1">
+              Timezone
+            </label>
+            <select
+              value={data.wedding.timezone}
+              onChange={(e) => updateNestedData("wedding", { timezone: e.target.value })}
+              className="w-full px-2.5 py-2 border border-[#eae6df] rounded bg-white text-xs text-[#1a1a1a] focus:outline-none focus:border-[#855f18]"
+            >
+              {timezones.map((tz) => (
+                <option key={tz} value={tz}>
+                  {tz}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
