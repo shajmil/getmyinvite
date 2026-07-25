@@ -405,26 +405,30 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
               </span>
             </div>
 
-            <button
-              disabled={currentStep === stepsCount - 1}
-              onClick={() => {
-                if (hasUnsavedChanges) handleSaveDraft();
-                setCurrentStep(currentStep + 1);
-              }}
-              className="flex items-center gap-1.5 px-5 py-2.5 sm:px-6 sm:py-2.5 bg-gradient-to-r from-[#855f18] to-[#6c4c12] text-white text-xs font-extrabold rounded-xl hover:shadow-lg hover:shadow-[#855f18]/25 active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all shadow-md"
-            >
-              <span>{currentStep === stepsCount - 1 ? "Finish" : "Next Step"}</span>
-              <ChevronRight className="w-4 h-4 text-white" />
-            </button>
+            {/* Next / Step Action Button */}
+            {currentStep < stepsCount - 1 ? (
+              <button
+                onClick={() => {
+                  if (hasUnsavedChanges) handleSaveDraft();
+                  setCurrentStep(currentStep + 1);
+                }}
+                className="flex items-center gap-1.5 px-5 py-2.5 sm:px-6 sm:py-2.5 bg-gradient-to-r from-[#855f18] to-[#6c4c12] text-white text-xs font-extrabold rounded-xl hover:shadow-lg hover:shadow-[#855f18]/25 active:scale-95 transition-all shadow-md"
+              >
+                <span>Next Step</span>
+                <ChevronRight className="w-4 h-4 text-white" />
+              </button>
+            ) : (
+              <div className="w-20 sm:w-24" />
+            )}
           </div>
         </div>
 
         {/* Right Preview Panel (Visible on Desktop OR Mobile preview mode) */}
         <div
           className={`${
-            mobileTab === "preview" ? "flex w-full" : "hidden md:flex md:w-1/2"
-          } bg-[#efede8] flex-col relative h-full overflow-hidden transition-all duration-300 ${
-            previewDevice === "mobile" ? "items-center justify-center p-2 sm:p-6" : "items-stretch justify-stretch p-3 sm:p-6"
+            mobileTab === "preview" ? "flex w-full h-full min-h-[500px]" : "hidden md:flex md:w-1/2 h-full min-h-[500px]"
+          } bg-[#efede8] flex-col relative overflow-hidden transition-all duration-300 ${
+            previewDevice === "mobile" ? "items-center justify-center p-3 sm:p-6" : "items-stretch justify-stretch p-3 sm:p-6"
           }`}
         >
           {/* Mobile Preview Top Header Bar */}
@@ -465,10 +469,10 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
 
           {/* Preview Container Frame */}
           <div
-            className={`transition-all duration-500 ease-in-out shadow-2xl bg-white border border-[#eae6df] overflow-hidden relative flex-1 ${
+            className={`transition-all duration-500 ease-in-out shadow-2xl bg-white border border-[#eae6df] overflow-hidden relative ${
               previewDevice === "mobile"
-                ? "w-full max-w-[375px] max-h-[768px] h-full rounded-[24px] sm:rounded-[36px] border-[6px] sm:border-[12px] border-[#1a1a1a] z-10"
-                : "w-full rounded-2xl z-10"
+                ? "w-full max-w-[375px] h-[680px] sm:h-[768px] rounded-[24px] sm:rounded-[36px] border-[6px] sm:border-[12px] border-[#1a1a1a] z-10"
+                : "w-full h-full min-h-[500px] rounded-2xl z-10"
             }`}
           >
             {/* The Actual Template Client Render */}
@@ -505,17 +509,20 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
               Step {currentStep + 1}/{stepsCount}: {steps[currentStep]?.title}
             </span>
 
-            <button
-              disabled={currentStep === stepsCount - 1}
-              onClick={() => {
-                if (hasUnsavedChanges) handleSaveDraft();
-                setCurrentStep(currentStep + 1);
-              }}
-              className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-[#855f18] to-[#6c4c12] text-white text-xs font-extrabold rounded-xl active:scale-95 disabled:opacity-30 disabled:pointer-events-none transition-all shadow-md"
-            >
-              <span>Next</span>
-              <ChevronRight className="w-4 h-4 text-white" />
-            </button>
+            {currentStep < stepsCount - 1 ? (
+              <button
+                onClick={() => {
+                  if (hasUnsavedChanges) handleSaveDraft();
+                  setCurrentStep(currentStep + 1);
+                }}
+                className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-[#855f18] to-[#6c4c12] text-white text-xs font-extrabold rounded-xl active:scale-95 transition-all shadow-md"
+              >
+                <span>Next</span>
+                <ChevronRight className="w-4 h-4 text-white" />
+              </button>
+            ) : (
+              <div className="w-14" />
+            )}
           </div>
         </div>
 
