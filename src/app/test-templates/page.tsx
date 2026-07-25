@@ -176,12 +176,16 @@ function TestTemplatesContent() {
   );
 }
 
+import { WeddingLoader } from "@/components/WeddingLoader";
+
 export default function TestTemplatesPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#faf8f5]">
-        <div className="animate-spin w-8 h-8 border-4 border-[#855f18] border-t-transparent rounded-full" />
-      </div>
+      <WeddingLoader
+        message="Loading Template Preview"
+        subMessage="Preparing wedding design templates..."
+        fullScreen
+      />
     }>
       <TestTemplatesContent />
     </Suspense>

@@ -8,6 +8,8 @@ import { useWizardStore } from "@/lib/store";
 import { saveInvitationDraft, updateInvitationSettingsAction } from "@/app/actions";
 import { templateRegistry } from "@/templates/registry";
 
+import { WeddingLoader } from "./WeddingLoader";
+
 // Steps Imports
 import { StepCouple } from "./wizard-steps/StepCouple";
 import { StepWedding } from "./wizard-steps/StepWedding";
@@ -194,9 +196,11 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
 
   if (!mounted || !data) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-[#855f18] border-t-transparent rounded-full" />
-      </div>
+      <WeddingLoader
+        message="Loading Your Wedding Editor"
+        subMessage="Preparing your design tools &amp; love story..."
+        fullScreen
+      />
     );
   }
 
