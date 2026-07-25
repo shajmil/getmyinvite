@@ -465,7 +465,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
 
           {/* Preview Container Frame */}
           <div
-            className={`transition-all duration-500 ease-in-out bg-white overflow-hidden relative w-full ${
+            className={`transition-[width,height,border-radius] duration-300 ease-out bg-white overflow-hidden relative w-full ${
               previewDevice === "mobile"
                 ? "h-full md:w-[375px] md:h-[calc(100vh-120px)] md:max-h-[768px] md:rounded-[36px] md:border-[12px] md:border-[#1a1a1a] md:shadow-2xl z-10"
                 : "w-full h-full md:h-[calc(100vh-120px)] rounded-none md:rounded-2xl z-10"
@@ -473,7 +473,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
           >
             {/* The Actual Template Client Render */}
             <div className="absolute inset-0 w-full h-full">
-              <IframePreview key={previewDevice}>
+              <IframePreview>
                 <ActiveTemplateComponent data={data} colorSchemeId={colorSchemeId} isPreview={true} />
               </IframePreview>
             </div>
