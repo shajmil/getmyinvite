@@ -98,14 +98,14 @@ html {
 }
 
 /* =============================================================
-   PREVENT IOS SAFARI INPUT AUTO-ZOOM ON FOCUS ONLY
-   (Preserves original compact font sizes while blocking Safari zoom)
+   PREVENT IOS SAFARI DOUBLE-TAP & GESTURE ZOOM
+   (Keeps exact original input font sizes intact)
    ============================================================= */
 @media (max-width: 768px) {
-  input:focus,
-  textarea:focus,
-  select:focus {
-    font-size: 16px !important;
+  input,
+  textarea,
+  select {
+    touch-action: manipulation;
   }
 }
 
