@@ -194,7 +194,7 @@ export function StepRSVPExtras() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       {/* Active Crop Modal */}
       {cropModal?.isOpen && (
         <ImageCropModal

@@ -366,7 +366,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
           </div>
 
           {/* Form Scroll Body */}
-          <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 pb-28">
+          <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 pb-44 sm:pb-48">
             {renderStepContent()}
           </div>
 
