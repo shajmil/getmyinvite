@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { allFontVariables } from "@/templates/fonts";
 import { DeveloperCredits } from "@/components/DeveloperCredits";
@@ -27,6 +27,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "./",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
