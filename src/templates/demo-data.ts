@@ -4,6 +4,8 @@ export const demoInvitationData: InvitationData = {
   partner1: {
     firstName: "Sophia",
     lastName: "John",
+    roleTitle: "The Bride",
+    relationPrefix: "Daughter of",
     photo: "/templates/barcelona/ai-bride.png",
     parents: "Mrs. Toncy Bosco & John Bosco Kuzhikkadan",
     facebookUrl: "https://facebook.com",
@@ -12,6 +14,8 @@ export const demoInvitationData: InvitationData = {
   partner2: {
     firstName: "Garyson",
     lastName: "George",
+    roleTitle: "The Groom",
+    relationPrefix: "Son of",
     photo: "/templates/barcelona/ai-groom.png",
     parents: "Mrs. Latha George & Konnoth Antony George",
     facebookUrl: "https://facebook.com",

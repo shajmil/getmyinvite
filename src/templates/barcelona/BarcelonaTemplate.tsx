@@ -342,11 +342,11 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
                 {data.partner1.firstName} {data.partner1.lastName}
               </h3>
               <h6 className="font-sans text-xs tracking-widest uppercase font-semibold text-var(--gold)">
-                The Bride
+                {data.partner1.roleTitle || "The Bride"}
               </h6>
               {data.partner1.parents && (
                 <p className="text-sm font-serif italic text-[#777] mt-2">
-                  Daughter of {data.partner1.parents}
+                  {data.partner1.relationPrefix ? `${data.partner1.relationPrefix} ` : "Daughter of "}{data.partner1.parents}
                 </p>
               )}
               <div className="flex justify-center md:justify-end gap-4 pt-3 text-[#777]">
@@ -388,11 +388,11 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
                 {data.partner2.firstName} {data.partner2.lastName}
               </h3>
               <h6 className="font-sans text-xs tracking-widest uppercase font-semibold text-var(--gold)">
-                The Groom
+                {data.partner2.roleTitle || "The Groom"}
               </h6>
               {data.partner2.parents && (
                 <p className="text-sm font-serif italic text-[#777] mt-2">
-                  Son of {data.partner2.parents}
+                  {data.partner2.relationPrefix ? `${data.partner2.relationPrefix} ` : "Son of "}{data.partner2.parents}
                 </p>
               )}
               <div className="flex justify-center md:justify-start gap-4 pt-3 text-[#777]">

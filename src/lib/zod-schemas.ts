@@ -3,6 +3,8 @@ import { z } from "zod";
 export const PartnerSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
+  roleTitle: z.string().optional().or(z.literal("")),
+  relationPrefix: z.string().optional().or(z.literal("")),
   photo: z.string().optional().or(z.literal("")),
   parents: z.string().optional().or(z.literal("")),
   facebookUrl: z.string().optional().or(z.literal("")),

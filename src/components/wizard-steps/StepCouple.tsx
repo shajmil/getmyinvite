@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useWizardStore } from "@/lib/store";
 import { uploadFile } from "@/lib/compress";
 import { ImageCropModal, AspectRatioType, CropShapeType } from "@/components/ImageCropModal";
-import { Crop, Trash2, Loader2 } from "lucide-react";
+import { Crop, Trash2, Loader2, ArrowLeftRight } from "lucide-react";
 
 export function StepCouple() {
   const { data, updateNestedData, updateData, templateId } = useWizardStore();
@@ -177,9 +177,25 @@ export function StepCouple() {
         />
       )}
 
-      <div className="border-b border-[#eae6df] pb-4">
-        <h2 className="text-xl font-serif font-bold text-[#1a1a1a]">Step 1 — The Couple</h2>
-        <p className="text-xs text-[#666]">Enter the details and photos of the happy couple</p>
+      <div className="flex items-center justify-between border-b border-[#eae6df] pb-4">
+        <div>
+          <h2 className="text-xl font-serif font-bold text-[#1a1a1a]">Step 1 — The Couple</h2>
+          <p className="text-xs text-[#666]">Enter the details, roles, and photos of the couple</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            updateData({
+              partner1: data.partner2,
+              partner2: data.partner1,
+            });
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#855f18]/10 text-[#855f18] hover:bg-[#855f18]/20 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-xs"
+          title="Swap Groom and Bride order"
+        >
+          <ArrowLeftRight className="w-3.5 h-3.5" />
+          <span>Swap Partner Order</span>
+        </button>
       </div>
 
       <div>
@@ -197,9 +213,14 @@ export function StepCouple() {
 
       {/* Grid for Partner 1 & 2 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Partner 1 (Bride) */}
+        {/* Partner 1 */}
         <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
-          <h3 className="font-serif text-lg font-semibold text-[#855f18] border-b border-[#faf8f5] pb-2">First Partner</h3>
+          <div className="flex items-center justify-between border-b border-[#faf8f5] pb-2">
+            <h3 className="font-serif text-lg font-semibold text-[#855f18]">First Partner</h3>
+            <span className="text-[10px] font-bold uppercase bg-[#855f18]/10 text-[#855f18] px-2 py-0.5 rounded">
+              {data.partner1.roleTitle || "The Bride"}
+            </span>
+          </div>
           
           <div className="grid grid-cols-2 gap-2">
             <div>
@@ -224,6 +245,80 @@ export function StepCouple() {
             </div>
           </div>
 
+          {/* Role / Title Selection */}
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Role / Title</label>
+            <div className="grid grid-cols-2 gap-2">
+              <select
+                value={
+                  ["The Bride", "The Groom", "Bride", "Groom", "The Bride-to-be", "The Groom-to-be", "Host"].includes(data.partner1.roleTitle || "The Bride")
+                    ? (data.partner1.roleTitle || "The Bride")
+                    : "custom"
+                }
+                onChange={(e) => {
+                  if (e.target.value !== "custom") {
+                    updateNestedData("partner1", { roleTitle: e.target.value });
+                  }
+                }}
+                className="px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18] bg-white"
+              >
+                <option value="The Bride">The Bride</option>
+                <option value="The Groom">The Groom</option>
+                <option value="Bride">Bride</option>
+                <option value="Groom">Groom</option>
+                <option value="The Bride-to-be">The Bride-to-be</option>
+                <option value="The Groom-to-be">The Groom-to-be</option>
+                <option value="Host">Host</option>
+                <option value="custom">Custom Title...</option>
+              </select>
+              <input
+                type="text"
+                value={data.partner1.roleTitle !== undefined ? data.partner1.roleTitle : "The Bride"}
+                onChange={(e) => updateNestedData("partner1", { roleTitle: e.target.value })}
+                className="px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+                placeholder="e.g. The Bride"
+              />
+            </div>
+          </div>
+
+          {/* Relationship Prefix */}
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Parent Relationship Prefix</label>
+            <div className="grid grid-cols-2 gap-2">
+              <select
+                value={
+                  ["Daughter of", "Son of", "D/o", "S/o", "Granddaughter of", "Grandson of", "Niece of", "Nephew of", "Child of"].includes(data.partner1.relationPrefix || "Daughter of")
+                    ? (data.partner1.relationPrefix || "Daughter of")
+                    : "custom"
+                }
+                onChange={(e) => {
+                  if (e.target.value !== "custom") {
+                    updateNestedData("partner1", { relationPrefix: e.target.value });
+                  }
+                }}
+                className="px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18] bg-white"
+              >
+                <option value="Daughter of">Daughter of</option>
+                <option value="Son of">Son of</option>
+                <option value="D/o">D/o</option>
+                <option value="S/o">S/o</option>
+                <option value="Granddaughter of">Granddaughter of</option>
+                <option value="Grandson of">Grandson of</option>
+                <option value="Niece of">Niece of</option>
+                <option value="Nephew of">Nephew of</option>
+                <option value="Child of">Child of</option>
+                <option value="custom">Custom Prefix...</option>
+              </select>
+              <input
+                type="text"
+                value={data.partner1.relationPrefix !== undefined ? data.partner1.relationPrefix : "Daughter of"}
+                onChange={(e) => updateNestedData("partner1", { relationPrefix: e.target.value })}
+                className="px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+                placeholder="e.g. Daughter of"
+              />
+            </div>
+          </div>
+
           <div>
             <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Parents Line (Optional)</label>
             <input
@@ -231,7 +326,7 @@ export function StepCouple() {
               value={data.partner1.parents || ""}
               onChange={(e) => updateNestedData("partner1", { parents: e.target.value })}
               className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
-              placeholder="D/o Mr. & Mrs. John"
+              placeholder="Mrs. Toncy Bosco & John Bosco Kuzhikkadan"
             />
           </div>
 
@@ -295,9 +390,14 @@ export function StepCouple() {
           </div>
         </div>
 
-        {/* Partner 2 (Groom) */}
+        {/* Partner 2 */}
         <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
-          <h3 className="font-serif text-lg font-semibold text-[#855f18] border-b border-[#faf8f5] pb-2">Second Partner</h3>
+          <div className="flex items-center justify-between border-b border-[#faf8f5] pb-2">
+            <h3 className="font-serif text-lg font-semibold text-[#855f18]">Second Partner</h3>
+            <span className="text-[10px] font-bold uppercase bg-[#855f18]/10 text-[#855f18] px-2 py-0.5 rounded">
+              {data.partner2.roleTitle || "The Groom"}
+            </span>
+          </div>
           
           <div className="grid grid-cols-2 gap-2">
             <div>
@@ -322,6 +422,80 @@ export function StepCouple() {
             </div>
           </div>
 
+          {/* Role / Title Selection */}
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Role / Title</label>
+            <div className="grid grid-cols-2 gap-2">
+              <select
+                value={
+                  ["The Bride", "The Groom", "Bride", "Groom", "The Bride-to-be", "The Groom-to-be", "Host"].includes(data.partner2.roleTitle || "The Groom")
+                    ? (data.partner2.roleTitle || "The Groom")
+                    : "custom"
+                }
+                onChange={(e) => {
+                  if (e.target.value !== "custom") {
+                    updateNestedData("partner2", { roleTitle: e.target.value });
+                  }
+                }}
+                className="px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18] bg-white"
+              >
+                <option value="The Groom">The Groom</option>
+                <option value="The Bride">The Bride</option>
+                <option value="Groom">Groom</option>
+                <option value="Bride">Bride</option>
+                <option value="The Groom-to-be">The Groom-to-be</option>
+                <option value="The Bride-to-be">The Bride-to-be</option>
+                <option value="Host">Host</option>
+                <option value="custom">Custom Title...</option>
+              </select>
+              <input
+                type="text"
+                value={data.partner2.roleTitle !== undefined ? data.partner2.roleTitle : "The Groom"}
+                onChange={(e) => updateNestedData("partner2", { roleTitle: e.target.value })}
+                className="px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+                placeholder="e.g. The Groom"
+              />
+            </div>
+          </div>
+
+          {/* Relationship Prefix */}
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Parent Relationship Prefix</label>
+            <div className="grid grid-cols-2 gap-2">
+              <select
+                value={
+                  ["Daughter of", "Son of", "D/o", "S/o", "Granddaughter of", "Grandson of", "Niece of", "Nephew of", "Child of"].includes(data.partner2.relationPrefix || "Son of")
+                    ? (data.partner2.relationPrefix || "Son of")
+                    : "custom"
+                }
+                onChange={(e) => {
+                  if (e.target.value !== "custom") {
+                    updateNestedData("partner2", { relationPrefix: e.target.value });
+                  }
+                }}
+                className="px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18] bg-white"
+              >
+                <option value="Son of">Son of</option>
+                <option value="Daughter of">Daughter of</option>
+                <option value="S/o">S/o</option>
+                <option value="D/o">D/o</option>
+                <option value="Grandson of">Grandson of</option>
+                <option value="Granddaughter of">Granddaughter of</option>
+                <option value="Nephew of">Nephew of</option>
+                <option value="Niece of">Niece of</option>
+                <option value="Child of">Child of</option>
+                <option value="custom">Custom Prefix...</option>
+              </select>
+              <input
+                type="text"
+                value={data.partner2.relationPrefix !== undefined ? data.partner2.relationPrefix : "Son of"}
+                onChange={(e) => updateNestedData("partner2", { relationPrefix: e.target.value })}
+                className="px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+                placeholder="e.g. Son of"
+              />
+            </div>
+          </div>
+
           <div>
             <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Parents Line (Optional)</label>
             <input
@@ -329,7 +503,7 @@ export function StepCouple() {
               value={data.partner2.parents || ""}
               onChange={(e) => updateNestedData("partner2", { parents: e.target.value })}
               className="w-full px-3 py-2 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
-              placeholder="S/o Mr. & Mrs. George"
+              placeholder="Mrs. Latha George & Konnoth Antony George"
             />
           </div>
 
