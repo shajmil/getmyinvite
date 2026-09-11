@@ -548,6 +548,61 @@ export function StepRSVPExtras() {
           </div>
         )}
       </div>
+
+      {/* Dress Code, Gifts, Hashtag & Footer */}
+      <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
+        <h3 className="font-serif text-lg font-semibold text-[#855f18] border-b border-[#faf8f5] pb-2">Details & Extras</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Dress Code</label>
+            <input
+              type="text"
+              value={data.extras.dressCode || ""}
+              onChange={(e) => updateNestedData("extras", { dressCode: e.target.value })}
+              maxLength={200}
+              className="w-full px-3 py-2 border border-[#eae6df] rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#855f18]/30"
+              placeholder="e.g. Elegant, Formal, Traditional (leave empty to hide)"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Wedding Hashtag</label>
+            <input
+              type="text"
+              value={data.extras.hashtag || ""}
+              onChange={(e) => updateNestedData("extras", { hashtag: e.target.value })}
+              maxLength={100}
+              className="w-full px-3 py-2 border border-[#eae6df] rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#855f18]/30"
+              placeholder="e.g. #SophiaAndGaryson (leave empty to hide)"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Gift Note</label>
+          <textarea
+            value={data.extras.giftNote || ""}
+            onChange={(e) => updateNestedData("extras", { giftNote: e.target.value })}
+            rows={2}
+            maxLength={500}
+            className="w-full px-3 py-2 border border-[#eae6df] rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#855f18]/30"
+            placeholder="e.g. Your presence is our present. No gifts required. (leave empty to hide)"
+          />
+        </div>
+
+        <div>
+          <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">Footer Message</label>
+          <textarea
+            value={data.extras.footerMessage || ""}
+            onChange={(e) => updateNestedData("extras", { footerMessage: e.target.value })}
+            rows={2}
+            maxLength={300}
+            className="w-full px-3 py-2 border border-[#eae6df] rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#855f18]/30"
+            placeholder="e.g. We can't wait to share this beautiful day with you."
+          />
+        </div>
+      </div>
     </div>
   );
 }
