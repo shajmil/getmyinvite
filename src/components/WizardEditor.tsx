@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -34,77 +34,77 @@ interface WizardEditorProps {
 
 interface IframePreviewProps {
   children: React.ReactNode;
+  activeTab?: string;
 }
 
-function IframePreview({ children }: IframePreviewProps) {
+function IframePreview({ children, activeTab }: IframePreviewProps) {
   const [iframeRef, setIframeRef] = useState<HTMLIFrameElement | null>(null);
   const [mountNode, setMountNode] = useState<HTMLElement | null>(null);
 
-  useEffect(() => {
+  const setupIframe = useCallback(() => {
     if (!iframeRef) return;
     const doc = iframeRef.contentDocument;
-    if (!doc) return;
+    if (!doc || !doc.body) return;
 
-    const setupIframe = () => {
-      const doc = iframeRef.contentDocument;
-      if (!doc || !doc.body) return;
+    // Clear head to avoid duplicates
+    doc.head.innerHTML = "";
 
-      // Clear head to avoid duplicates
-      doc.head.innerHTML = "";
+    // Copy styles
+    document.querySelectorAll("style, link[rel='stylesheet']").forEach((el) => {
+      doc.head.appendChild(el.cloneNode(true));
+    });
 
-      // Copy styles
-      document.querySelectorAll("style, link[rel='stylesheet']").forEach((el) => {
-        doc.head.appendChild(el.cloneNode(true));
-      });
+    // Viewport meta
+    const meta = doc.createElement("meta");
+    meta.name = "viewport";
+    meta.content = "width=device-width, initial-scale=1.0";
+    doc.head.appendChild(meta);
 
-      // Viewport meta
-      const meta = doc.createElement("meta");
-      meta.name = "viewport";
-      meta.content = "width=device-width, initial-scale=1.0";
-      doc.head.appendChild(meta);
+    // Base URL for relative paths
+    const base = doc.createElement("base");
+    base.href = window.location.origin;
+    doc.head.appendChild(base);
 
-      // Base URL for relative paths
-      const base = doc.createElement("base");
-      base.href = window.location.origin;
-      doc.head.appendChild(base);
+    // Document styles
+    doc.documentElement.style.minHeight = "100%";
+    doc.body.style.margin = "0";
+    doc.body.style.padding = "0";
+    doc.body.style.minHeight = "100%";
+    doc.body.style.width = "100%";
+    doc.body.style.overflowX = "hidden";
+    doc.body.style.overflowY = "auto";
 
-      // Document styles
-      doc.documentElement.style.height = "100%";
-      doc.body.style.margin = "0";
-      doc.body.style.padding = "0";
-      doc.body.style.height = "100%";
-      doc.body.style.width = "100%";
-      doc.body.style.overflowX = "hidden";
-
-      // Intercept hash link clicks to prevent base URL navigation inside the preview iframe
-      doc.addEventListener("click", (e) => {
-        const target = e.target as HTMLElement;
-        const anchor = target.closest("a");
-        if (anchor) {
-          const href = anchor.getAttribute("href");
-          if (href?.startsWith("#")) {
-            e.preventDefault();
-            const id = href.slice(1);
-            if (id) {
-              const element = doc.getElementById(id);
-              if (element) {
-                element.scrollIntoView({ behavior: "smooth" });
-              }
+    // Intercept hash link clicks to prevent base URL navigation inside the preview iframe
+    doc.addEventListener("click", (e) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest("a");
+      if (anchor) {
+        const href = anchor.getAttribute("href");
+        if (href?.startsWith("#")) {
+          e.preventDefault();
+          const id = href.slice(1);
+          if (id) {
+            const element = doc.getElementById(id);
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth" });
             }
           }
         }
-      });
+      }
+    });
 
-      setMountNode(doc.body);
-    };
-
-    setupIframe();
+    setMountNode(doc.body);
   }, [iframeRef]);
+
+  useEffect(() => {
+    setupIframe();
+  }, [setupIframe, activeTab]);
 
   return (
     <iframe
       ref={setIframeRef}
-      style={{ border: "none", width: "100%", height: "100%" }}
+      onLoad={setupIframe}
+      style={{ border: "none", width: "100%", height: "100%", minHeight: "100%" }}
       title="preview-frame"
     >
       {mountNode && createPortal(children, mountNode)}
@@ -444,7 +444,9 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
         {/* Right Preview Panel (Visible on Desktop OR Mobile preview mode) */}
         <div
           className={`${
-            mobileTab === "preview" ? "flex w-full h-full" : "hidden md:flex md:w-1/2 h-full md:h-[calc(100vh-68px)]"
+            mobileTab === "preview"
+              ? "flex w-full h-[100vh] min-h-[100vh]"
+              : "hidden md:flex md:w-1/2 h-full md:h-[calc(100vh-68px)]"
           } bg-[#efede8] md:bg-[#efede8] flex-col p-0 sm:p-4 md:p-6 relative overflow-hidden transition-all duration-300 ${
             previewDevice === "mobile" ? "items-center justify-center" : "items-stretch justify-stretch"
           }`}
@@ -485,13 +487,13 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
           <div
             className={`transition-[width,height,border-radius] duration-300 ease-out bg-white overflow-hidden relative w-full ${
               previewDevice === "mobile"
-                ? "h-full md:w-[375px] md:h-[calc(100vh-120px)] md:max-h-[768px] md:rounded-[36px] md:border-[12px] md:border-[#1a1a1a] md:shadow-2xl z-10"
-                : "w-full h-full md:h-[calc(100vh-120px)] rounded-none md:rounded-2xl z-10"
+                ? "h-full min-h-full md:w-[375px] md:h-[calc(100vh-120px)] md:max-h-[768px] md:rounded-[36px] md:border-[12px] md:border-[#1a1a1a] md:shadow-2xl z-10"
+                : "w-full h-full min-h-full md:h-[calc(100vh-120px)] rounded-none md:rounded-2xl z-10"
             }`}
           >
             {/* The Actual Template Client Render */}
             <div className="absolute inset-0 w-full h-full">
-              <IframePreview>
+              <IframePreview activeTab={mobileTab}>
                 <ActiveTemplateComponent data={data} colorSchemeId={colorSchemeId} isPreview={true} />
               </IframePreview>
             </div>

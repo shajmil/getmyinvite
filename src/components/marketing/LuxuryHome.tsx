@@ -24,7 +24,13 @@ export function LuxuryHome({ isLoggedIn, templates }: { isLoggedIn: boolean; tem
     </header>
     <main id="main">
       <section className={styles.hero}>
-        <div className={styles.heroCopy}><p className={styles.eyebrow}><span aria-hidden="true">✧</span> BEAUTIFUL BEGINNINGS, BEAUTIFULLY SHARED</p><h1>A little link.<br />A beautiful<br /><em>forever.</em></h1><p className={styles.intro}>Your story deserves more than a message.<br />Create a wedding invitation that feels like you.<br />Thoughtfully designed. Joyfully shared.</p><Action href={startHref}>{isLoggedIn ? "Your invitations" : "Create your invitation"}</Action><p className={styles.note}>Free to create. A pleasure to receive.</p></div>
+        <div className={styles.heroCopy}>
+          <p className={styles.eyebrow}><span aria-hidden="true">✧</span> BEAUTIFUL BEGINNINGS, BEAUTIFULLY SHARED</p>
+          <h1 className={styles.heroTitle}>A little link.<br />A beautiful<br /><em>forever.</em></h1>
+          <p className={styles.intro}>Your story deserves more than a message.<br />Create a wedding invitation that feels like you.<br />Thoughtfully designed. Joyfully shared.</p>
+          <Action href={startHref}>{isLoggedIn ? "Your invitations" : "Create your invitation"}</Action>
+          <p className={styles.note}>Free to create. A pleasure to receive.</p>
+        </div>
         <InvitationShowcase />
         <div className={styles.heroFoot}><span>DIGITAL INVITATIONS. REAL CONNECTIONS.</span><a href="#collection">Discover the collection <span aria-hidden="true">↓</span></a></div>
       </section>
@@ -33,7 +39,30 @@ export function LuxuryHome({ isLoggedIn, templates }: { isLoggedIn: boolean; tem
         <div className={styles.sectionHead}><div><p className={styles.eyebrow}>01 / THE COLLECTION</p><h2>Distinct expressions.<br /><em>Endlessly yours.</em></h2></div><p>Start with a design you love.<br />Make every detail your own.</p></div>
         <div className={styles.collection}>{templates.map((template, index) => <article key={template.id} className={styles.template}>
           <Link href={`/test-templates?template=${encodeURIComponent(template.id)}`} className={`${styles.templateArt} ${index % 2 ? styles.darkArt : ""}`} aria-label={`Preview ${template.name}`}>
-            {template.id === "barcelona" ? <div className={styles.photoCard}><Image src="/templates/barcelona/ai-couple2.png" alt="Wedding couple in a romantic outdoor setting" fill sizes="(max-width: 700px) 75vw, 350px" /><div><span>WE’RE GETTING MARRIED</span><p>Aarav &amp; Ananya</p><small>THE START OF SOMETHING BEAUTIFUL</small></div></div> : <div className={styles.classicCard}><span>THE WEDDING CELEBRATION OF</span><p>Aarav<br /><em>&amp;</em><br />Ananya</p><span>TOGETHER IS A BEAUTIFUL PLACE TO BE</span><div>OUR STORY &nbsp; · &nbsp; THE DAY &nbsp; · &nbsp; RSVP</div></div>}
+            {template.id === "barcelona" ? (
+              <div className={styles.photoCard}>
+                <Image src="/templates/barcelona/ai-couple2.png" alt="Wedding couple in a romantic outdoor setting" fill sizes="(max-width: 700px) 75vw, 350px" />
+                <div><span>WE’RE GETTING MARRIED</span><p>Aarav &amp; Ananya</p><small>THE START OF SOMETHING BEAUTIFUL</small></div>
+              </div>
+            ) : template.id === "aurelia" ? (
+              <div className={styles.aureliaCard}>
+                <span className={styles.aureliaMonogram}>S / G</span>
+                <div className={styles.aureliaPortrait}>
+                  <Image src="/templates/barcelona/ai-couple1.png" alt="Couple in romantic editorial setting" fill sizes="(max-width: 700px) 75vw, 350px" />
+                </div>
+                <span>A CELEBRATION OF LOVE</span>
+                <p>Sophia<br /><em>&amp;</em><br />Garyson</p>
+                <small>20 · 12 · 2026 · KERALA</small>
+                <div className={styles.aureliaNav}>THE DAY &nbsp; · &nbsp; MEMORIES &nbsp; · &nbsp; RSVP</div>
+              </div>
+            ) : (
+              <div className={styles.classicCard}>
+                <span>THE WEDDING CELEBRATION OF</span>
+                <p>Aarav<br /><em>&amp;</em><br />Ananya</p>
+                <span>TOGETHER IS A BEAUTIFUL PLACE TO BE</span>
+                <div>OUR STORY &nbsp; · &nbsp; THE DAY &nbsp; · &nbsp; RSVP</div>
+              </div>
+            )}
             <span className={styles.previewBadge}>Explore live preview ↗</span>
           </Link><div className={styles.templateCaption}><div><span className={styles.eyebrow}>COLLECTION / 0{index + 1}</span><h3>{template.name}</h3><p>{template.description}</p></div><Link href={`/test-templates?template=${encodeURIComponent(template.id)}`} aria-label={`Open ${template.name} preview`}>↗</Link></div>
         </article>)}</div><p className={styles.collectionNote}>A glimpse of the possibilities. Explore a live preview to experience each template.</p>
