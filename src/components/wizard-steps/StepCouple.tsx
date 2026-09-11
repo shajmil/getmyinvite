@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useWizardStore } from "@/lib/store";
 import { uploadFile } from "@/lib/compress";
 import { ImageCropModal, AspectRatioType, CropShapeType } from "@/components/ImageCropModal";
-import { Crop, Trash2, Loader2, ArrowLeftRight } from "lucide-react";
+import { Crop, Trash2, Loader2, ArrowLeftRight, X } from "lucide-react";
 
 export function StepCouple() {
   const { data, updateNestedData, updateData, templateId } = useWizardStore();
@@ -388,6 +388,80 @@ export function StepCouple() {
               <p className="text-[10px] text-[#855f18] mt-1">Uploading: {progress}%</p>
             )}
           </div>
+
+          {/* Social Media Links */}
+          <div className="pt-3 border-t border-[#faf8f5] space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-[#777]">
+                  Social Media Links (Optional)
+                </label>
+                <p className="text-[10px] text-[#999]">
+                  Leave blank to remove social icons from the invitation
+                </p>
+              </div>
+              {(data.partner1.facebookUrl || data.partner1.instagramUrl) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateNestedData("partner1", { facebookUrl: "", instagramUrl: "" });
+                  }}
+                  className="flex items-center gap-1 text-[10px] font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2 py-0.5 rounded transition-colors"
+                  title="Remove all social links for First Partner"
+                >
+                  <Trash2 className="w-2.5 h-2.5" /> Remove Links
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 gap-2">
+              <div>
+                <label className="block text-[9px] font-semibold uppercase text-[#888] mb-0.5">Facebook URL</label>
+                <div className="relative flex items-center">
+                  <input
+                    type="url"
+                    value={data.partner1.facebookUrl || ""}
+                    onChange={(e) => updateNestedData("partner1", { facebookUrl: e.target.value })}
+                    className="w-full px-3 py-1.5 pr-7 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+                    placeholder="https://facebook.com/username"
+                  />
+                  {data.partner1.facebookUrl && (
+                    <button
+                      type="button"
+                      onClick={() => updateNestedData("partner1", { facebookUrl: "" })}
+                      className="absolute right-2 text-[#999] hover:text-red-500"
+                      title="Clear Facebook link"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[9px] font-semibold uppercase text-[#888] mb-0.5">Instagram URL</label>
+                <div className="relative flex items-center">
+                  <input
+                    type="url"
+                    value={data.partner1.instagramUrl || ""}
+                    onChange={(e) => updateNestedData("partner1", { instagramUrl: e.target.value })}
+                    className="w-full px-3 py-1.5 pr-7 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+                    placeholder="https://instagram.com/username"
+                  />
+                  {data.partner1.instagramUrl && (
+                    <button
+                      type="button"
+                      onClick={() => updateNestedData("partner1", { instagramUrl: "" })}
+                      className="absolute right-2 text-[#999] hover:text-red-500"
+                      title="Clear Instagram link"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Partner 2 */}
@@ -563,6 +637,80 @@ export function StepCouple() {
             {uploading === "partner2" && (
               <p className="text-[10px] text-[#855f18] mt-1">Uploading: {progress}%</p>
             )}
+          </div>
+
+          {/* Social Media Links */}
+          <div className="pt-3 border-t border-[#faf8f5] space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-[#777]">
+                  Social Media Links (Optional)
+                </label>
+                <p className="text-[10px] text-[#999]">
+                  Leave blank to remove social icons from the invitation
+                </p>
+              </div>
+              {(data.partner2.facebookUrl || data.partner2.instagramUrl) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateNestedData("partner2", { facebookUrl: "", instagramUrl: "" });
+                  }}
+                  className="flex items-center gap-1 text-[10px] font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2 py-0.5 rounded transition-colors"
+                  title="Remove all social links for Second Partner"
+                >
+                  <Trash2 className="w-2.5 h-2.5" /> Remove Links
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 gap-2">
+              <div>
+                <label className="block text-[9px] font-semibold uppercase text-[#888] mb-0.5">Facebook URL</label>
+                <div className="relative flex items-center">
+                  <input
+                    type="url"
+                    value={data.partner2.facebookUrl || ""}
+                    onChange={(e) => updateNestedData("partner2", { facebookUrl: e.target.value })}
+                    className="w-full px-3 py-1.5 pr-7 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+                    placeholder="https://facebook.com/username"
+                  />
+                  {data.partner2.facebookUrl && (
+                    <button
+                      type="button"
+                      onClick={() => updateNestedData("partner2", { facebookUrl: "" })}
+                      className="absolute right-2 text-[#999] hover:text-red-500"
+                      title="Clear Facebook link"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[9px] font-semibold uppercase text-[#888] mb-0.5">Instagram URL</label>
+                <div className="relative flex items-center">
+                  <input
+                    type="url"
+                    value={data.partner2.instagramUrl || ""}
+                    onChange={(e) => updateNestedData("partner2", { instagramUrl: e.target.value })}
+                    className="w-full px-3 py-1.5 pr-7 border border-[#eae6df] rounded text-xs focus:outline-none focus:border-[#855f18]"
+                    placeholder="https://instagram.com/username"
+                  />
+                  {data.partner2.instagramUrl && (
+                    <button
+                      type="button"
+                      onClick={() => updateNestedData("partner2", { instagramUrl: "" })}
+                      className="absolute right-2 text-[#999] hover:text-red-500"
+                      title="Clear Instagram link"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

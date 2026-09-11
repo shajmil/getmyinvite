@@ -8,8 +8,8 @@ export const demoInvitationData: InvitationData = {
     relationPrefix: "Daughter of",
     photo: "/templates/barcelona/ai-bride.png",
     parents: "Mrs. Toncy Bosco & John Bosco Kuzhikkadan",
-    facebookUrl: "https://facebook.com",
-    instagramUrl: "https://instagram.com",
+    facebookUrl: "",
+    instagramUrl: "",
   },
   partner2: {
     firstName: "Garyson",
@@ -18,8 +18,8 @@ export const demoInvitationData: InvitationData = {
     relationPrefix: "Son of",
     photo: "/templates/barcelona/ai-groom.png",
     parents: "Mrs. Latha George & Konnoth Antony George",
-    facebookUrl: "https://facebook.com",
-    instagramUrl: "https://instagram.com",
+    facebookUrl: "",
+    instagramUrl: "",
   },
   coupleTagline: "Save the Date for Our Betrothal",
   wedding: {
