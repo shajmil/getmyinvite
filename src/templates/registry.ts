@@ -1,4 +1,6 @@
 import React from "react";
+import { AureliaTemplate } from "./aurelia/AureliaTemplate";
+import { aureliaPalettes } from "./aurelia/palettes";
 import { InvitationData } from "@/lib/zod-schemas";
 import { BarcelonaTemplate } from "./barcelona/BarcelonaTemplate";
 import { ClassicTemplate } from "./classic/ClassicTemplate";
@@ -78,6 +80,16 @@ export const templateRegistry: Record<string, Template> = {
       },
     ],
     component: BarcelonaTemplate,
+  },
+  aurelia: {
+    id: "aurelia",
+    name: "Aurelia",
+    description: "A premium editorial invitation with cinematic photography, an elegant love story, wedding events, and an immersive gallery.",
+    thumbnail: "/templates/aurelia-thumb.svg",
+    supportedSections: ["couple", "events", "gallery", "story", "keyGuests", "contactPersons"],
+    fonts: { heading: "Cormorant Garamond, serif", body: "Geist, sans-serif" },
+    colorSchemes: aureliaPalettes,
+    component: AureliaTemplate,
   },
   classic: {
     id: "classic",

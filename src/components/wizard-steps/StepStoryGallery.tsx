@@ -182,7 +182,44 @@ export function StepStoryGallery() {
       {/* Love Story Details */}
       {!isBarcelona && templateId !== "classic" && (
         <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
-          <div className="flex justify-between items-center border-b border-[#faf8f5] pb-2">
+          <h3 className="font-serif text-lg font-semibold text-[#855f18] border-b border-[#faf8f5] pb-2">Your Love Story</h3>
+
+          {/* How We Met */}
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">How You Met</label>
+            <textarea
+              value={data.story?.howWeMet || ""}
+              onChange={(e) =>
+                updateData({
+                  story: { ...data.story, timeline: data.story?.timeline || [], howWeMet: e.target.value, proposal: data.story?.proposal || "" },
+                })
+              }
+              rows={2}
+              maxLength={500}
+              className="w-full px-3 py-2 border border-[#eae6df] rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#855f18]/30"
+              placeholder="Share how you first met (leave empty to hide this section)"
+            />
+          </div>
+
+          {/* The Proposal */}
+          <div>
+            <label className="block text-[10px] font-bold uppercase text-[#777] mb-1">The Proposal</label>
+            <textarea
+              value={data.story?.proposal || ""}
+              onChange={(e) =>
+                updateData({
+                  story: { ...data.story, timeline: data.story?.timeline || [], howWeMet: data.story?.howWeMet || "", proposal: e.target.value },
+                })
+              }
+              rows={2}
+              maxLength={500}
+              className="w-full px-3 py-2 border border-[#eae6df] rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#855f18]/30"
+              placeholder="Tell the proposal story (leave empty to hide this section)"
+            />
+          </div>
+
+          {/* Timeline */}
+          <div className="flex justify-between items-center border-t border-[#faf8f5] pt-4">
             <h3 className="font-serif text-lg font-semibold text-[#855f18]">Love Story Timeline</h3>
             <button
               onClick={handleStoryTimelineAdd}

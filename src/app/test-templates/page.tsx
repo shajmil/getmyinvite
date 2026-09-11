@@ -91,7 +91,7 @@ function IframePreview({ children }: IframePreviewProps) {
 function TestTemplatesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const templateParam = searchParams.get("template") as "barcelona" | "classic" | null;
+  const templateParam = searchParams.get("template") as string | null;
   
   // Deriving active template state directly from search parameters to prevent conflicting updates
   const selectedTemplate = (templateParam && templateRegistry[templateParam]) ? templateParam : "barcelona";
@@ -108,7 +108,7 @@ function TestTemplatesContent() {
   const TemplateComponent = registryEntry.component;
 
   // Transition template by updating URL query params, keeping URL as single source of truth
-  const handleTemplateChange = (tempId: "barcelona" | "classic") => {
+  const handleTemplateChange = (tempId: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("template", tempId);
     router.push(`/test-templates?${params.toString()}`);
@@ -131,31 +131,19 @@ function TestTemplatesContent() {
 
         {/* Center: Template Switcher (Visible and Accessible on Both) */}
         <div className="flex items-center gap-1 bg-white/10 p-1 rounded-lg border border-white/5">
-          <button
-            onClick={() => handleTemplateChange("barcelona")}
-            className={`px-3 py-1.5 rounded-md transition-all text-xs font-bold cursor-pointer ${
-              selectedTemplate === "barcelona" ? "bg-white text-black" : "hover:bg-white/5 text-white/80"
-            }`}
-          >
-            Barcelona
-          </button>
-          <button
-            onClick={() => handleTemplateChange("classic")}
-            className={`px-3 py-1.5 rounded-md transition-all text-xs font-bold cursor-pointer ${
-              selectedTemplate === "classic" ? "bg-white text-black" : "hover:bg-white/5 text-white/80"
-            }`}
-          >
-            Classic
-          </button>
+          <select aria-label="Invitation template" value={selectedTemplate} onChange={event => handleTemplateChange(event.target.value)} className="min-w-0 max-w-32 bg-neutral-900 text-white text-xs rounded px-2 py-3">
+            {Object.values(templateRegistry).map(template => <option key={template.id} value={template.id}>{template.name}</option>)}
+          </select>
         </div>
 
         {/* Right: Color Scheme Selector */}
         <div className="flex items-center gap-2">
           <span className="text-[10px] uppercase tracking-wider text-white/40 font-bold hidden md:inline">Palette:</span>
           <select
+            aria-label="Colour palette"
             value={activeSchemeId}
             onChange={(e) => setSelectedScheme(e.target.value)}
-            className="bg-white/10 border border-white/20 rounded-lg py-1.5 px-3 text-xs text-white outline-none cursor-pointer hover:bg-white/15 transition-all"
+            className="bg-white/10 border border-white/20 rounded-lg py-1.5 px-2 max-w-32 sm:max-w-none text-xs text-white outline-none cursor-pointer hover:bg-white/15 transition-all"
           >
             {registryEntry.colorSchemes.map((scheme) => (
               <option key={scheme.id} value={scheme.id} className="bg-neutral-900 text-white">

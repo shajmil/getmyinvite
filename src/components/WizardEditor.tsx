@@ -187,7 +187,8 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
     }
   };
 
-  const stepsCount = templateId === "barcelona" ? 7 : 5;
+  const hasStoryAndEvents = templateId === "barcelona" || templateId === "aurelia";
+  const stepsCount = hasStoryAndEvents ? 7 : 5;
 
   // Reference for step badge buttons to auto-scroll horizontal stepper bar into view
   const stepBadgeRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -251,7 +252,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
   const steps = [
     { id: "couple", title: "Couple", component: <StepCouple /> },
     { id: "details", title: "Details", component: <StepWedding /> },
-    ...(templateId === "barcelona"
+    ...(hasStoryAndEvents
       ? [
           { id: "events", title: "Events", component: <StepEvents /> },
           { id: "gallery", title: "Gallery", component: <StepStoryGallery /> },

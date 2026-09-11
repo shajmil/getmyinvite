@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -47,7 +48,7 @@ export function TemplatesList({ isLoggedIn }: TemplatesListProps) {
         >
           {/* Thumbnail Placeholder */}
           <div className="aspect-video bg-[#faf8f5] border-b border-[#eae6df] flex flex-col items-center justify-center p-6 text-center relative group">
-            <span className="font-serif italic font-bold text-3xl text-[#855f18]/60">{temp.name}</span>
+            {temp.id === "aurelia" ? <Image src={temp.thumbnail} alt="Aurelia premium invitation" fill sizes="(max-width: 768px) 90vw, 50vw" className="object-cover" /> : (<span className="font-serif italic font-bold text-3xl text-[#855f18]/60">{temp.name}</span>)}
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-3 transition-opacity">
               <Link
                 href={`/test-templates?template=${temp.id}`}
