@@ -35,9 +35,10 @@ interface WizardEditorProps {
 interface IframePreviewProps {
   children: React.ReactNode;
   activeTab?: string;
+  fullScreen?: boolean;
 }
 
-function IframePreview({ children, activeTab }: IframePreviewProps) {
+function IframePreview({ children, activeTab, fullScreen }: IframePreviewProps) {
   const [iframeRef, setIframeRef] = useState<HTMLIFrameElement | null>(null);
   const [mountNode, setMountNode] = useState<HTMLElement | null>(null);
 
@@ -54,10 +55,10 @@ function IframePreview({ children, activeTab }: IframePreviewProps) {
       doc.head.appendChild(el.cloneNode(true));
     });
 
-    // Viewport meta
+    // Viewport meta — lock to 375px mobile width
     const meta = doc.createElement("meta");
     meta.name = "viewport";
-    meta.content = "width=device-width, initial-scale=1.0";
+    meta.content = fullScreen ? "width=device-width, initial-scale=1.0" : "width=375, initial-scale=1.0";
     doc.head.appendChild(meta);
 
     // Base URL for relative paths
@@ -70,7 +71,7 @@ function IframePreview({ children, activeTab }: IframePreviewProps) {
     doc.body.style.margin = "0";
     doc.body.style.padding = "0";
     doc.body.style.minHeight = "100%";
-    doc.body.style.width = "100%";
+    doc.body.style.width = fullScreen ? "100%" : "375px";
     doc.body.style.overflowX = "hidden";
     doc.body.style.overflowY = "auto";
 
@@ -94,7 +95,7 @@ function IframePreview({ children, activeTab }: IframePreviewProps) {
     });
 
     setMountNode(doc.body);
-  }, [iframeRef]);
+  }, [iframeRef, fullScreen]);
 
   useEffect(() => {
     setupIframe();
@@ -104,11 +105,95 @@ function IframePreview({ children, activeTab }: IframePreviewProps) {
     <iframe
       ref={setIframeRef}
       onLoad={setupIframe}
-      style={{ border: "none", width: "100%", height: "100%", minHeight: "100%" }}
+      style={{ border: "none", width: fullScreen ? "100%" : "375px", height: fullScreen ? "100%" : "812px" }}
       title="preview-frame"
     >
       {mountNode && createPortal(children, mountNode)}
     </iframe>
+  );
+}
+
+/* ── Phone frame preview panel ── */
+const PHONE_W = 375;
+const PHONE_H = 812;
+const BEZEL = 14;
+const FRAME_W = PHONE_W + BEZEL * 2;
+const FRAME_H = PHONE_H + BEZEL * 2;
+
+interface PreviewPanelProps {
+  mobileTab: "edit" | "preview";
+  setMobileTab: (tab: "edit" | "preview") => void;
+  children: React.ReactNode;
+}
+
+function PreviewPanel({ mobileTab, setMobileTab, children }: PreviewPanelProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      // Compute the scale that fits the phone frame inside the container with padding
+      const pad = 32;
+      const sx = (width - pad) / FRAME_W;
+      const sy = (height - pad) / FRAME_H;
+      setScale(Math.min(sx, sy, 1));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      className={`${
+        mobileTab === "preview"
+          ? "flex w-full h-[100dvh]"
+          : "hidden md:flex md:w-1/2 h-full"
+      } bg-[#efede8] flex-col items-center justify-center relative overflow-hidden transition-all duration-300`}
+    >
+      {/* Mobile: Floating Back to Edit Pill */}
+      <div className="flex md:hidden absolute top-3 left-1/2 -translate-x-1/2 z-40">
+        <button
+          type="button"
+          onClick={() => setMobileTab("edit")}
+          className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-[#855f18] bg-white/95 backdrop-blur-md rounded-full border border-[#855f18]/30 shadow-lg active:scale-95 transition-all"
+        >
+          <Edit3 className="w-3.5 h-3.5" />
+          <span>← Edit Form</span>
+        </button>
+      </div>
+
+      {/* Desktop: Scaled Phone Frame */}
+      <div className="hidden md:block" style={{ transform: `scale(${scale})`, transformOrigin: "center center" }}>
+        <div
+          style={{ width: FRAME_W, height: FRAME_H, borderRadius: 48, border: `${BEZEL}px solid #1a1a1a`, position: "relative", overflow: "hidden", background: "#fff", boxShadow: "0 30px 70px -20px rgba(0,0,0,0.35), 0 4px 15px rgba(0,0,0,0.12)" }}
+        >
+          {/* Dynamic Island / Notch */}
+          <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 126, height: 34, background: "#1a1a1a", borderRadius: "0 0 18px 18px", zIndex: 40, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#0d0d0d" }} />
+            <span style={{ width: 44, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.15)" }} />
+          </div>
+          {/* Home Indicator */}
+          <div style={{ position: "absolute", bottom: 8, left: "50%", transform: "translateX(-50%)", width: 134, height: 5, borderRadius: 3, background: "rgba(0,0,0,0.15)", zIndex: 40 }} />
+          {/* Iframe Content */}
+          <div style={{ position: "absolute", inset: 0, width: PHONE_W, height: PHONE_H }}>
+            <IframePreview activeTab={mobileTab}>
+              {children}
+            </IframePreview>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile: Full-screen preview (no phone frame) */}
+      <div className="flex md:hidden w-full h-full pt-12">
+        <IframePreview activeTab={mobileTab} fullScreen>
+          {children}
+        </IframePreview>
+      </div>
+    </div>
   );
 }
 
@@ -137,7 +222,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
   } = useWizardStore();
 
   const [mounted, setMounted] = useState(false);
-  const [previewDevice, setPreviewDevice] = useState<"mobile" | "desktop">("mobile");
+
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
   
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -187,7 +272,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
     }
   };
 
-  const hasStoryAndEvents = templateId === "barcelona" || templateId === "aurelia";
+  const hasStoryAndEvents = templateId === "barcelona" || templateId === "aurelia" || templateId === "eternal-journey";
   const stepsCount = hasStoryAndEvents ? 7 : 5;
 
   // Reference for step badge buttons to auto-scroll horizontal stepper bar into view
@@ -441,72 +526,10 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
           </div>
         </div>
 
-        {/* Right Preview Panel (Visible on Desktop OR Mobile preview mode) */}
-        <div
-          className={`${
-            mobileTab === "preview"
-              ? "flex w-full h-[100vh] min-h-[100vh]"
-              : "hidden md:flex md:w-1/2 h-full md:h-[calc(100vh-68px)]"
-          } bg-[#efede8] md:bg-[#efede8] flex-col p-0 sm:p-4 md:p-6 relative overflow-hidden transition-all duration-300 ${
-            previewDevice === "mobile" ? "items-center justify-center" : "items-stretch justify-stretch"
-          }`}
-        >
-          {/* Mobile Floating Back to Edit Pill */}
-          <div className="flex md:hidden absolute top-3 left-1/2 -translate-x-1/2 z-40">
-            <button
-              type="button"
-              onClick={() => setMobileTab("edit")}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-[#855f18] bg-white/95 backdrop-blur-md rounded-full border border-[#855f18]/30 shadow-lg active:scale-95 transition-all"
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span>← Edit Form</span>
-            </button>
-          </div>
-
-          {/* Desktop Device View Controls Bar */}
-          <div className="absolute top-4 right-4 bg-white border border-[#eae6df] rounded-xl p-1 shadow-lg hidden md:flex items-center gap-1 z-30">
-            <button
-              onClick={() => setPreviewDevice("mobile")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all ${
-                previewDevice === "mobile" ? "bg-[#855f18] text-white" : "text-[#666] hover:bg-[#faf8f5]"
-              }`}
-            >
-              Mobile
-            </button>
-            <button
-              onClick={() => setPreviewDevice("desktop")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all ${
-                previewDevice === "desktop" ? "bg-[#855f18] text-white" : "text-[#666] hover:bg-[#faf8f5]"
-              }`}
-            >
-              Desktop
-            </button>
-          </div>
-
-          {/* Preview Container Frame */}
-          <div
-            className={`transition-[width,height,border-radius] duration-300 ease-out bg-white overflow-hidden relative w-full ${
-              previewDevice === "mobile"
-                ? "h-full min-h-full md:w-[375px] md:h-[calc(100vh-120px)] md:max-h-[768px] md:rounded-[36px] md:border-[12px] md:border-[#1a1a1a] md:shadow-2xl z-10"
-                : "w-full h-full min-h-full md:h-[calc(100vh-120px)] rounded-none md:rounded-2xl z-10"
-            }`}
-          >
-            {/* The Actual Template Client Render */}
-            <div className="absolute inset-0 w-full h-full">
-              <IframePreview activeTab={mobileTab}>
-                <ActiveTemplateComponent data={data} colorSchemeId={colorSchemeId} isPreview={true} />
-              </IframePreview>
-            </div>
-
-            {/* Mobile Notch overlay (Desktop view only) */}
-            {previewDevice === "mobile" && (
-              <div className="hidden md:flex absolute top-0 left-1/2 -translate-x-1/2 w-40 h-5 bg-[#1a1a1a] rounded-b-2xl z-40 justify-center items-center">
-                <span className="w-2.5 h-2.5 bg-black/80 rounded-full mr-2" />
-                <span className="w-12 h-1 bg-white/20 rounded-full" />
-              </div>
-            )}
-          </div>
-        </div>
+        {/* Right Preview Panel — Always shows a standard mobile preview (375×812) */}
+        <PreviewPanel mobileTab={mobileTab} setMobileTab={setMobileTab}>
+          <ActiveTemplateComponent data={data} colorSchemeId={colorSchemeId} isPreview={true} />
+        </PreviewPanel>
 
       </div>
     </div>

@@ -120,7 +120,7 @@ export async function createNewInvitationAction(templateId: string) {
     const id = `inv-${Date.now()}`;
     const slug = `wedding-${id.split("-").pop()}`;
 
-    await queries.createInvitation(id, user.id, slug, templateId, templateId === "aurelia" ? "aurelia-olive" : "gold-light", demoInvitationData);
+    await queries.createInvitation(id, user.id, slug, templateId, templateId === "eternal-journey" ? "eternal-champagne" : templateId === "aurelia" ? "aurelia-olive" : "gold-light", demoInvitationData);
     return { ok: true, id };
   } catch (err: any) {
     console.error("createNewInvitationAction error:", err);

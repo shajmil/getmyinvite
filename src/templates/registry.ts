@@ -4,6 +4,8 @@ import { aureliaPalettes } from "./aurelia/palettes";
 import { InvitationData } from "@/lib/zod-schemas";
 import { BarcelonaTemplate } from "./barcelona/BarcelonaTemplate";
 import { ClassicTemplate } from "./classic/ClassicTemplate";
+import { EternalJourneyTemplate } from "./eternal-journey/EternalJourneyTemplate";
+import { eternalJourneyPalettes } from "./eternal-journey/palettes";
 
 export interface ColorScheme {
   id: string;
@@ -32,6 +34,16 @@ export interface Template {
 }
 
 export const templateRegistry: Record<string, Template> = {
+  "eternal-journey": {
+    id: "eternal-journey",
+    name: "Eternal Journey",
+    description: "A cinematic invitation with a dimensional paper opening, floating photographs, and an elegant journey through your love story.",
+    thumbnail: "/templates/eternal-journey-thumb.svg",
+    supportedSections: ["couple", "story", "gallery", "events", "keyGuests", "contactPersons"],
+    fonts: { heading: "Cormorant Garamond, serif", body: "Arial, sans-serif" },
+    colorSchemes: eternalJourneyPalettes,
+    component: EternalJourneyTemplate,
+  },
   barcelona: {
     id: "barcelona",
     name: "Barcelona",

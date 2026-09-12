@@ -42,7 +42,7 @@ export function StepTemplateStyle({ onUpdateTemplate }: StepTemplateStyleProps) 
             >
               {/* Thumbnail Placeholder Icon */}
               <div className="w-full md:w-36 aspect-video bg-[#faf8f5] rounded-xl flex items-center justify-center border border-[#eae6df] relative overflow-hidden">
-                {temp.id === "aurelia" ? <Image src={temp.thumbnail} alt="Aurelia premium invitation" fill sizes="(max-width: 768px) 90vw, 50vw" className="object-cover" /> : (<span className="font-serif italic font-bold text-2xl text-[#855f18]/60">{temp.name}</span>)}
+                {(temp.id === "aurelia" || temp.id === "eternal-journey") ? <Image src={temp.thumbnail} alt={`${temp.name} premium invitation`} fill sizes="(max-width: 768px) 90vw, 50vw" className="object-cover" /> : (<span className="font-serif italic font-bold text-2xl text-[#855f18]/60">{temp.name}</span>)}
               </div>
 
               {/* Template details and scheme choices */}
