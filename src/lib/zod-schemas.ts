@@ -92,6 +92,29 @@ export const ExtrasSchema = z.object({
   footerMessage: z.string().optional().or(z.literal("")),
 });
 
+export const NocturneCopySchema = z.object({
+  openingLabel: z.string().optional(),
+  firstLabel: z.string().optional(),
+  firstTitle: z.string().optional(),
+  firstAccent: z.string().optional(),
+  proposalLabel: z.string().optional(),
+  proposalTitle: z.string().optional(),
+  proposalAccent: z.string().optional(),
+  chapterLabel: z.string().optional(),
+  chapterTitle: z.string().optional(),
+  chapterAccent: z.string().optional(),
+  finalLabel: z.string().optional(),
+  finalTitle: z.string().optional(),
+  finalAccent: z.string().optional(),
+  ticketLabel: z.string().optional(),
+  ticketTitle: z.string().optional(),
+  ticketAccent: z.string().optional(),
+  ticketMessage: z.string().optional(),
+  programmeTitle: z.string().optional(),
+  galleryTitle: z.string().optional(),
+  rsvpTitle: z.string().optional(),
+});
+
 export const InvitationContentSchema = z.object({
   partner1: PartnerSchema,
   partner2: PartnerSchema,
@@ -108,6 +131,7 @@ export const InvitationContentSchema = z.object({
   hero: HeroSchema,
   rsvpConfig: RSVPConfigSchema,
   extras: ExtrasSchema,
+  nocturneCopy: NocturneCopySchema.optional(),
 });
 
 export type InvitationData = z.infer<typeof InvitationContentSchema>;

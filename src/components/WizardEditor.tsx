@@ -272,7 +272,7 @@ export function WizardEditor({ invitation }: WizardEditorProps) {
     }
   };
 
-  const hasStoryAndEvents = templateId === "barcelona" || templateId === "aurelia" || templateId === "eternal-journey";
+  const hasStoryAndEvents = templateId === "barcelona" || templateId === "aurelia" || templateId === "eternal-journey" || templateId === "nocturne";
   const stepsCount = hasStoryAndEvents ? 7 : 5;
 
   // Reference for step badge buttons to auto-scroll horizontal stepper bar into view

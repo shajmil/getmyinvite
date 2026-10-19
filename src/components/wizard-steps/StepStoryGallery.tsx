@@ -153,6 +153,29 @@ export function StepStoryGallery() {
   };
 
   const isBarcelona = templateId === "barcelona";
+  const isNocturne = templateId === "nocturne";
+  const nocturneFields = [
+    ["openingLabel", "Opening label", "Presenting a love story"],
+    ["firstLabel", "First scene label", "The first frame"],
+    ["firstTitle", "First scene heading", "One ordinary day."],
+    ["firstAccent", "First scene accent", "Everything changed."],
+    ["proposalLabel", "Proposal scene label", "The turning point"],
+    ["proposalTitle", "Proposal heading", "And then"],
+    ["proposalAccent", "Proposal accent", "came yes."],
+    ["chapterLabel", "Next chapter label", "The next chapter"],
+    ["chapterTitle", "Next chapter heading", "A date. A place."],
+    ["chapterAccent", "Next chapter accent", "A promise."],
+    ["finalLabel", "Final scene label", "The final scene needs you"],
+    ["finalTitle", "Final scene heading", "Come be part"],
+    ["finalAccent", "Final scene accent", "of our story."],
+    ["ticketLabel", "Invitation label", "Admit one to the beginning of forever"],
+    ["ticketTitle", "Invitation heading", "We saved you"],
+    ["ticketAccent", "Invitation accent", "a seat."],
+    ["ticketMessage", "Invitation message", "With so much love, we invite you to celebrate our wedding."],
+    ["programmeTitle", "Programme heading", "What happens next."],
+    ["galleryTitle", "Gallery heading", "Keep these close."],
+    ["rsvpTitle", "RSVP heading", "The story is better with you in it."],
+  ] as const;
 
   return (
     <div className="space-y-6">
@@ -178,6 +201,12 @@ export function StepStoryGallery() {
             : "Share how you met and upload up to 20 gallery memories"}
         </p>
       </div>
+
+      {isNocturne && <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
+        <h3 className="font-serif text-lg font-semibold text-[#855f18]">Wedding Film wording</h3>
+        <p className="text-xs text-[#666]">These words appear only in The Wedding Film. Scene descriptions are in Your Love Story below.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{nocturneFields.map(([key, label, fallback]) => <label key={key} className="block text-[10px] font-bold uppercase text-[#777]">{label}<input type="text" maxLength={180} value={data.nocturneCopy?.[key] ?? fallback} onChange={e => updateData({ nocturneCopy: { ...data.nocturneCopy, [key]: e.target.value } })} className="mt-1 w-full px-3 py-2 border border-[#eae6df] rounded-lg text-xs font-normal normal-case focus:outline-none focus:ring-1 focus:ring-[#855f18]/30" /></label>)}</div>
+      </div>}
 
       {/* Love Story Details */}
       {!isBarcelona && templateId !== "classic" && (
