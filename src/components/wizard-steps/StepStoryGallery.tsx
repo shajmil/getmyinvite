@@ -179,6 +179,15 @@ export function StepStoryGallery() {
     ["galleryTitle", "Gallery heading", "Keep these close."],
     ["rsvpTitle", "RSVP heading", "The story is better with you in it."],
   ] as const;
+  const filmCards = [
+    { number: "01", title: "Opening frame", hint: "The first words guests see", fields: nocturneFields.slice(0, 1) },
+    { number: "02", title: "How it began", hint: "Your first story scene", fields: nocturneFields.slice(1, 5) },
+    { number: "03", title: "The turning point", hint: "The proposal scene", fields: nocturneFields.slice(5, 10) },
+    { number: "04", title: "The next chapter", hint: "The wedding date and place", fields: nocturneFields.slice(10, 13) },
+    { number: "05", title: "The invitation reveal", hint: "Invite guests into your story", fields: nocturneFields.slice(13, 16) },
+    { number: "✦", title: "Invitation ticket", hint: "The printed invitation section", fields: nocturneFields.slice(16, 20) },
+    { number: "✦", title: "The closing sections", hint: "Programme, gallery and RSVP", fields: nocturneFields.slice(20) },
+  ];
 
   return (
     <div className="space-y-6">
@@ -196,20 +205,32 @@ export function StepStoryGallery() {
 
       <div className="border-b border-[#eae6df] pb-4">
         <h2 className="text-xl font-serif font-bold text-[#1a1a1a]">
-          {isBarcelona ? "Step 4 — Media Gallery" : "Step 4 — Story & Gallery"}
+          {isBarcelona ? "Step 4 — Media Gallery" : isNocturne ? "Step 4 — Wedding Film & Gallery" : "Step 4 — Story & Gallery"}
         </h2>
         <p className="text-xs text-[#666]">
-          {isBarcelona 
+          {isNocturne ? "Write each scene of your film, then add your photos" : isBarcelona
             ? "Upload up to 20 gallery memories for your wedding template carousel" 
             : "Share how you met and upload up to 20 gallery memories"}
         </p>
       </div>
 
-      {isNocturne && <div className="bg-white border border-[#eae6df] rounded-xl p-5 space-y-4 shadow-sm">
-        <h3 className="font-serif text-lg font-semibold text-[#855f18]">Wedding Film wording</h3>
-        <p className="text-xs text-[#666]">Edit the film scenes, invitation, gallery, and RSVP wording here. These fields appear only for The Wedding Film.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{nocturneFields.map(([key, label, fallback]) => <label key={key} className="block text-[10px] font-bold uppercase text-[#777]">{label}{key.endsWith("Body") || key === "ticketMessage" ? <textarea rows={2} maxLength={500} value={data.nocturneCopy?.[key] ?? fallback} onChange={e => updateData({ nocturneCopy: { ...data.nocturneCopy, [key]: e.target.value } })} className="mt-1 w-full px-3 py-2 border border-[#eae6df] rounded-lg text-xs font-normal normal-case focus:outline-none focus:ring-1 focus:ring-[#855f18]/30" /> : <input type="text" maxLength={180} value={data.nocturneCopy?.[key] ?? fallback} onChange={e => updateData({ nocturneCopy: { ...data.nocturneCopy, [key]: e.target.value } })} className="mt-1 w-full px-3 py-2 border border-[#eae6df] rounded-lg text-xs font-normal normal-case focus:outline-none focus:ring-1 focus:ring-[#855f18]/30" />}</label>)}</div>
-      </div>}
+      {isNocturne && <section className="space-y-4" aria-labelledby="film-wording-title">
+        <div className="rounded-xl bg-[#211d1b] px-5 py-5 text-white">
+          <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#ddb4a6]">The Wedding Film</span>
+          <h3 id="film-wording-title" className="mt-1 font-serif text-xl">Your film, in your words</h3>
+          <p className="mt-1 text-xs leading-relaxed text-white/70">Open a scene card to edit its wording. Changes appear in the preview beside you.</p>
+        </div>
+        {filmCards.map((card) => <details key={card.title} className="group rounded-xl border border-[#eae6df] bg-white shadow-sm open:border-[#d8c4ac]">
+          <summary className="flex cursor-pointer list-none items-center gap-4 px-4 py-4 sm:px-5 [&::-webkit-details-marker]:hidden">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f5eee6] font-serif text-base text-[#855f18]">{card.number}</span>
+            <span className="min-w-0 flex-1"><span className="block font-serif text-base font-semibold text-[#29221c]">{card.title}</span><span className="block text-xs text-[#777]">{card.hint}</span></span>
+            <span aria-hidden="true" className="text-xl text-[#855f18] transition-transform group-open:rotate-45">+</span>
+          </summary>
+          <div className="grid grid-cols-1 gap-4 border-t border-[#eee8e0] px-4 py-5 sm:grid-cols-2 sm:px-5">
+            {card.fields.map(([key, label, fallback]) => <label key={key} className={`block text-[10px] font-bold uppercase tracking-wide text-[#777] ${key.endsWith("Body") || key === "ticketMessage" ? "sm:col-span-2" : ""}`}>{label}{key.endsWith("Body") || key === "ticketMessage" ? <textarea rows={3} maxLength={500} value={data.nocturneCopy?.[key] ?? fallback} onChange={e => updateData({ nocturneCopy: { ...data.nocturneCopy, [key]: e.target.value } })} className="mt-1.5 w-full rounded-lg border border-[#eae6df] px-3 py-2.5 text-sm font-normal normal-case tracking-normal text-[#29221c] focus:outline-none focus:ring-2 focus:ring-[#855f18]/30" /> : <input type="text" maxLength={180} value={data.nocturneCopy?.[key] ?? fallback} onChange={e => updateData({ nocturneCopy: { ...data.nocturneCopy, [key]: e.target.value } })} className="mt-1.5 w-full rounded-lg border border-[#eae6df] px-3 py-2.5 text-sm font-normal normal-case tracking-normal text-[#29221c] focus:outline-none focus:ring-2 focus:ring-[#855f18]/30" />}</label>)}
+          </div>
+        </details>)}
+      </section>}
 
       {/* Love Story Details */}
       {!isBarcelona && !isNocturne && templateId !== "classic" && (
