@@ -6,6 +6,8 @@ import { BarcelonaTemplate } from "./barcelona/BarcelonaTemplate";
 import { ClassicTemplate } from "./classic/ClassicTemplate";
 import { EternalJourneyTemplate } from "./eternal-journey/EternalJourneyTemplate";
 import { eternalJourneyPalettes } from "./eternal-journey/palettes";
+import { NocturneTemplate } from "./nocturne/NocturneTemplate";
+import { nocturnePalettes } from "./nocturne/palettes";
 
 export interface ColorScheme {
   id: string;
@@ -34,6 +36,16 @@ export interface Template {
 }
 
 export const templateRegistry: Record<string, Template> = {
+  nocturne: {
+    id: "nocturne",
+    name: "The Wedding Film",
+    description: "A five-scene wedding film that leads guests to a keepsake invitation ticket, celebration programme, and RSVP.",
+    thumbnail: "/templates/nocturne-thumb.svg",
+    supportedSections: ["couple", "story", "gallery", "events", "rsvp"],
+    fonts: { heading: "Georgia, serif", body: "Arial, sans-serif" },
+    colorSchemes: nocturnePalettes,
+    component: NocturneTemplate,
+  },
   "eternal-journey": {
     id: "eternal-journey",
     name: "Eternal Journey",
