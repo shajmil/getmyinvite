@@ -8,10 +8,10 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/db", () => ({
-  db: {
+  getDb: () => ({
     select: (columns?: unknown) => ({ from: () => ({ where: columns ? mocks.selectOtherContent : mocks.selectContent }) }),
     delete: () => ({ where: mocks.deleteRecords }),
-  },
+  }),
 }));
 vi.mock("@vercel/blob", () => ({ del: mocks.deleteBlob }));
 

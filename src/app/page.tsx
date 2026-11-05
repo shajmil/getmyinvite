@@ -1,7 +1,7 @@
 import React from "react";
 import { LuxuryHome, homeFaqs } from "@/components/marketing/LuxuryHome";
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import { templateRegistry } from "@/templates/registry";
 
 import { Metadata, Viewport } from "next";
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
 
 export default async function LandingPage() {
   // Check if user is logged in
-  const session = await auth.api.getSession({
+  const session = await getAuth().api.getSession({
     headers: await headers(),
   });
   const isLoggedIn = !!session?.user;

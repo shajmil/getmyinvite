@@ -1,6 +1,11 @@
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 
-export const GET = auth.handler;
-export const POST = auth.handler;
+export function GET(request: Request) {
+  return getAuth().handler(request);
+}
+
+export function POST(request: Request) {
+  return getAuth().handler(request);
+}
 export const runtime = "nodejs";
 

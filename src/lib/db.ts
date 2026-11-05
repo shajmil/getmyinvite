@@ -1,33 +1,25 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import { cache } from "react";
 import * as schema from "../db/schema";
 
-const dbUrl = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/getmyinvite";
-
-const globalForDb = globalThis as unknown as {
-  pool: Pool | undefined;
-};
-
-const pool =
-  globalForDb.pool ??
-  new Pool({
+export const getDb = cache(() => {
+  const dbUrl = process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/getmyinvite";
+  const pool = new Pool({
     connectionString: dbUrl,
     ssl: dbUrl.includes("neon.tech") ? { rejectUnauthorized: false } : undefined,
-    max: 2, // Prevent Neon connection limit exhaustion in serverless environments
+    max: 2,
+    // Workers cannot reuse a connection opened by another request.
+    maxUses: 1,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 20000,
-    keepAlive: true, // Prevent firewall NAT terminations of idle connections
+    keepAlive: true,
   });
 
-// Prevent idle connection terminations (like Neon scale-down) from crashing Node.js
-pool.on("error", (err) => {
-  console.error("Unexpected database pool client error:", err);
+  pool.on("error", (error) => {
+    console.error("Unexpected database pool client error:", error);
+  });
+  return drizzle(pool, { schema });
 });
-
-if (process.env.NODE_ENV !== "production") {
-  globalForDb.pool = pool;
-}
-
-export const db = drizzle(pool, { schema });
 
 

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import * as queries from "@/db/queries/invitation";
 import { InvitationData, InvitationSlugSchema } from "@/lib/zod-schemas";
 
@@ -10,7 +10,7 @@ import { InvitationData, InvitationSlugSchema } from "@/lib/zod-schemas";
 // SESSION HELPER
 // ==========================================
 async function getAuthenticatedUser() {
-  const session = await auth.api.getSession({
+  const session = await getAuth().api.getSession({
     headers: await headers(),
   });
 

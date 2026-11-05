@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import { put } from "@vercel/blob";
 
 export const runtime = "nodejs";
@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 export async function PUT(req: Request) {
   try {
     // Authenticate user
-    const session = await auth.api.getSession({
+    const session = await getAuth().api.getSession({
       headers: await headers(),
     });
 
@@ -42,6 +42,10 @@ export async function PUT(req: Request) {
         ok: true,
         url: blob.url,
       });
+    }
+
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json({ error: "Local uploads are unavailable in production. Configure R2." }, { status: 503 });
     }
 
     // Write file to public/uploads/[key]

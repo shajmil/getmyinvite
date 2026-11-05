@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { rsvps, invitations, user } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Resend } from "resend";
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
 
     // 3. Save RSVP to Database
     const rsvpId = `rsvp-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-    await db.insert(rsvps).values({
+    await getDb().insert(rsvps).values({
       id: rsvpId,
       invitationId,
       guestName,
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
     });
 
     // 4. Trigger Email Notification (if configured and Resend API key is present)
-    const invitationList = await db
+    const invitationList = await getDb()
       .select()
       .from(invitations)
       .where(eq(invitations.id, invitationId))
@@ -85,7 +85,7 @@ export async function POST(req: Request) {
 
     if (invitationList.length > 0) {
       const invitation = invitationList[0];
-      const hostUserList = await db
+      const hostUserList = await getDb()
         .select()
         .from(user)
         .where(eq(user.id, invitation.userId))

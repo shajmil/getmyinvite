@@ -1,6 +1,6 @@
 import React from "react";
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import { TemplatesList } from "@/components/TemplatesList";
 import Link from "next/link";
 
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export default async function TemplatesPage() {
-  const session = await auth.api.getSession({
+  const session = await getAuth().api.getSession({
     headers: await headers(),
   });
   const isLoggedIn = !!session?.user;

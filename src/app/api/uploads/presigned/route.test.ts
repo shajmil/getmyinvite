@@ -5,7 +5,7 @@ vi.mock("@/lib/r2-storage-limit", () => ({ reserveR2UploadSpace: vi.fn(), R2_UPL
 
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 vi.mock("@/lib/auth", () => ({
-  auth: { api: { getSession: async () => ({ user: { id: "test-user" } }) } },
+  getAuth: () => ({ api: { getSession: async () => ({ user: { id: "test-user" } }) } }),
 }));
 
 import { POST } from "./route";
@@ -33,6 +33,13 @@ afterEach(() => {
 });
 
 describe("upload provider selection", () => {
+  it("rejects production uploads without persistent storage", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("BLOB_READ_WRITE_TOKEN", "");
+    const response = await requestUpload();
+    expect(response.status).toBe(503);
+  });
+
   it("rejects incomplete R2 settings instead of falling back to suspended Blob", async () => {
     vi.stubEnv("R2_BUCKET_NAME", "test-bucket");
     const response = await requestUpload();

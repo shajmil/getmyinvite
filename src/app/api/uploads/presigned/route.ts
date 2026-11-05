@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import { reserveR2UploadSpace, R2_UPLOAD_URL_TTL_SECONDS } from "@/lib/r2-storage-limit";
 
 export const runtime = "nodejs";
@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 export async function POST(req: Request) {
   try {
     // 1. Authenticate user
-    const session = await auth.api.getSession({
+    const session = await getAuth().api.getSession({
       headers: await headers(),
     });
 
@@ -59,6 +59,9 @@ export async function POST(req: Request) {
       );
     }
     const hasR2 = hasR2Settings && missingR2Variables.length === 0;
+    if (!hasR2 && process.env.NODE_ENV === "production" && !process.env.BLOB_READ_WRITE_TOKEN) {
+      return NextResponse.json({ error: "Configure R2 before accepting uploads in production." }, { status: 503 });
+    }
 
     const fileId = crypto.randomUUID();
     const fileExtension = filename.split(".").pop();

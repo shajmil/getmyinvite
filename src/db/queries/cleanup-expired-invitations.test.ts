@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   deleteBlob: vi.fn(),
 }));
 
-vi.mock("@/lib/db", () => ({ db: {
+vi.mock("@/lib/db", () => ({ getDb: () => ({
   select: () => ({ from: () => ({ leftJoin: () => ({ orderBy: mocks.candidates }) }) }),
   transaction: async (callback: (transaction: unknown) => Promise<unknown>) => callback({
     select: (columns?: Record<string, unknown>) => ({ from: () => columns?.slug ? {
@@ -17,7 +17,7 @@ vi.mock("@/lib/db", () => ({ db: {
     } : { where: columns ? mocks.otherContents : mocks.contents } }),
     delete: () => ({ where: mocks.deleteRecords }),
   }),
-} }));
+}) }));
 vi.mock("@vercel/blob", () => ({ del: mocks.deleteBlob }));
 
 import { cleanupExpiredInvitations } from "./invitation";

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import { getInvitationById, getRSVPsForInvitation } from "@/db/queries/invitation";
 import { RSVPManager } from "@/components/RSVPManager";
 import Link from "next/link";
@@ -15,7 +15,7 @@ export default async function RSVPsPage(
   const { id } = await props.params;
 
   // 1. Authenticate user
-  const session = await auth.api.getSession({
+  const session = await getAuth().api.getSession({
     headers: await headers(),
   });
 

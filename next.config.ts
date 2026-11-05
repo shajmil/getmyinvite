@@ -12,6 +12,7 @@ if (r2Url) {
 
 const nextConfig: NextConfig = {
   images: {
+    unoptimized: true,
     remotePatterns: [
       ...(r2Hostname
         ? [

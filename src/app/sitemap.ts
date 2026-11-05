@@ -1,8 +1,10 @@
 import { MetadataRoute } from "next";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { invitations } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { siteUrl } from "@/lib/site";
+
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteUrl;
@@ -10,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch all published invitation paths to index in Google Search Console
   let invitationRoutes: MetadataRoute.Sitemap = [];
   try {
-    const activeInvites = await db
+    const activeInvites = await getDb()
       .select({ slug: invitations.slug, updatedAt: invitations.updatedAt })
       .from(invitations)
       .where(

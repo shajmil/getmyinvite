@@ -1,5 +1,5 @@
 import { eq, and, desc, inArray, notInArray, asc } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import {
   invitations,
   invitationContent,
@@ -105,7 +105,7 @@ export async function deleteAsset(url: string) {
   }
 }
 
-export async function deleteInvitationsByIds(ids: string[], database: Pick<typeof db, "select" | "delete"> = db) {
+export async function deleteInvitationsByIds(ids: string[], database: Pick<ReturnType<typeof getDb>, "select" | "delete"> = getDb()) {
   if (ids.length === 0) return;
 
   try {
@@ -145,7 +145,7 @@ export async function deleteInvitationsByIds(ids: string[], database: Pick<typeo
 // ==========================================
 
 export async function cleanupExpiredInvitations(now = new Date()) {
-  const candidates = await db.select({
+  const candidates = await getDb().select({
     id: invitations.id,
     status: invitations.status,
     createdAt: invitations.createdAt,
@@ -163,7 +163,7 @@ export async function cleanupExpiredInvitations(now = new Date()) {
     if (Date.now() >= deadline) break;
     processed++;
     try {
-      const deletedSlug = await db.transaction(async (transaction) => {
+      const deletedSlug = await getDb().transaction(async (transaction) => {
         // Lock and recheck: an invitation may have been rescheduled since the initial scan.
         const [current] = await transaction.select({
           id: invitations.id,
@@ -190,7 +190,7 @@ export async function cleanupExpiredInvitations(now = new Date()) {
 }
 
 export async function getInvitationById(id: string, userId: string) {
-  const result = await db
+  const result = await getDb()
     .select({
       invitation: invitations,
       content: invitationContent.content,
@@ -209,7 +209,7 @@ export async function getInvitationById(id: string, userId: string) {
 }
 
 export async function getInvitationBySlug(slug: string) {
-  const result = await db
+  const result = await getDb()
     .select({
       invitation: invitations,
       content: invitationContent.content,
@@ -233,7 +233,7 @@ export const getCachedInvitationBySlug = cache(async (slug: string) => {
 });
 
 export async function checkSlugAvailable(slug: string, excludeInvitationId?: string) {
-  const query = db.select().from(invitations).where(eq(invitations.slug, slug));
+  const query = getDb().select().from(invitations).where(eq(invitations.slug, slug));
   const results = await query;
   if (results.length === 0) return true;
   if (excludeInvitationId && results[0].id === excludeInvitationId) return true;
@@ -241,7 +241,7 @@ export async function checkSlugAvailable(slug: string, excludeInvitationId?: str
 }
 
 export async function getInvitationsByUser(userId: string) {
-  const list = await db
+  const list = await getDb()
     .select({
       invitation: invitations,
       content: invitationContent.content,
@@ -256,7 +256,7 @@ export async function getInvitationsByUser(userId: string) {
   const invitationIds = list.map((item) => item.invitation.id);
 
   // Fetch RSVPs in a single query instead of N queries
-  const allRsvps = await db
+  const allRsvps = await getDb()
     .select()
     .from(rsvps)
     .where(inArray(rsvps.invitationId, invitationIds));
@@ -283,7 +283,7 @@ export async function createInvitation(
   colorSchemeId: string,
   content: InvitationData
 ) {
-  return await db.transaction(async (tx: any) => {
+  return await getDb().transaction(async (tx: any) => {
     await tx.insert(invitations).values({
       id,
       userId,
@@ -304,7 +304,7 @@ export async function createInvitation(
 
 export async function updateInvitationContent(id: string, userId: string, content: InvitationData) {
   // Validate ownership first
-  const inv = await db
+  const inv = await getDb()
     .select()
     .from(invitations)
     .where(and(eq(invitations.id, id), eq(invitations.userId, userId)))
@@ -314,7 +314,7 @@ export async function updateInvitationContent(id: string, userId: string, conten
     throw new Error("Invitation not found or unauthorized");
   }
 
-  await db
+  await getDb()
     .insert(invitationContent)
     .values({ invitationId: id, content })
     .onConflictDoUpdate({
@@ -322,7 +322,7 @@ export async function updateInvitationContent(id: string, userId: string, conten
       set: { content },
     });
 
-  await db
+  await getDb()
     .update(invitations)
     .set({ updatedAt: new Date() })
     .where(eq(invitations.id, id));
@@ -336,7 +336,7 @@ export async function updateInvitationSettings(
   data: { slug?: string; templateId?: string; colorSchemeId?: string; status?: "draft" | "published"; publishedAt?: Date; privacy?: "public" | "unlisted" }
 ) {
   // Validate ownership first
-  const inv = await db
+  const inv = await getDb()
     .select()
     .from(invitations)
     .where(and(eq(invitations.id, id), eq(invitations.userId, userId)))
@@ -346,7 +346,7 @@ export async function updateInvitationSettings(
     throw new Error("Invitation not found or unauthorized");
   }
 
-  await db
+  await getDb()
     .update(invitations)
     .set({
       ...data,
@@ -358,7 +358,7 @@ export async function updateInvitationSettings(
 }
 
 export async function deleteInvitation(id: string, userId: string) {
-  const inv = await db
+  const inv = await getDb()
     .select()
     .from(invitations)
     .where(and(eq(invitations.id, id), eq(invitations.userId, userId)))
@@ -378,7 +378,7 @@ export async function deleteInvitation(id: string, userId: string) {
 
 export async function getRSVPsForInvitation(invitationId: string, userId: string) {
   // Check ownership of the invitation first
-  const inv = await db
+  const inv = await getDb()
     .select()
     .from(invitations)
     .where(and(eq(invitations.id, invitationId), eq(invitations.userId, userId)))
@@ -388,7 +388,7 @@ export async function getRSVPsForInvitation(invitationId: string, userId: string
     throw new Error("Invitation not found or unauthorized");
   }
 
-  return await db
+  return await getDb()
     .select()
     .from(rsvps)
     .where(eq(rsvps.invitationId, invitationId))
@@ -408,7 +408,7 @@ export async function createRSVP(
     message?: string;
   }
 ) {
-  await db.insert(rsvps).values({
+  await getDb().insert(rsvps).values({
     id,
     invitationId,
     ...data,
@@ -421,7 +421,7 @@ export async function createRSVP(
 // ==========================================
 
 export async function getAssetsByUser(userId: string) {
-  return await db
+  return await getDb()
     .select()
     .from(assets)
     .where(eq(assets.userId, userId))
@@ -440,7 +440,7 @@ export async function createAsset(
     sizeBytes: number;
   }
 ) {
-  await db.insert(assets).values({
+  await getDb().insert(assets).values({
     id,
     userId,
     ...data,
