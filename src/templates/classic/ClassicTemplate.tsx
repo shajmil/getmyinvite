@@ -315,7 +315,7 @@ export function ClassicTemplate({ data, colorSchemeId, isPreview = false }: Clas
                       </a>
                     </div>
                   )}
-                  <AdditionalVenues venues={data.wedding.additionalVenues} />
+                  <AdditionalVenues venues={data.wedding.additionalVenues} variant="classic" />
                 </div>
               )}
 

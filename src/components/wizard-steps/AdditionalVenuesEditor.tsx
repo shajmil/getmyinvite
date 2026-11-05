@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import Image from "next/image";
+import { ImagePlus, Loader2, MapPin, Plus, Trash2, ArrowUpRight } from "lucide-react";
 import { useWizardStore } from "@/lib/store";
 import { uploadFile } from "@/lib/compress";
 import type { AdditionalVenue } from "@/lib/zod-schemas";
@@ -11,6 +12,7 @@ export function AdditionalVenuesEditor() {
   const updateWedding = useWizardStore((state) => state.updateNestedData);
   const [uploadingVenueId, setUploadingVenueId] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
   if (!wedding) return null;
   const venues = wedding.additionalVenues ?? [];
 
@@ -24,8 +26,9 @@ export function AdditionalVenuesEditor() {
   async function uploadVenuePhoto(id: string, file: File) {
     setUploadingVenueId(id);
     setUploadError("");
+    setUploadProgress(0);
     try {
-      const { url } = await uploadFile(file);
+      const { url } = await uploadFile(file, setUploadProgress);
       updateVenue(id, { photo: url });
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : "Could not upload the venue photo. Please try again.");
@@ -93,13 +96,18 @@ export function AdditionalVenuesEditor() {
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([venue.name, venue.address, venue.city].filter(Boolean).join(", "))}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block text-xs font-semibold text-[#855f18] underline"
-            >Find this venue on Google Maps ↗</a>
+              className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-[#faf8f5] px-3 py-2 text-xs font-medium text-[#855f18] transition-colors hover:bg-[#f5f0eb]"
+            ><MapPin aria-hidden="true" className="h-3.5 w-3.5" /> Find on Google Maps <ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5" /></a>
           )}
-          <label className="block space-y-1 text-xs text-[#666]">
-            <span>Venue photo (optional)</span>
+          <div className="space-y-2 pt-1">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-[#666]">Venue photo <span className="font-normal text-[#999]">(optional)</span></span>
+              {venue.photo && <button type="button" onClick={() => updateVenue(venue.id, { photo: "" })} className="rounded px-1 py-1 text-xs text-red-700 hover:bg-red-50">Remove photo</button>}
+            </div>
+            <label className={`relative flex min-h-[144px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-[#d8cbb4] bg-[#faf8f5] text-center transition-colors hover:border-[#855f18] hover:bg-[#f5f0eb] focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[#855f18] ${uploadingVenueId !== null ? "pointer-events-none opacity-70" : ""}`}>
             <input
               type="file"
+              aria-label={`Venue photo for additional venue ${index + 1}`}
               accept="image/jpeg,image/png,image/webp,image/gif"
               disabled={uploadingVenueId !== null}
               onChange={(event) => {
@@ -107,11 +115,23 @@ export function AdditionalVenuesEditor() {
                 if (file) void uploadVenuePhoto(venue.id, file);
                 event.target.value = "";
               }}
-              className="block w-full min-w-0 text-xs text-[#666] disabled:opacity-50"
+              className="sr-only"
             />
-          </label>
-          {uploadingVenueId === venue.id && <p role="status" className="text-xs text-[#855f18]">Uploading photo…</p>}
-          {venue.photo && <button type="button" onClick={() => updateVenue(venue.id, { photo: "" })} className="text-xs text-red-700 underline">Remove venue photo</button>}
+            {venue.photo ? (
+              <>
+                <Image src={venue.photo} alt={`${venue.name || "Venue"} photo preview`} fill unoptimized sizes="(max-width: 640px) 90vw, 480px" className="object-cover" />
+                <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 bg-gradient-to-t from-black/75 to-transparent px-4 pb-3 pt-8 text-xs font-medium text-white"><ImagePlus aria-hidden="true" className="h-4 w-4" /> Change photo</span>
+              </>
+            ) : (
+              <span className="flex flex-col items-center gap-2 px-4 py-5">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#855f18]/10 text-[#855f18]"><ImagePlus aria-hidden="true" className="h-5 w-5" /></span>
+                <span className="text-xs font-semibold text-[#855f18]">Choose a venue photo</span>
+                <span className="text-[10px] leading-relaxed text-[#888]">JPG, PNG, WebP or GIF · up to 8 MB</span>
+              </span>
+            )}
+            {uploadingVenueId === venue.id && <span role="status" className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-white/90 text-xs font-medium text-[#855f18]"><Loader2 aria-hidden="true" className="h-5 w-5 animate-spin" /> Uploading {uploadProgress}%</span>}
+            </label>
+          </div>
         </fieldset>
       ))}
       {uploadError && <p role="alert" className="text-sm text-red-700">{uploadError}</p>}

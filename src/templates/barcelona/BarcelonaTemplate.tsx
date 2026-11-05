@@ -470,7 +470,7 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
         </ScrollReveal>
       </ParallaxBanner>
 
-      <AdditionalVenues venues={data.wedding.additionalVenues} />
+      <AdditionalVenues venues={data.wedding.additionalVenues} variant="barcelona" />
 
       {/* -------------------- EVENTS TIMELINE -------------------- */}
       <section id="events" className="py-24 max-w-4xl mx-auto px-6">

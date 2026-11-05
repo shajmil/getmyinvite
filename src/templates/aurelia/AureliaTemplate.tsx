@@ -185,7 +185,7 @@ export function AureliaTemplate({ data, colorSchemeId, isPreview = false }: { da
               )}
             </div>
           </div>
-          <AdditionalVenues venues={data.wedding.additionalVenues} />
+          <AdditionalVenues venues={data.wedding.additionalVenues} variant="aurelia" />
           {data.events.length > 0 && (
             <div className={styles.events}>
               {data.events.map((event, index) => (
