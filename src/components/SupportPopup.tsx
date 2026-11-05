@@ -40,10 +40,10 @@ export function SupportPopup() {
           </div>
           <h2 className="mt-3 font-serif text-lg text-[#1a1a1a]">Need a little hand?</h2>
           <p className="mt-1 text-sm leading-relaxed text-[#666]">
-            Facing an issue or have a question? Feel free to send me a message. I’m happy to help!
+            Facing any issues? Feel free to message me on Instagram. I’m happy to help!
           </p>
           <a
-            href="https://www.instagram.com/shajmil.ai/"
+            href="https://www.instagram.com/shajmil.vj/"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Message Shajmil on Instagram (opens in a new tab)"
