@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { compressImage } from "./compress";
+import { compressImage, uploadFile } from "./compress";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -51,4 +51,24 @@ describe("image compression", () => {
     expect(canvas.width).toBe(200);
     expect(canvas.height).toBe(100);
   });
+});
+
+it("shows the storage provider error when the upload fails", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({
+    uploadUrl: "/api/uploads/local?key=assets/photo.webp",
+    publicUrl: "/uploads/assets/photo.webp",
+    key: "assets/photo.webp",
+    isLocal: true,
+  })));
+  vi.stubGlobal("XMLHttpRequest", class {
+    public status = 500;
+    public responseText = JSON.stringify({ error: "Vercel Blob: This store has been suspended." });
+    public onload: (() => void) | null = null;
+    public open(): void {}
+    public setRequestHeader(): void {}
+    public send(): void { this.onload?.(); }
+  });
+  await expect(uploadFile(new Blob(["photo"], { type: "image/webp" }))).rejects.toThrow(
+    "Vercel Blob: This store has been suspended."
+  );
 });

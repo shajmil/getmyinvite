@@ -37,10 +37,23 @@ export async function POST(req: Request) {
     }
 
     // R2 Settings
-    const hasR2 =
-      process.env.R2_ACCESS_KEY_ID &&
-      process.env.R2_SECRET_ACCESS_KEY &&
-      process.env.R2_BUCKET_NAME;
+    const r2Variables = [
+      "R2_ACCOUNT_ID",
+      "R2_ACCESS_KEY_ID",
+      "R2_SECRET_ACCESS_KEY",
+      "R2_BUCKET_NAME",
+      "R2_PUBLIC_URL",
+    ] as const;
+    const hasR2Settings = r2Variables.some((name) => process.env[name]?.trim());
+    const missingR2Variables = r2Variables.filter((name) => !process.env[name]?.trim());
+    if (hasR2Settings && missingR2Variables.length > 0) {
+      console.error("Incomplete R2 configuration. Missing:", missingR2Variables.join(", "));
+      return NextResponse.json(
+        { error: "R2 uploads are not fully configured. Add all five R2 environment variables to the deployment environment and redeploy." },
+        { status: 503 }
+      );
+    }
+    const hasR2 = hasR2Settings && missingR2Variables.length === 0;
 
     const fileId = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
     const fileExtension = filename.split(".").pop();
@@ -87,8 +100,8 @@ export async function POST(req: Request) {
         isLocal: true,
       });
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("presigned upload route error:", err);
-    return NextResponse.json({ error: err.message || "Failed to generate upload URL" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to generate upload URL" }, { status: 500 });
   }
 }

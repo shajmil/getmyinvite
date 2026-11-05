@@ -122,7 +122,16 @@ export async function uploadFile(
       if (xhr.status >= 200 && xhr.status < 300) {
         resolve({ url: publicUrl, key });
       } else {
-        reject(new Error(`Upload failed with status ${xhr.status}`));
+        let errorMessage = `Upload failed with status ${xhr.status}`;
+        try {
+          const response: unknown = JSON.parse(xhr.responseText);
+          if (response && typeof response === "object" && "error" in response && typeof response.error === "string") {
+            errorMessage = response.error;
+          }
+        } catch {
+          // R2 may return XML instead of a JSON error response.
+        }
+        reject(new Error(errorMessage));
       }
     };
 
