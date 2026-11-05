@@ -21,6 +21,13 @@ export const VenueSchema = z.object({
   photo: z.string().optional().or(z.literal("")), // Extended for Template 2 venue photo
 });
 
+export const AdditionalVenueSchema = VenueSchema.extend({
+  id: z.string().min(1),
+  label: z.string().optional(),
+});
+
+export type AdditionalVenue = z.infer<typeof AdditionalVenueSchema>;
+
 export const EventSchema = z.object({
   id: z.string(),
   name: z.string().min(1, "Event name is required"),
@@ -127,6 +134,7 @@ export const InvitationContentSchema = z.object({
     time: z.string().min(1, "Time is required"),
     timezone: z.string().min(1, "Timezone is required"),
     venue: VenueSchema,
+    additionalVenues: z.array(AdditionalVenueSchema).optional(),
   }),
   events: z.array(EventSchema).default([]),
   story: StorySchema.optional(),

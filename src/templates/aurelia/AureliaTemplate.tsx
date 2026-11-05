@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { InvitationData } from "@/lib/zod-schemas";
+import { AdditionalVenues } from "@/components/AdditionalVenues";
 import { aureliaPalettes } from "./palettes";
 import { AureliaRSVP } from "./AureliaRSVP";
 import styles from "./aurelia.module.css";
@@ -184,6 +185,7 @@ export function AureliaTemplate({ data, colorSchemeId, isPreview = false }: { da
               )}
             </div>
           </div>
+          <AdditionalVenues venues={data.wedding.additionalVenues} />
           {data.events.length > 0 && (
             <div className={styles.events}>
               {data.events.map((event, index) => (

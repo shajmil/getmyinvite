@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useWizardStore } from "@/lib/store";
 import { uploadFile } from "@/lib/compress";
+import { AdditionalVenuesEditor } from "./AdditionalVenuesEditor";
 import { Trash2, MapPin, Search, Sparkles, X, Check, ExternalLink, Loader2, Building2 } from "lucide-react";
 
 declare global {
@@ -831,6 +832,8 @@ export function StepWedding() {
           {uploading && <p className="text-[10px] text-[#855f18] mt-1">Uploading: {progress}%</p>}
         </div>
       </div>
+
+      <AdditionalVenuesEditor />
 
       {/* Extracted Venue Photos Selection Modal */}
       {showImageModal && (

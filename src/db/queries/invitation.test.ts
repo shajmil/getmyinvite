@@ -32,6 +32,18 @@ afterEach(() => {
 });
 
 describe("invitation asset cleanup", () => {
+  it("cleans up photos belonging to additional venues", async () => {
+    mocks.selectContent.mockResolvedValue([{ content: {
+      wedding: {
+        venue: { photo: "/uploads/assets/user/main.webp" },
+        additionalVenues: [{ photo: "/uploads/assets/user/reception.webp" }],
+      },
+    } }]);
+    await deleteInvitationsByIds(["invitation-1"]);
+    expect(mocks.deleteBlob).toHaveBeenCalledWith("assets/user/main.webp");
+    expect(mocks.deleteBlob).toHaveBeenCalledWith("assets/user/reception.webp");
+  });
+
   it("prevents invitation content from deleting the R2 quota counter", async () => {
     vi.stubEnv("R2_PUBLIC_URL", "https://assets.example.com");
     await expect(deleteAsset("https://assets.example.com/_system/upload-budget.json")).rejects.toThrow(

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { InvitationData } from "@/lib/zod-schemas";
+import { AdditionalVenues } from "@/components/AdditionalVenues";
 import { templateRegistry } from "../registry";
 import { meddon, lavishly, merienda, pinyon } from "../fonts";
 
@@ -314,6 +315,7 @@ export function ClassicTemplate({ data, colorSchemeId, isPreview = false }: Clas
                       </a>
                     </div>
                   )}
+                  <AdditionalVenues venues={data.wedding.additionalVenues} />
                 </div>
               )}
 

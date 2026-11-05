@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { InvitationData } from "@/lib/zod-schemas";
+import { AdditionalVenues } from "@/components/AdditionalVenues";
 import { templateRegistry } from "../registry";
 import { cormorant, josefin, greatVibes } from "../fonts";
 
@@ -468,6 +469,8 @@ export function BarcelonaTemplate({ data, colorSchemeId, isPreview = false }: Ba
           )}
         </ScrollReveal>
       </ParallaxBanner>
+
+      <AdditionalVenues venues={data.wedding.additionalVenues} />
 
       {/* -------------------- EVENTS TIMELINE -------------------- */}
       <section id="events" className="py-24 max-w-4xl mx-auto px-6">

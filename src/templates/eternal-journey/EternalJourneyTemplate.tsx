@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState, type CSSProperties } from "react";
 import type { InvitationData } from "@/lib/zod-schemas";
+import { AdditionalVenues } from "@/components/AdditionalVenues";
 import { AureliaRSVP } from "../aurelia/AureliaRSVP";
 import { eternalJourneyPalettes } from "./palettes";
 import { useJourneyMotion } from "./useJourneyMotion";
@@ -79,6 +80,7 @@ export function EternalJourneyTemplate({ data, colorSchemeId, isPreview = false 
       <section id="journey-day" className={styles.day}><div data-reveal><p className={styles.eyebrow}>The wedding</p><h2>One day.<br /><i>All our tomorrows.</i></h2><p className={styles.weddingDate}>{date}</p><p>{timeLabel(data.wedding.time)} · {data.wedding.timezone}</p><p>{venue.name}<br />{venue.city}</p></div></section>
       {data.events.length > 0 && <section className={`${styles.section} ${styles.events}`}><p className={styles.eyebrow}>Come celebrate with us</p><h2>The <i>celebrations.</i></h2>{data.events.map((event, index) => <article key={event.id} data-reveal><span className={styles.eventNumber}>{String(index + 1).padStart(2, "0")}</span><div><p className={styles.eyebrow}>{dateLabel(event.date)} · {timeLabel(event.time)}</p><h3>{event.name}</h3><p>{event.venue}</p>{event.note && <p>{event.note}</p>}{event.dressCode && <p>Dress code · {event.dressCode}</p>}</div>{event.photo && <Photo src={event.photo} alt={event.name} />}</article>)}</section>}
       <section className={`${styles.section} ${styles.venue}`}><div data-reveal>{venue.photo && <Photo src={venue.photo} alt={venue.name} />}</div><div data-reveal><p className={styles.eyebrow}>The place we’ll remember</p><h2>{venue.name}</h2><p>{venue.address}<br />{venue.city}</p>{mapUrl && <a className={styles.button} href={mapUrl} target="_blank" rel="noopener noreferrer">Find your way ↗</a>}</div></section>
+      <AdditionalVenues venues={data.wedding.additionalVenues} />
       {data.extras.keyGuests.length > 0 && <section className={styles.section}><p className={styles.eyebrow}>By our side</p><h2>Our favourite <i>people.</i></h2><div className={styles.people}>{data.extras.keyGuests.map(guest => <article key={guest.id} data-reveal>{guest.photo && <Photo src={guest.photo} alt={guest.name} />}<h3>{guest.name}</h3><p>{guest.relationship}</p></article>)}</div></section>}
       {(data.extras.giftNote || data.extras.dressCode) && <section className={`${styles.section} ${styles.notes}`}>{data.extras.dressCode && <div><h3>A note on attire</h3><p>{data.extras.dressCode}</p></div>}{data.extras.giftNote && <div><h3>Your presence, our present</h3><p>{data.extras.giftNote}</p></div>}</section>}
       {data.rsvpConfig.enabled && <section id="journey-rsvp" className={`${styles.section} ${styles.rsvp}`}><div data-reveal><p className={styles.eyebrow}>The next chapter includes you</p><h2>Will you<br /><i>join us?</i></h2><p>We’ve saved a place for you.</p>{data.rsvpConfig.deadline && <p>Kindly reply by {dateLabel(data.rsvpConfig.deadline)}</p>}</div><AureliaRSVP config={data.rsvpConfig} invitationId={data.invitationId} isPreview={isPreview} /></section>}
