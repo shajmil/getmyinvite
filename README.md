@@ -20,6 +20,14 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## R2 upload storage limit
+
+App uploads reserve space against a 9,000,000,000-byte budget, leaving a buffer below 10 GB. Existing bucket objects are counted when the budget is first created. Reservations use conditional R2 writes so concurrent uploads cannot spend the same remaining space. Upload URLs expire after 15 minutes and sign the declared file size.
+
+The counter is stored at `_system/upload-budget.json`. Do not delete or edit this object while uploads are enabled. Reservations are deliberately not released for failed uploads or deleted photos; this can stop uploads before actual storage reaches 9 GB. Reclaiming reservations requires a maintenance reconciliation after all outstanding upload URLs have expired. Do not reset the counter monthly: stored files remain between months.
+
+This protects uploads issued by this app, not dashboard uploads, other API clients, other buckets, or Cloudflare operation charges. Keep the bucket credentials scoped to this bucket and monitor account-wide usage. After first deploying this limit, previously issued upload URLs can remain valid for up to one hour.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

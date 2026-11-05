@@ -72,6 +72,9 @@ export async function deleteAsset(url: string) {
     // 3. Cloudflare R2 cleanup
     if (process.env.R2_PUBLIC_URL && url.startsWith(process.env.R2_PUBLIC_URL)) {
       const key = url.replace(process.env.R2_PUBLIC_URL + "/", "");
+      if (!key.startsWith("assets/") || key.split("/").some((segment) => segment === "." || segment === "..")) {
+        throw new Error("Only uploaded assets can be deleted");
+      }
       const { S3Client, DeleteObjectCommand } = await import("@aws-sdk/client-s3");
       const s3 = new S3Client({
         region: "auto",

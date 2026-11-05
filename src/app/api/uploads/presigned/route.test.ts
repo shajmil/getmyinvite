@@ -1,4 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { reserveR2UploadSpace } from "@/lib/r2-storage-limit";
+
+vi.mock("@/lib/r2-storage-limit", () => ({ reserveR2UploadSpace: vi.fn() }));
 
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 vi.mock("@/lib/auth", () => ({
@@ -7,15 +10,17 @@ vi.mock("@/lib/auth", () => ({
 
 import { POST } from "./route";
 
-function requestUpload(): Promise<Response> {
+function requestUpload(size: unknown = 1024): Promise<Response> {
   return POST(new Request("http://localhost/api/uploads/presigned", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ filename: "photo.webp", contentType: "image/webp", size: 1024 }),
+    body: JSON.stringify({ filename: "photo.webp", contentType: "image/webp", size }),
   }));
 }
 
 beforeEach(() => {
+  vi.clearAllMocks();
+  vi.mocked(reserveR2UploadSpace).mockResolvedValue(true);
   for (const name of ["R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET_NAME", "R2_PUBLIC_URL"]) {
     vi.stubEnv(name, "");
   }
@@ -56,6 +61,21 @@ describe("upload provider selection", () => {
     const upload = await response.json();
     expect(upload.isLocal).toBe(false);
     expect(new URL(upload.uploadUrl).hostname).toContain("test-account.r2.cloudflarestorage.com");
+    expect(new URL(upload.uploadUrl).searchParams.get("X-Amz-SignedHeaders")).toContain("content-length");
+    expect(new URL(upload.uploadUrl).searchParams.get("X-Amz-Expires")).toBe("900");
     expect(upload.publicUrl).toMatch(/^https:\/\/assets.example.com\/assets\/test-user\//);
+  });
+
+  it("blocks uploads when the storage budget is exhausted", async () => {
+    for (const name of ["R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET_NAME", "R2_PUBLIC_URL"]) {
+      vi.stubEnv(name, "test-setting");
+    }
+    vi.mocked(reserveR2UploadSpace).mockResolvedValue(false);
+    expect((await requestUpload()).status).toBe(507);
+  });
+
+  it.each([0, -1, 1.5, "1024", null, 9 * 1024 * 1024])("rejects invalid upload size %s", async (size) => {
+    expect((await requestUpload(size)).status).toBe(400);
+    expect(reserveR2UploadSpace).not.toHaveBeenCalled();
   });
 });

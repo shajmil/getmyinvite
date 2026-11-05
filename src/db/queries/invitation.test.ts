@@ -14,7 +14,7 @@ vi.mock("@/lib/db", () => ({
 }));
 vi.mock("@vercel/blob", () => ({ del: mocks.deleteBlob }));
 
-import { deleteInvitationsByIds } from "./invitation";
+import { deleteAsset, deleteInvitationsByIds } from "./invitation";
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -32,6 +32,13 @@ afterEach(() => {
 });
 
 describe("invitation asset cleanup", () => {
+  it("prevents invitation content from deleting the R2 quota counter", async () => {
+    vi.stubEnv("R2_PUBLIC_URL", "https://assets.example.com");
+    await expect(deleteAsset("https://assets.example.com/_system/upload-budget.json")).rejects.toThrow(
+      "Only uploaded assets can be deleted"
+    );
+  });
+
   it("deletes legacy Blob pathnames once and waits before deleting invitation records", async () => {
     let completeDeletion: () => void = () => {};
     mocks.deleteBlob.mockImplementation(() => new Promise<void>((resolve) => {

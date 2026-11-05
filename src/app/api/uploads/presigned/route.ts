@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { reserveR2UploadSpace } from "@/lib/r2-storage-limit";
 
 export const runtime = "nodejs";
 
@@ -16,6 +17,10 @@ export async function POST(req: Request) {
     }
 
     const { filename, contentType, size } = await req.json();
+
+    if (typeof filename !== "string" || !filename.trim() || typeof size !== "number" || !Number.isSafeInteger(size) || size <= 0) {
+      return NextResponse.json({ error: "A filename and valid file size are required" }, { status: 400 });
+    }
 
     // Limit files to 8MB
     if (size > 8 * 1024 * 1024) {
@@ -55,7 +60,7 @@ export async function POST(req: Request) {
     }
     const hasR2 = hasR2Settings && missingR2Variables.length === 0;
 
-    const fileId = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+    const fileId = crypto.randomUUID();
     const fileExtension = filename.split(".").pop();
     const key = `assets/${session.user.id}/${fileId}.${fileExtension}`;
 
@@ -71,15 +76,28 @@ export async function POST(req: Request) {
           accessKeyId: process.env.R2_ACCESS_KEY_ID!,
           secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
         },
+        requestChecksumCalculation: "WHEN_REQUIRED",
       });
+
+      const hasUploadSpace = await reserveR2UploadSpace(s3, process.env.R2_BUCKET_NAME!, size);
+      if (!hasUploadSpace) {
+        return NextResponse.json(
+          { error: "Photo storage is full for now. Please message us on Instagram for help." },
+          { status: 507 }
+        );
+      }
 
       const command = new PutObjectCommand({
         Bucket: process.env.R2_BUCKET_NAME!,
         Key: key,
         ContentType: contentType,
+        ContentLength: size,
       });
 
-      const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+      const uploadUrl = await getSignedUrl(s3, command, {
+        expiresIn: 900,
+        signableHeaders: new Set(["content-length", "content-type"]),
+      });
       const publicUrl = `${process.env.R2_PUBLIC_URL}/${key}`;
 
       return NextResponse.json({
