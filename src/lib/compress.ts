@@ -4,9 +4,9 @@
  */
 export async function compressImage(
   file: File,
-  maxWidth = 1000,
-  maxHeight = 1000,
-  quality = 0.8
+  maxWidth = 1600,
+  maxHeight = 1600,
+  quality = 0.9
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -21,21 +21,9 @@ export async function compressImage(
     };
 
     img.onload = () => {
-      let width = img.width;
-      let height = img.height;
-
-      // Maintain aspect ratio while resizing
-      if (width > height) {
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
-        }
-      } else {
-        if (height > maxHeight) {
-          width = Math.round((width * maxHeight) / height);
-          height = maxHeight;
-        }
-      }
+      const scale = Math.min(1, maxWidth / img.width, maxHeight / img.height);
+      const width = Math.max(1, Math.round(img.width * scale));
+      const height = Math.max(1, Math.round(img.height * scale));
 
       const canvas = document.createElement("canvas");
       canvas.width = width;
@@ -47,12 +35,14 @@ export async function compressImage(
         return;
       }
 
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
       ctx.drawImage(img, 0, 0, width, height);
 
       canvas.toBlob(
         (blob) => {
           if (blob) {
-            resolve(blob);
+            resolve(blob.size < file.size ? blob : file);
           } else {
             reject(new Error("Failed to convert canvas to blob"));
           }
@@ -85,8 +75,10 @@ export async function uploadFile(
   if (file instanceof File && file.type.startsWith("image/") && file.type !== "image/gif" && file.type !== "image/webp") {
     try {
       uploadData = await compressImage(file);
-      uploadType = "image/webp";
-      uploadName = uploadName.replace(/\.[^/.]+$/, "") + ".webp";
+      uploadType = uploadData.type;
+      if (uploadType === "image/webp") {
+        uploadName = uploadName.replace(/\.[^/.]+$/, "") + ".webp";
+      }
     } catch (err) {
       console.warn("Client compression failed, uploading raw image", err);
     }

@@ -16,10 +16,10 @@ import { del } from "@vercel/blob";
 // ASSET CLEANUP HELPERS
 // ==========================================
 
-function extractUploadUrls(content: any): string[] {
+function extractUploadUrls(content: unknown): string[] {
   const urls: string[] = [];
 
-  const traverse = (obj: any) => {
+  const traverse = (obj: unknown) => {
     if (!obj) return;
     if (typeof obj === "string") {
       if (
@@ -37,7 +37,7 @@ function extractUploadUrls(content: any): string[] {
   };
 
   traverse(content);
-  return urls;
+  return [...new Set(urls)];
 }
 
 export async function deleteAsset(url: string) {
@@ -45,7 +45,15 @@ export async function deleteAsset(url: string) {
     // 1. Local filesystem cleanup
     if (url.startsWith("/uploads/")) {
       const relativePath = url.replace(/^\/uploads\//, "");
-      const fullPath = path.join(process.cwd(), "public", "uploads", relativePath);
+      if (process.env.BLOB_READ_WRITE_TOKEN) {
+        await del(relativePath);
+        return;
+      }
+      const uploadsDirectory = path.resolve(process.cwd(), "public", "uploads");
+      const fullPath = path.resolve(uploadsDirectory, relativePath);
+      if (!fullPath.startsWith(uploadsDirectory + path.sep)) {
+        throw new Error("Invalid upload path");
+      }
       if (fs.existsSync(fullPath)) {
         fs.unlinkSync(fullPath);
         console.log(`Deleted local asset: ${fullPath}`);
@@ -54,10 +62,11 @@ export async function deleteAsset(url: string) {
 
     // 2. Vercel Blob cleanup
     if (url.includes(".public.blob.vercel-storage.com/")) {
-      if (process.env.BLOB_READ_WRITE_TOKEN) {
-        await del(url);
-        console.log(`Deleted Vercel Blob asset: ${url}`);
+      if (!process.env.BLOB_READ_WRITE_TOKEN) {
+        throw new Error("Blob token is required to delete this asset");
       }
+      await del(url);
+      console.log(`Deleted Vercel Blob asset: ${url}`);
     }
 
     // 3. Cloudflare R2 cleanup
@@ -80,6 +89,7 @@ export async function deleteAsset(url: string) {
     }
   } catch (err) {
     console.error(`Failed to delete asset ${url}:`, err);
+    throw err;
   }
 }
 
@@ -98,7 +108,7 @@ export async function deleteInvitationsByIds(ids: string[]) {
       if (item.content) {
         const urls = extractUploadUrls(item.content);
         for (const url of urls) {
-          deleteAsset(url).catch((e) => console.error("Asset deletion error:", e));
+          await deleteAsset(url);
         }
       }
     }
@@ -107,6 +117,7 @@ export async function deleteInvitationsByIds(ids: string[]) {
     await db.delete(invitations).where(inArray(invitations.id, ids));
   } catch (err) {
     console.error("deleteInvitationsByIds query error:", err);
+    throw err;
   }
 }
 
