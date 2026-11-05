@@ -1,4 +1,4 @@
-import { eq, and, desc, inArray, lt, sql } from "drizzle-orm";
+import { eq, and, desc, inArray, notInArray, asc } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   invitations,
@@ -11,6 +11,7 @@ import { cache } from "react";
 import fs from "fs";
 import path from "path";
 import { del } from "@vercel/blob";
+import { isInvitationExpired } from "@/lib/invitation-expiry";
 
 // ==========================================
 // ASSET CLEANUP HELPERS
@@ -38,6 +39,14 @@ function extractUploadUrls(content: unknown): string[] {
 
   traverse(content);
   return [...new Set(urls)];
+}
+
+function getAssetIdentity(url: string): string {
+  if (url.startsWith("/uploads/")) return `blob:${url.slice("/uploads/".length)}`;
+  if (url.includes(".public.blob.vercel-storage.com/")) {
+    return `blob:${new URL(url).pathname.slice(1)}`;
+  }
+  return url;
 }
 
 export async function deleteAsset(url: string) {
@@ -96,28 +105,35 @@ export async function deleteAsset(url: string) {
   }
 }
 
-export async function deleteInvitationsByIds(ids: string[]) {
+export async function deleteInvitationsByIds(ids: string[], database: Pick<typeof db, "select" | "delete"> = db) {
   if (ids.length === 0) return;
 
   try {
     // 1. Fetch content for asset extraction
-    const contents = await db
+    const contents = await database
       .select()
       .from(invitationContent)
       .where(inArray(invitationContent.invitationId, ids));
+
+    const otherContents = await database.select({ content: invitationContent.content })
+      .from(invitationContent)
+      .where(notInArray(invitationContent.invitationId, ids));
+    const sharedUrls = new Set(otherContents.flatMap((item) => extractUploadUrls(item.content).map(getAssetIdentity)));
 
     // 2. Extract and delete assets
     for (const item of contents) {
       if (item.content) {
         const urls = extractUploadUrls(item.content);
         for (const url of urls) {
+          if (sharedUrls.has(getAssetIdentity(url))) continue;
           await deleteAsset(url);
         }
       }
     }
 
     // 3. Delete records from invitations (cascade deletes invitationContent & rsvps)
-    await db.delete(invitations).where(inArray(invitations.id, ids));
+    await database.delete(assets).where(inArray(assets.invitationId, ids));
+    await database.delete(invitations).where(inArray(invitations.id, ids));
   } catch (err) {
     console.error("deleteInvitationsByIds query error:", err);
     throw err;
@@ -127,6 +143,51 @@ export async function deleteInvitationsByIds(ids: string[]) {
 // ==========================================
 // INVITATION QUERIES
 // ==========================================
+
+export async function cleanupExpiredInvitations(now = new Date()) {
+  const candidates = await db.select({
+    id: invitations.id,
+    status: invitations.status,
+    createdAt: invitations.createdAt,
+    content: invitationContent.content,
+  }).from(invitations)
+    .leftJoin(invitationContent, eq(invitationContent.invitationId, invitations.id))
+    .orderBy(asc(invitations.createdAt));
+  const expired = candidates.filter((invitation) => isInvitationExpired(invitation, now));
+  const deletedSlugs: string[] = [];
+  let failed = 0;
+  let processed = 0;
+  const deadline = Date.now() + 180_000;
+
+  for (const candidate of expired) {
+    if (Date.now() >= deadline) break;
+    processed++;
+    try {
+      const deletedSlug = await db.transaction(async (transaction) => {
+        // Lock and recheck: an invitation may have been rescheduled since the initial scan.
+        const [current] = await transaction.select({
+          id: invitations.id,
+          slug: invitations.slug,
+          status: invitations.status,
+          createdAt: invitations.createdAt,
+          content: invitationContent.content,
+        }).from(invitations)
+          .innerJoin(invitationContent, eq(invitationContent.invitationId, invitations.id))
+          .where(eq(invitations.id, candidate.id))
+          .limit(1).for("update", { skipLocked: true });
+        if (!current || !isInvitationExpired(current, now)) return null;
+        await deleteInvitationsByIds([current.id], transaction);
+        return current.slug;
+      });
+      if (deletedSlug) deletedSlugs.push(deletedSlug);
+    } catch (error) {
+      failed++;
+      console.error("Invitation cleanup failed; retained for retry:", candidate.id, error);
+    }
+  }
+
+  return { deletedSlugs, failed, remaining: expired.length - processed };
+}
 
 export async function getInvitationById(id: string, userId: string) {
   const result = await db
@@ -180,42 +241,6 @@ export async function checkSlugAvailable(slug: string, excludeInvitationId?: str
 }
 
 export async function getInvitationsByUser(userId: string) {
-  // Automatically clean up drafts older than 7 days and past wedding events on dashboard load
-  try {
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    
-    // 1. Fetch expired drafts and delete them with assets
-    const expiredDrafts = await db
-      .select({ id: invitations.id })
-      .from(invitations)
-      .where(
-        and(
-          eq(invitations.status, "draft"),
-          lt(invitations.createdAt, sevenDaysAgo)
-        )
-      );
-
-    if (expiredDrafts.length > 0) {
-      const draftIds = expiredDrafts.map((d) => d.id);
-      await deleteInvitationsByIds(draftIds);
-    }
-
-    // 2. Fetch invitations where the wedding date has passed by more than 7 days and delete them with assets
-    const expiredList = await db
-      .select({ id: invitationContent.invitationId })
-      .from(invitationContent)
-      .where(
-        sql`to_date(content->'wedding'->>'date', 'YYYY-MM-DD') < CURRENT_DATE - 7`
-      );
-
-    if (expiredList.length > 0) {
-      const expiredIds = expiredList.map((item) => item.id);
-      await deleteInvitationsByIds(expiredIds);
-    }
-  } catch (err) {
-    console.error("Dashboard cleanup drafts and past weddings error:", err);
-  }
-
   const list = await db
     .select({
       invitation: invitations,

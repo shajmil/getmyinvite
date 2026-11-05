@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { reserveR2UploadSpace } from "@/lib/r2-storage-limit";
+import { reserveR2UploadSpace, R2_UPLOAD_URL_TTL_SECONDS } from "@/lib/r2-storage-limit";
 
 export const runtime = "nodejs";
 
@@ -79,7 +79,7 @@ export async function POST(req: Request) {
         requestChecksumCalculation: "WHEN_REQUIRED",
       });
 
-      const hasUploadSpace = await reserveR2UploadSpace(s3, process.env.R2_BUCKET_NAME!, size);
+      const hasUploadSpace = await reserveR2UploadSpace(s3, process.env.R2_BUCKET_NAME!, size, key);
       if (!hasUploadSpace) {
         return NextResponse.json(
           { error: "Photo storage is full for now. Please message us on Instagram for help." },
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
       });
 
       const uploadUrl = await getSignedUrl(s3, command, {
-        expiresIn: 900,
+        expiresIn: R2_UPLOAD_URL_TTL_SECONDS,
         signableHeaders: new Set(["content-length", "content-type"]),
       });
       const publicUrl = `${process.env.R2_PUBLIC_URL}/${key}`;

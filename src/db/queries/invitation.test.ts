@@ -3,12 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   deleteBlob: vi.fn(),
   selectContent: vi.fn(),
+  selectOtherContent: vi.fn(),
   deleteRecords: vi.fn(),
 }));
 
 vi.mock("@/lib/db", () => ({
   db: {
-    select: () => ({ from: () => ({ where: mocks.selectContent }) }),
+    select: (columns?: unknown) => ({ from: () => ({ where: columns ? mocks.selectOtherContent : mocks.selectContent }) }),
     delete: () => ({ where: mocks.deleteRecords }),
   },
 }));
@@ -24,6 +25,7 @@ beforeEach(() => {
     { content: { hero: "/uploads/assets/user/photo.webp", gallery: ["/uploads/assets/user/photo.webp"] } },
   ]);
   mocks.deleteRecords.mockResolvedValue(undefined);
+  mocks.selectOtherContent.mockResolvedValue([]);
 });
 
 afterEach(() => {
@@ -32,6 +34,19 @@ afterEach(() => {
 });
 
 describe("invitation asset cleanup", () => {
+  it("preserves a photo still referenced by another invitation", async () => {
+    mocks.selectOtherContent.mockResolvedValue([{ content: { hero: "/uploads/assets/user/photo.webp" } }]);
+    await deleteInvitationsByIds(["invitation-1"]);
+    expect(mocks.deleteBlob).not.toHaveBeenCalled();
+    expect(mocks.deleteRecords).toHaveBeenCalled();
+  });
+
+  it("recognizes shared Blob photos referenced through a direct URL", async () => {
+    mocks.selectOtherContent.mockResolvedValue([{ content: { hero: "https://store.public.blob.vercel-storage.com/assets/user/photo.webp" } }]);
+    await deleteInvitationsByIds(["invitation-1"]);
+    expect(mocks.deleteBlob).not.toHaveBeenCalled();
+  });
+
   it("cleans up photos belonging to additional venues", async () => {
     mocks.selectContent.mockResolvedValue([{ content: {
       wedding: {
@@ -62,7 +77,7 @@ describe("invitation asset cleanup", () => {
     completeDeletion();
     await deletion;
     expect(mocks.deleteBlob).toHaveBeenCalledTimes(1);
-    expect(mocks.deleteRecords).toHaveBeenCalledTimes(1);
+    expect(mocks.deleteRecords).toHaveBeenCalledTimes(2);
   });
 
   it("keeps invitation records for retry when Blob deletion fails", async () => {

@@ -1,70 +1,61 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { invitations, invitationContent } from "@/db/schema";
-import { and, eq, lt, sql } from "drizzle-orm";
-import { deleteInvitationsByIds } from "@/db/queries/invitation";
+import { revalidatePath } from "next/cache";
+import { S3Client } from "@aws-sdk/client-s3";
+import { cleanupExpiredInvitations } from "@/db/queries/invitation";
+import { reconcileR2UploadBudget } from "@/lib/r2-storage-limit";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const maxDuration = 300;
+
+async function reconcileStorage() {
+  const requiredSettings = ["R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET_NAME", "R2_PUBLIC_URL"];
+  if (requiredSettings.every((name) => !process.env[name]?.trim())) {
+    return { reconciled: false, reason: "R2 is not configured" };
+  }
+  if (requiredSettings.some((name) => !process.env[name]?.trim())) {
+    throw new Error("R2 configuration is incomplete");
+  }
+  const client = new S3Client({
+    region: "auto",
+    endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+    },
+    requestChecksumCalculation: "WHEN_REQUIRED",
+  });
+  return reconcileR2UploadBudget(client, process.env.R2_BUCKET_NAME!);
+}
 
 export async function GET(req: Request) {
+  const secret = process.env.CRON_SECRET?.trim();
+  if (!secret) {
+    return NextResponse.json({ error: "Cleanup is disabled until CRON_SECRET is configured" }, { status: 503 });
+  }
+  if (req.headers.get("authorization") !== `Bearer ${secret}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    // 1. Optional security check (Cron Secret validation)
-    const { searchParams } = new URL(req.url);
-    const secret = searchParams.get("secret");
-    
-    const cronSecret = process.env.CRON_SECRET;
-    const authHeader = req.headers.get("authorization");
-    
-    if (cronSecret) {
-      const isAuthorized = 
-        secret === cronSecret || 
-        authHeader === `Bearer ${cronSecret}`;
-        
-      if (!isAuthorized) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-    }
-
-    // 2. Clear drafts older than 7 days based on creation date
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const expiredDrafts = await db
-      .select({ id: invitations.id })
-      .from(invitations)
-      .where(
-        and(
-          eq(invitations.status, "draft"),
-          lt(invitations.createdAt, sevenDaysAgo)
-        )
-      );
-
-    if (expiredDrafts.length > 0) {
-      const draftIds = expiredDrafts.map((d) => d.id);
-      await deleteInvitationsByIds(draftIds);
-    }
-
-    // 3. Clear invitations where the wedding date is more than 7 days in the past
-    const expiredList = await db
-      .select({ id: invitationContent.invitationId })
-      .from(invitationContent)
-      .where(
-        sql`to_date(content->'wedding'->>'date', 'YYYY-MM-DD') < CURRENT_DATE - 7`
-      );
-
-    if (expiredList.length > 0) {
-      const expiredIds = expiredList.map((item) => item.id);
-      await deleteInvitationsByIds(expiredIds);
-    }
-
-    return NextResponse.json({
-      ok: true,
-      message: "Expired drafts and past wedding events cleaned up successfully along with all associated image assets",
+    // Observe completed uploads before deleting files so their reservations can be reconciled safely.
+    await reconcileStorage();
+    const cleanup = await cleanupExpiredInvitations();
+    for (const slug of cleanup.deletedSlugs) revalidatePath(`/${slug}`);
+    const storage = await reconcileStorage();
+    const summary = {
+      ok: cleanup.failed === 0,
+      deletedInvitations: cleanup.deletedSlugs.length,
+      failedInvitations: cleanup.failed,
+      remainingInvitations: cleanup.remaining,
+      storage,
       timestamp: new Date().toISOString(),
-      expiredWeddingsCount: expiredList.length,
-      expiredDraftsCount: expiredDrafts.length,
-    });
-  } catch (err: any) {
-    console.error("Cleanup cron error:", err);
-    return NextResponse.json({ error: err.message || "Failed to cleanup invitations" }, { status: 500 });
+    };
+    console.info("Daily invitation cleanup:", summary);
+    return NextResponse.json(summary, { status: cleanup.failed ? 500 : 200 });
+  } catch (error) {
+    console.error("Daily invitation cleanup failed:", error);
+    return NextResponse.json({ error: "Cleanup failed. Check server logs before retrying." }, { status: 500 });
   }
 }
 

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { reserveR2UploadSpace } from "@/lib/r2-storage-limit";
 
-vi.mock("@/lib/r2-storage-limit", () => ({ reserveR2UploadSpace: vi.fn() }));
+vi.mock("@/lib/r2-storage-limit", () => ({ reserveR2UploadSpace: vi.fn(), R2_UPLOAD_URL_TTL_SECONDS: 900 }));
 
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 vi.mock("@/lib/auth", () => ({
