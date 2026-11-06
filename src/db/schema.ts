@@ -86,6 +86,19 @@ export const invitationContent = pgTable("invitation_content", {
   content: jsonb("content").notNull(), // Validated by InvitationContentSchema
 });
 
+export const invitationPayments = pgTable("invitation_payments", {
+  orderId: text("order_id").primaryKey(),
+  invitationId: text("invitation_id").references(() => invitations.id, { onDelete: "set null" }),
+  userId: text("user_id").notNull(),
+  paymentId: text("payment_id").unique(),
+  amount: integer("amount").notNull(),
+  currency: text("currency").notNull(),
+  status: text("status").$type<"pending" | "paid">().notNull().default("pending"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastCheckoutAt: timestamp("last_checkout_at").defaultNow().notNull(),
+  paidAt: timestamp("paid_at"),
+}, (table) => [index("invitation_payments_invitation_idx").on(table.invitationId)]);
+
 export const rsvps = pgTable(
   "rsvps",
   {

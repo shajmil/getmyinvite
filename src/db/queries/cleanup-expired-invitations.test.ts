@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { isInvitationPaymentProtected } from "./premium";
+
+vi.mock("./premium", () => ({ isInvitationPaymentProtected: vi.fn() }));
 
 const mocks = vi.hoisted(() => ({
   candidates: vi.fn(),
@@ -33,6 +36,7 @@ const expired = {
 
 beforeEach(() => {
   vi.resetAllMocks();
+  vi.mocked(isInvitationPaymentProtected).mockResolvedValue(false);
   mocks.candidates.mockResolvedValue([expired]);
   mocks.lockedInvitation.mockResolvedValue([expired]);
   mocks.contents.mockResolvedValue([]);
@@ -41,6 +45,22 @@ beforeEach(() => {
 });
 
 describe("expired invitation cleanup", () => {
+  it("never deletes a paid or payment-protected invitation", async () => {
+    vi.mocked(isInvitationPaymentProtected).mockResolvedValue(true);
+    expect((await cleanupExpiredInvitations(now)).deletedSlugs).toEqual([]);
+    expect(mocks.deleteRecords).not.toHaveBeenCalled();
+    expect(mocks.deleteBlob).not.toHaveBeenCalled();
+  });
+
+  it("fails closed if premium protection cannot be checked", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      vi.mocked(isInvitationPaymentProtected).mockRejectedValue(new Error("Payment database unavailable"));
+      expect((await cleanupExpiredInvitations(now)).failed).toBe(1);
+      expect(mocks.deleteRecords).not.toHaveBeenCalled();
+    } finally { consoleError.mockRestore(); }
+  });
+
   it("rechecks under a row lock before deleting data", async () => {
     const result = await cleanupExpiredInvitations(now);
     expect(result).toEqual({ deletedSlugs: ["past-wedding"], failed: 0, remaining: 0 });

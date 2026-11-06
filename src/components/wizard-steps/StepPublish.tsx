@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import QRCode from "qrcode";
 import { useWizardStore } from "@/lib/store";
 import { checkSlugAvailabilityAction, publishInvitation, suggestAvailableSlugAction } from "@/app/actions";
+import { PremiumKeepsake } from "@/components/PremiumKeepsake";
 
 interface StepPublishProps {
   onPublishSuccess: (slug: string) => void;
@@ -214,6 +215,8 @@ export function StepPublish({ onPublishSuccess }: StepPublishProps) {
           </div>
         </div>
       )}
+
+      <PremiumKeepsake key={invitationId} invitationId={invitationId} />
 
       <div className="bg-white border border-[#eae6df] rounded-2xl p-6 shadow-md space-y-6">
         <h3 className="font-serif text-lg font-bold text-[#855f18] border-b border-[#faf8f5] pb-2">

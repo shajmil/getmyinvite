@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { createNewInvitationAction, deleteInvitationAction } from "@/app/actions";
+import { PremiumKeepsake } from "@/components/PremiumKeepsake";
 
 interface InvitationListItem {
   id: string;
@@ -15,6 +16,7 @@ interface InvitationListItem {
   publishedAt: string | null;
   createdAt: string;
   weddingDate: string | null;
+  isPremium: boolean;
   rsvpCount: number;
   partner1Name: string;
   partner2Name: string;
@@ -180,7 +182,7 @@ export function DashboardList({ initialInvitations, user }: DashboardListProps) 
                     </div>
                   </div>
 
-                  {inv.status === "draft" && (() => {
+                  {!inv.isPremium && inv.status === "draft" && (() => {
                     const idTimestamp = parseInt(inv.id.replace("inv-", ""), 10);
                     const createdDate = !isNaN(idTimestamp) && idTimestamp > 0 
                       ? new Date(idTimestamp) 
@@ -200,7 +202,7 @@ export function DashboardList({ initialInvitations, user }: DashboardListProps) 
                     );
                   })()}
 
-                  {inv.status === "published" && inv.weddingDate && (() => {
+                  {!inv.isPremium && inv.status === "published" && inv.weddingDate && (() => {
                     const wDate = new Date(inv.weddingDate + "T00:00:00");
                     const expiryDate = new Date(wDate.getTime() + 7 * 24 * 60 * 60 * 1000);
                     const msRemaining = expiryDate.getTime() - Date.now();
@@ -223,12 +225,18 @@ export function DashboardList({ initialInvitations, user }: DashboardListProps) 
                           <span className="text-xs leading-none mt-0.5">ℹ️</span>
                           <div>
                             <p className="font-bold text-blue-900">Live Website Active</p>
-                            <p className="text-blue-800/80">Auto-deletes 7 days after the wedding (expires in {daysRemaining} days).</p>
+                            <p className="text-blue-800/80">Auto-deletes 7 days after the last event (expires in {daysRemaining} days).</p>
                           </div>
                         </div>
                       );
                     }
                   })()}
+                  <PremiumKeepsake
+                    invitationId={inv.id}
+                    initialPaid={inv.isPremium}
+                    compact
+                    onActivated={() => setInvitations((current) => current.map((invitation) => invitation.id === inv.id ? { ...invitation, isPremium: true } : invitation))}
+                  />
                 </div>
 
                 {/* Dashboard Card Actions */}

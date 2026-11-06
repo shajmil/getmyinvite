@@ -114,6 +114,27 @@ Before deletion, the job locks and rechecks each invitation so rescheduled event
 
 R2 reconciliation runs before and after deletion. It accounts for uploads still in progress and restores available budget as confirmed files are removed. Inspect Vercel's function logs for the `Daily invitation cleanup` summary, including deletion failures and any unprocessed backlog. Jobs stop starting more invitations after three minutes to stay within the function time limit; failures and backlog are retried on a later run.
 
+## Premium keepsake (₹99 per invitation)
+
+The Publish step and each dashboard card offer a one-time ₹99 upgrade. Only a server-verified, captured INR 9,900-paise payment protects that specific invitation, its referenced photos and RSVPs from automatic expiry. Free publishing remains available. Premium does not prevent the owner from explicitly deleting the invitation; deleted invitations cannot be restored by a later payment callback. Payment audit rows survive invitation deletion. Refunds/disputes require manual review; they do not automatically revoke preservation.
+
+Checkout is disabled by default and displays **Premium coming soon**. Existing invitations require no data conversion. Do not enable checkout until the database and Razorpay configuration are ready:
+
+1. Keep `PREMIUM_PAYMENTS_ENABLED=false` in the existing GetMyInvite app while setup is incomplete. No separate Worker, database or bucket is required. The temporary staging resources have been removed.
+2. Back up the existing database before applying `src/db/migrations/0001_invitation_payments.sql`. This adds a separate payment table and index without changing existing invitation data. Do not run `drizzle-kit push` against production for this change. The payment migration was applied to the existing database on 6 November 2026 after a verified database backup.
+3. Create and activate your Razorpay merchant account, and enable automatic capture. Rotate API credentials exposed in chat. Store `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` and a separate `RAZORPAY_WEBHOOK_SECRET` only in server environment variables; never use `NEXT_PUBLIC_` for secrets. Production checkout requires live keys.
+4. Configure the live Razorpay webhook at `https://getmyinvite.in/api/payments/razorpay/webhook` with the matching webhook secret and events `payment.captured` and `order.paid`.
+5. Run the local payment tests before release. They cover order ownership, fixed pricing, signature verification, capture checks, idempotency and cleanup protection using mocked provider responses. An actual Razorpay checkout has not been tested. Never test destructive cleanup on customer records.
+6. Deploy the reviewed payment code to the existing GetMyInvite Worker with payments disabled. Enable `PREMIUM_PAYMENTS_ENABLED=true` only after the migration, live credentials and webhook are ready. Verify a controlled purchase before advertising the upgrade.
+
+The existing integration uses server-side `fetch` and HMAC, so no extra SDK is needed. Existing routes are `POST /api/payments/premium` for order creation, `PUT /api/payments/premium` for verification, `GET /api/payments/premium?invitationId=...` for status, and `POST /api/payments/razorpay/webhook` for signed provider events. The server supplies the public Key ID to checkout only when payments are enabled.
+
+Setting `PREMIUM_PAYMENTS_ENABLED=false` disables new purchases while retaining all existing premium protection. Keep the provider keys and webhook secret configured to verify payments already in flight. Missing payment storage while premium is enabled, or an unsuccessful provider check during expiry cleanup, preserves the affected invitation for a later retry.
+
+Starting or resuming checkout reserves a 24-hour cleanup grace period. Older pending checkouts are checked against Razorpay before deletion; captured or authorized payments preserve the invitation. Opening checkout reuses the saved order to reduce duplicate purchases and refreshes the grace period under the same invitation lock as cleanup. The checkout UI has a 15-minute timeout; monitor delayed payments and webhook failures. Keep database/photo backups and handle exceptional late payments or deleted invitations through support. Unreferenced/replaced uploads still follow the existing storage behavior; premium is not a backup service.
+
+Implementation follows Razorpay's [Standard Checkout integration](https://razorpay.com/docs/payments/payment-gateway/web-integration/standard/integration-steps/), [webhook signature validation](https://razorpay.com/docs/webhooks/validate-test/) and [server payment lookup](https://razorpay.com/docs/api/payments/fetch-with-id/). No live payment or production migration is performed by the local test suite.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

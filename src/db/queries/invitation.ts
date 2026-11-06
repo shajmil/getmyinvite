@@ -12,6 +12,7 @@ import fs from "fs";
 import path from "path";
 import { del } from "@vercel/blob";
 import { isInvitationExpired } from "@/lib/invitation-expiry";
+import { isInvitationPaymentProtected } from "@/db/queries/premium";
 
 // ==========================================
 // ASSET CLEANUP HELPERS
@@ -176,6 +177,7 @@ export async function cleanupExpiredInvitations(now = new Date()) {
           .where(eq(invitations.id, candidate.id))
           .limit(1).for("update", { skipLocked: true });
         if (!current || !isInvitationExpired(current, now)) return null;
+        if (await isInvitationPaymentProtected(current.id, transaction)) return null;
         await deleteInvitationsByIds([current.id], transaction);
         return current.slug;
       });
