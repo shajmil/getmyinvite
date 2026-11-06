@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { head } from "@vercel/blob";
 import fs from "fs";
 import path from "path";
@@ -18,6 +17,13 @@ export async function GET(
       const blobMeta = await head(filePath);
       const blobRes = await fetch(blobMeta.url);
 
+      if (!blobRes.ok) {
+        return new Response(null, {
+          status: blobRes.status,
+          headers: { "Cache-Control": "no-store" },
+        });
+      }
+
       return new Response(blobRes.body, {
         headers: {
           "Content-Type": blobMeta.contentType || "image/webp",
@@ -26,7 +32,10 @@ export async function GET(
       });
     } catch (err) {
       console.error("Vercel Blob fetch error:", err);
-      return new Response("Not Found in Vercel Blob", { status: 404 });
+      return new Response("Not Found in Vercel Blob", {
+        status: 404,
+        headers: { "Cache-Control": "no-store" },
+      });
     }
   }
 
