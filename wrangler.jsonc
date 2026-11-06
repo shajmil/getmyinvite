@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "getmyinvite",
-  "main": ".open-next/worker.js",
+  "main": "cloudflare-worker.mjs",
   "compatibility_date": "2026-11-06",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
@@ -13,6 +13,12 @@
       "binding": "WORKER_SELF_REFERENCE",
       "service": "getmyinvite"
     }
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "APP_SERVER", "class_name": "AppServer" }]
+  },
+  "migrations": [
+    { "tag": "v1-app-server", "new_sqlite_classes": ["AppServer"] }
   ],
   "keep_vars": true,
   "minify": true,

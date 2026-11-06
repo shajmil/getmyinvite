@@ -9,9 +9,28 @@ export async function GET(
   { params }: { params: Promise<{ key: string[] }> }
 ) {
   const { key } = await params;
+  if (key[0] !== "assets" || key.some(segment => !segment || segment === "." || segment === ".." || /[\\/]/.test(segment))) {
+    return new Response("Not Found", { status: 404, headers: { "Cache-Control": "no-store" } });
+  }
   const filePath = key.join("/");
 
-  // 1. If Vercel Blob is active in production, fetch and stream the file
+  if (process.env.R2_PUBLIC_URL) {
+    const r2Url = `${process.env.R2_PUBLIC_URL.replace(/\/$/, "")}/${key.map(encodeURIComponent).join("/")}`;
+    try {
+      const r2Response = await fetch(r2Url);
+      if (r2Response.ok) {
+        return new Response(r2Response.body, {
+          headers: {
+            "Content-Type": r2Response.headers.get("Content-Type") || "image/webp",
+            "Cache-Control": "public, max-age=31536000, immutable",
+          },
+        });
+      }
+    } catch {
+      // Legacy photos can still be available in Blob when R2 is unavailable.
+    }
+  }
+
   if (process.env.BLOB_READ_WRITE_TOKEN) {
     try {
       const blobMeta = await head(filePath);
@@ -39,7 +58,6 @@ export async function GET(
     }
   }
 
-  // 2. Fallback to reading the local static directory (for local development)
   const fullPath = path.join(process.cwd(), "public", "uploads", filePath);
   if (!fs.existsSync(fullPath)) {
     return new Response("Not Found on Local Disk", { status: 404 });
