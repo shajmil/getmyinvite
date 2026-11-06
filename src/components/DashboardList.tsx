@@ -134,11 +134,11 @@ export function DashboardList({ initialInvitations, user }: DashboardListProps) 
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-start gap-6">
             {invitations.map((inv) => (
               <div
                 key={inv.id}
-                className="bg-white border border-[#eae6df] rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-lg transition-all duration-300"
+                className="bg-white border border-[#eae6df] rounded-2xl overflow-hidden shadow-sm flex flex-col hover:shadow-lg transition-all duration-300"
               >
                 <div className="p-6 space-y-4">
                   <div className="flex justify-between items-center border-b border-[#faf8f5] pb-2">
@@ -245,7 +245,7 @@ export function DashboardList({ initialInvitations, user }: DashboardListProps) 
                     href={`/dashboard/invitations/${inv.id}/edit`}
                     className="py-2 border border-[#eae6df] bg-white text-center hover:bg-[#faf8f5] text-xs font-semibold rounded active:scale-95 transition-all text-[#1a1a1a]"
                   >
-                    Edit Draft
+                    Edit Invitation
                   </Link>
                   <Link
                     href={`/dashboard/invitations/${inv.id}/rsvps`}

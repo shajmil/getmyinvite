@@ -15,7 +15,10 @@
 .message { margin-top: 12px; font: 12px/1.6 Arial, sans-serif; color: #7c4c24; overflow-wrap: anywhere; }
 .message button { display: block; min-height: 44px; padding: 8px 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; cursor: pointer; }
 .compact { margin-top: 16px; padding: 16px; }
-.paid { background: #f6f8f3; border-color: #dce3d3; }
+.paid { background: #f7f8f5; border-color: #e3e7dc; }
+.compact.paid { padding: 12px 14px; border-radius: 8px; }
+.compact.paid .title { font-size: 14px; }
+.compact.paid .description { margin-top: 6px; font-size: 11px; }
 .paid .badge { color: #4d653b; }
 .spinner { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
