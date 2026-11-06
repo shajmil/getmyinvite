@@ -55,8 +55,7 @@ export function PremiumKeepsake({ invitationId, compact = false, initialPaid = f
   onActivated?: () => void;
 }) {
   const [paid, setPaid] = useState(initialPaid);
-  const [available, setAvailable] = useState(false);
-  const [checking, setChecking] = useState(true);
+  const [checking, setChecking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const verifying = useRef(false);
@@ -67,7 +66,6 @@ export function PremiumKeepsake({ invitationId, compact = false, initialPaid = f
   const updateStatus = useCallback((status: z.infer<typeof statusSchema>) => {
     setPaid(status.paid);
     completed.current = status.paid;
-    setAvailable(status.available === true);
     if (status.paid) { setMessage(""); activated.current?.(); }
   }, []);
 
@@ -81,7 +79,7 @@ export function PremiumKeepsake({ invitationId, compact = false, initialPaid = f
     const controller = new AbortController();
     checkStatus(controller.signal).then(updateStatus).catch((error: unknown) => {
       if (!controller.signal.aborted) setMessage(error instanceof Error ? error.message : "Please retry.");
-    }).finally(() => { if (!controller.signal.aborted) setChecking(false); });
+    });
     return () => controller.abort();
   }, [checkStatus, updateStatus]);
 
@@ -145,11 +143,11 @@ export function PremiumKeepsake({ invitationId, compact = false, initialPaid = f
       </div>
       <p className={styles.description}>{paid ? "Your invitation, photos and RSVPs are protected from automatic expiry." : "Save your invitation, photos and guest list beyond the celebration."}</p>
       {!paid && <>
-        <button type="button" disabled={busy || checking} onClick={() => { if (available) void startCheckout(); else void refreshStatus(); }} className={styles.button}>
+        <button type="button" disabled={busy || checking} onClick={() => void startCheckout()} className={styles.button}>
           {(busy || checking) && <Loader2 size={15} aria-hidden="true" className={styles.spinner} />}
-          {checking ? "Checking availability…" : busy ? "Completing payment…" : available ? "Keep forever · ₹99" : "Check availability"}
+          {busy ? "Opening secure checkout…" : "Keep forever · ₹99"}
         </button>
-        <p className={styles.note}>{available ? "Pay once. No subscription. Secured by Razorpay." : "Checkout is temporarily unavailable. Free publishing still works."}</p>
+        <p className={styles.note}>Pay once. No subscription. Secured by Razorpay.</p>
         <details className={styles.retention}>
           <summary>What happens on the free plan?</summary>
           <p>Published invitations expire 7 days after the last event. Unpublished drafts expire 7 days after creation. Premium removes automatic expiry; you can still delete your invitation yourself.</p>
