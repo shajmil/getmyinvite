@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check, Crown, Heart, Infinity as InfinityIcon, Loader2, ShieldCheck } from "lucide-react";
+import { Check, Crown, Loader2 } from "lucide-react";
 import styles from "./premium-keepsake.module.css";
 import { z } from "zod";
 
@@ -129,33 +129,33 @@ export function PremiumKeepsake({ invitationId, compact = false, initialPaid = f
     } catch (error) { setBusy(false); setMessage(error instanceof Error ? error.message : "Please try again."); }
   }
 
+  async function refreshStatus() {
+    setChecking(true);
+    setMessage("");
+    try { updateStatus(await checkStatus()); }
+    catch (error) { setMessage(error instanceof Error ? error.message : "Please retry."); }
+    finally { setChecking(false); }
+  }
+
   return (
-    <section aria-label="Premium invitation keepsake" className={`${styles.card} ${compact ? styles.compact : ""} ${paid ? styles.paid : ""}`}>
-      <div className={styles.header}><span className={styles.eyebrow}><Crown size={13} aria-hidden="true" /> {paid ? "Your forever keepsake" : "A little forever"}</span>{paid && <span className={styles.badge}><Check size={12} aria-hidden="true" /> Premium</span>}</div>
-      <div className={styles.content}>
-        <div>
-          <h3 className={styles.title}>{paid ? "Your story stays." : "The day ends. The memories stay."}</h3>
-          <p className={styles.description}>{paid ? "This invitation, its photos and your RSVP list are protected from automatic expiry." : "Keep this invitation, your photos and your guest list beyond the celebration."}</p>
-        </div>
-        {!paid && <div className={styles.price}>₹99<span>one time · per invitation</span></div>}
+    <section aria-label="Premium invitation keepsake" className={[styles.card, compact ? styles.compact : "", paid ? styles.paid : ""].join(" ")}>
+      <div className={styles.header}>
+        <h3 className={styles.title}><Crown size={17} aria-hidden="true" /> {paid ? "Kept forever" : "Keep it forever"}</h3>
+        <span className={styles.badge}>{paid ? <><Check size={12} aria-hidden="true" /> Premium</> : "Optional"}</span>
       </div>
-      {!compact && <div className={styles.benefits}><span><InfinityIcon size={15} aria-hidden="true" /> No automatic expiry</span><span><Heart size={14} aria-hidden="true" /> Photos & RSVPs preserved</span></div>}
-      {paid ? (
-        <p className={styles.confirmed}><ShieldCheck size={16} aria-hidden="true" /> Kept forever. You can still delete it yourself.</p>
-      ) : (
-        <>
-          <button type="button" disabled={busy || checking || !available} onClick={() => void startCheckout()} className={styles.button}>
-            {(busy || checking) && <Loader2 size={15} aria-hidden="true" className={styles.spinner} />}
-            {checking ? "Checking…" : busy ? "Completing payment…" : available ? "Keep forever · ₹99" : "Premium coming soon"}
-          </button>
-          <p className={styles.note}>{available ? "One payment. No subscription. Secure checkout by Razorpay." : "Free publishing is available now. No payment is required."}</p>
-          <p className={styles.retention}>Free invitations expire after 7 days past the last event. Unpublished free drafts expire 7 days after creation.</p>
-        </>
-      )}
-      {message && <div className={styles.message} role="status">{message}<button type="button" disabled={busy} onClick={() => {
-        setChecking(true);
-        checkStatus().then(updateStatus).catch((error: unknown) => setMessage(error instanceof Error ? error.message : "Please retry.")).finally(() => setChecking(false));
-      }}>Check status</button></div>}
+      <p className={styles.description}>{paid ? "Your invitation, photos and RSVPs are protected from automatic expiry." : "Save your invitation, photos and guest list beyond the celebration."}</p>
+      {!paid && <>
+        <button type="button" disabled={busy || checking} onClick={() => { if (available) void startCheckout(); else void refreshStatus(); }} className={styles.button}>
+          {(busy || checking) && <Loader2 size={15} aria-hidden="true" className={styles.spinner} />}
+          {checking ? "Checking availability…" : busy ? "Completing payment…" : available ? "Keep forever · ₹99" : "Check availability"}
+        </button>
+        <p className={styles.note}>{available ? "Pay once. No subscription. Secured by Razorpay." : "Checkout is temporarily unavailable. Free publishing still works."}</p>
+        <details className={styles.retention}>
+          <summary>What happens on the free plan?</summary>
+          <p>Published invitations expire 7 days after the last event. Unpublished drafts expire 7 days after creation. Premium removes automatic expiry; you can still delete your invitation yourself.</p>
+        </details>
+      </>}
+      {message && <div className={styles.message} role="status">{message}<button type="button" disabled={busy || checking} onClick={() => void refreshStatus()}>Check payment status</button></div>}
     </section>
   );
 }

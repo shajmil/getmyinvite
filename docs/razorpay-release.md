@@ -13,3 +13,7 @@ Deployed the existing GetMyInvite app to its existing Cloudflare Worker. No sepa
 Pending: owner performs a controlled live INR 99 purchase and verifies captured status in Razorpay, successful webhook delivery, and the premium badge after reload. No real payment, authenticated checkout availability or provider credential validity was tested by this release. Production checkout rejects test keys. Do not retry a payment before checking its status.
 
 Rollback new purchases with PREMIUM_PAYMENTS_ENABLED=false; retain keys and webhook configuration for payments already in flight. Do not drop the payment table or remove paid records.
+
+## Compact premium card
+
+Simplified the dashboard and Publish card to a short title, description and single INR 99 action. Free-plan expiry details are expandable. Replaced the misleading coming-soon fallback with an availability retry. Mobile preview at 375px had no overflow; disclosure interaction passed. All 113 tests, TypeScript, targeted lint and production build passed. A temporary synthetic account confirmed authenticated payment availability is true, then the account and draft were removed without placing an order. UI deployment version: 65615514-8f76-4076-9fa9-9883963b382a. Actual live purchase remains pending.
