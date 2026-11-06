@@ -19,7 +19,8 @@
     }
   ],
   "durable_objects": {
-    "bindings": [{ "name": "APP_SERVER", "class_name": "AppServer" }]
+    "bindings": [{ "name": "APP_SERVER", "class_name": "AppServer" }],
+    "code_update_strategy": { "mode": "immediate" }
   },
   "migrations": [
     { "tag": "v1-app-server", "new_sqlite_classes": ["AppServer"] }
